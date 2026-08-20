@@ -1,3 +1,4 @@
+using EduTrack.Application.Abstractions.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ public static class DependencyInjection
     public const string ConnectionStringName = "Default";
 
     /// <summary>
-    /// Registers the EF Core PostgreSQL context and a readiness health check that verifies database connectivity.
+    /// Registers the EF Core PostgreSQL context and a readiness health check.
     /// </summary>
     public static IServiceCollection AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -19,6 +20,10 @@ public static class DependencyInjection
         services.AddDbContext<EduTrackDbContext>(options =>
             options.UseNpgsql(connectionString, npgsql =>
                 npgsql.MigrationsAssembly(typeof(EduTrackDbContext).Assembly.FullName)));
+
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<EduTrackDbContext>());
+
+        services.AddHostedService<DatabaseInitializer>();
 
         services.AddHealthChecks()
             .AddDbContextCheck<EduTrackDbContext>(
