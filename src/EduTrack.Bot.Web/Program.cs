@@ -1,3 +1,4 @@
+using EduTrack.Application;
 using EduTrack.Bot.Web.Telegram;
 using EduTrack.Infrastructure.Persistence;
 using EduTrack.Infrastructure.Telegram;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddApplication();
 builder.Services.AddPersistenceInfrastructure(builder.Configuration);
 builder.Services.AddTelegramInfrastructure(builder.Configuration);
 
