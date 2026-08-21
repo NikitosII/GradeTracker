@@ -1,3 +1,4 @@
+using EduTrack.Domain.Studies;
 using EduTrack.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,5 +11,9 @@ public interface IApplicationDbContext
 {
     DbSet<User> Users { get; }
     DbSet<InviteCode> InviteCodes { get; }
+    DbSet<Subject> Subjects { get; }
+    DbSet<StudentProfile> StudentProfiles { get; }
+    DbSet<Grade> Grades { get; }
+    DbSet<Assignment> Assignments { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
