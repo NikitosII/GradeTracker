@@ -11,50 +11,95 @@ using Telegram.Bot.Types.Enums;
 namespace EduTrack.Bot.Web.Telegram;
 
 /// <summary>
-/// Routes to the matching command/query and replies.
+/// Routes incoming Telegram updates to the matching command/query and replies.
 /// </summary>
 public sealed class WebhookUpdateProcessor
 {
     private readonly ISender _sender;
     private readonly ITelegramSender _telegram;
+    private readonly GradeModule _grades;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
+        _grades = grades;
         _logger = logger;
     }
 
     public async Task ProcessAsync(Update update, CancellationToken cancellationToken)
     {
-        if (update.Type != UpdateType.Message || update.Message is not { } message)
+        if (update.CallbackQuery is { } callback)
         {
-            _logger.LogDebug("Ignoring non-message update {UpdateId} of type {UpdateType}",
-                update.Id, update.Type);
+            await HandleCallbackAsync(callback, cancellationToken);
             return;
         }
 
-        if (message.From is null || string.IsNullOrWhiteSpace(message.Text))
+        if (update.Message is { } message && message.From is not null && !string.IsNullOrWhiteSpace(message.Text))
         {
+            await HandleMessageAsync(message, cancellationToken);
             return;
         }
 
+        _logger.LogDebug("Ignoring update {UpdateId} of type {UpdateType}", update.Id, update.Type);
+    }
+
+    private async Task HandleCallbackAsync(CallbackQuery callback, CancellationToken cancellationToken)
+    {
+        if (callback.Message is null || string.IsNullOrEmpty(callback.Data))
+        {
+            await _telegram.AnswerCallbackAsync(callback.Id, cancellationToken: cancellationToken);
+            return;
+        }
+
+        await _grades.HandleCallbackAsync(
+            callback.Message.Chat.Id, callback.From.Id, callback.Id, callback.Data, cancellationToken);
+    }
+
+    private async Task HandleMessageAsync(Message message, CancellationToken cancellationToken)
+    {
         var chatId = message.Chat.Id;
-        var (command, argument) = ParseCommand(message.Text);
+        var telegramUserId = message.From!.Id;
+        var (command, argument) = ParseCommand(message.Text!);
 
-        var reply = command switch
+        switch (command)
         {
-            "/start" => Text.Welcome,
-            "/help" => Text.Help,
-            "/bind" => await HandleBindAsync(message, argument, cancellationToken),
-            "/profile" => await HandleProfileAsync(message.From.Id, cancellationToken),
-            _ => Text.Unknown,
-        };
+            case "/start":
+                await _telegram.SendTextAsync(chatId, Text.Welcome, cancellationToken);
+                break;
+            case "/help":
+                await _telegram.SendTextAsync(chatId, Text.Help, cancellationToken);
+                break;
+            case "/bind":
+                await _telegram.SendTextAsync(chatId, await HandleBindAsync(message, argument, cancellationToken), cancellationToken);
+                break;
+            case "/profile":
+                await _telegram.SendTextAsync(chatId, await HandleProfileAsync(telegramUserId, cancellationToken), cancellationToken);
+                break;
+            case "/grades":
+            case "/subjects":
+                await _grades.ShowGradesMenuAsync(chatId, telegramUserId, cancellationToken);
+                break;
+            case "/grade_add":
+                await _grades.StartAddAsync(chatId, telegramUserId, cancellationToken);
+                break;
+            case "/grade_edit":
+                await _grades.StartEditAsync(chatId, telegramUserId, cancellationToken);
+                break;
+            case "/cancel":
+                await _grades.CancelAsync(chatId, cancellationToken);
+                break;
+            default:
+                if (!await _grades.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken))
+                {
+                    await _telegram.SendTextAsync(chatId, Text.Unknown, cancellationToken);
+                }
 
-        await _telegram.SendTextAsync(chatId, reply, cancellationToken);
-        _logger.LogInformation("Handled {Command} from Telegram user {TelegramUserId}",
-            command, message.From.Id);
+                break;
+        }
+
+        _logger.LogInformation("Handled {Command} from Telegram user {TelegramUserId}", command, telegramUserId);
     }
 
     private async Task<string> HandleBindAsync(Message message, string? code, CancellationToken cancellationToken)
@@ -127,8 +172,12 @@ public sealed class WebhookUpdateProcessor
             "/start - getting started\n" +
             "/help - this help\n" +
             "/bind <code> - link your account\n" +
-            "/profile - your profile\n\n" +
-            "Grades and deadlines arrive in the next stages.";
+            "/profile - your profile\n" +
+            "/grades - view your grades by subject\n" +
+            "/subjects - list subjects\n" +
+            "/grade_add - add a grade\n" +
+            "/grade_edit - edit a grade\n" +
+            "/cancel - cancel the current action";
 
         public const string Unknown =
             "Unknown command. Type /help to see what's available.";
