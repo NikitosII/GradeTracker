@@ -18,13 +18,15 @@ public sealed class WebhookUpdateProcessor
     private readonly ISender _sender;
     private readonly ITelegramSender _telegram;
     private readonly GradeModule _grades;
+    private readonly DeadlineModule _deadlines;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
         _grades = grades;
+        _deadlines = deadlines;
         _logger = logger;
     }
 
@@ -53,8 +55,19 @@ public sealed class WebhookUpdateProcessor
             return;
         }
 
-        await _grades.HandleCallbackAsync(
-            callback.Message.Chat.Id, callback.From.Id, callback.Id, callback.Data, cancellationToken);
+        var chatId = callback.Message.Chat.Id;
+        var userId = callback.From.Id;
+        var data = callback.Data;
+
+        if (data.StartsWith(CallbackData.DeadlineViewNamespace + ":", StringComparison.Ordinal)
+            || data.StartsWith(CallbackData.DeadlineWizardNamespace + ":", StringComparison.Ordinal))
+        {
+            await _deadlines.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
+        }
+        else
+        {
+            await _grades.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
+        }
     }
 
     private async Task HandleMessageAsync(Message message, CancellationToken cancellationToken)
@@ -87,11 +100,30 @@ public sealed class WebhookUpdateProcessor
             case "/grade_edit":
                 await _grades.StartEditAsync(chatId, telegramUserId, cancellationToken);
                 break;
+            case "/deadlines":
+                await _deadlines.ShowDeadlinesAsync(chatId, telegramUserId, DeadlineModule.ScopeAll, 1, cancellationToken);
+                break;
+            case "/today":
+                await _deadlines.ShowDeadlinesAsync(chatId, telegramUserId, DeadlineModule.ScopeToday, 1, cancellationToken);
+                break;
+            case "/week":
+                await _deadlines.ShowDeadlinesAsync(chatId, telegramUserId, DeadlineModule.ScopeWeek, 1, cancellationToken);
+                break;
+            case "/next":
+                await _deadlines.ShowDeadlinesAsync(chatId, telegramUserId, DeadlineModule.ScopeNext, 1, cancellationToken);
+                break;
+            case "/deadline_add":
+                await _deadlines.StartAddAsync(chatId, telegramUserId, cancellationToken);
+                break;
+            case "/deadline_edit":
+                await _deadlines.StartEditAsync(chatId, telegramUserId, cancellationToken);
+                break;
             case "/cancel":
                 await _grades.CancelAsync(chatId, cancellationToken);
                 break;
             default:
-                if (!await _grades.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken))
+                if (!await _grades.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken)
+                    && !await _deadlines.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken))
                 {
                     await _telegram.SendTextAsync(chatId, Text.Unknown, cancellationToken);
                 }
@@ -177,6 +209,12 @@ public sealed class WebhookUpdateProcessor
             "/subjects - list subjects\n" +
             "/grade_add - add a grade\n" +
             "/grade_edit - edit a grade\n" +
+            "/deadlines - your upcoming deadlines\n" +
+            "/today - deadlines due today\n" +
+            "/week - deadlines due this week\n" +
+            "/next - your nearest deadline\n" +
+            "/deadline_add - add a deadline\n" +
+            "/deadline_edit - edit a deadline\n" +
             "/cancel - cancel the current action";
 
         public const string Unknown =

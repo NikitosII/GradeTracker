@@ -23,6 +23,7 @@ else
 
 builder.Services.AddScoped<IConversationStore, ConversationStore>();
 builder.Services.AddScoped<GradeModule>();
+builder.Services.AddScoped<DeadlineModule>();
 builder.Services.AddScoped<WebhookUpdateProcessor>();
 
 builder.Services.AddHealthChecks()

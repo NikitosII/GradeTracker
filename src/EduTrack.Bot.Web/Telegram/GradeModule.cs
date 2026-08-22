@@ -101,7 +101,7 @@ public sealed class GradeModule
     public async Task<bool> TryHandleTextAsync(long chatId, long telegramUserId, string text, CancellationToken ct)
     {
         var state = await _conversations.GetAsync(chatId, ct);
-        if (state is null)
+        if (state is null || (state.Flow != ConversationFlow.GradeAdd && state.Flow != ConversationFlow.GradeEdit))
         {
             return false;
         }
