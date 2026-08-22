@@ -4,6 +4,7 @@ using EduTrack.Application.Users.Commands.BindUser;
 using EduTrack.Application.Users.Queries.GetUserProfile;
 using EduTrack.Domain.Common;
 using EduTrack.Bot.Web.Telegram;
+using EduTrack.Integration.Tests.TestSupport;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -18,8 +19,17 @@ public class WebhookUpdateProcessorTests
     private readonly ISender _sender = Substitute.For<ISender>();
     private readonly ITelegramSender _telegram = Substitute.For<ITelegramSender>();
 
+    private static readonly DateTime Clock = new(2026, 8, 21, 12, 0, 0, DateTimeKind.Utc);
+    private readonly InMemoryConversationStore _conversations = new();
+
+    private GradeModule CreateGradeModule() =>
+        new(_sender, _telegram, _conversations, new FixedClock(Clock), NullLogger<GradeModule>.Instance);
+
+    private DeadlineModule CreateDeadlineModule() =>
+        new(_sender, _telegram, _conversations, new FixedClock(Clock), NullLogger<DeadlineModule>.Instance);
+
     private WebhookUpdateProcessor CreateSut() =>
-        new(_sender, _telegram, NullLogger<WebhookUpdateProcessor>.Instance);
+        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), NullLogger<WebhookUpdateProcessor>.Instance);
 
     private static Update MessageUpdate(long fromId, string text) => new()
     {

@@ -1,5 +1,6 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Time;
+using EduTrack.Domain.Studies;
 using EduTrack.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,10 @@ public sealed class TestApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<InviteCode> InviteCodes => Set<InviteCode>();
+    public DbSet<Subject> Subjects => Set<Subject>();
+    public DbSet<StudentProfile> StudentProfiles => Set<StudentProfile>();
+    public DbSet<Grade> Grades => Set<Grade>();
+    public DbSet<Assignment> Assignments => Set<Assignment>();
 
     public static TestApplicationDbContext CreateInMemory() =>
         new(new DbContextOptionsBuilder<TestApplicationDbContext>()
