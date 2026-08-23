@@ -19,14 +19,16 @@ public sealed class WebhookUpdateProcessor
     private readonly ITelegramSender _telegram;
     private readonly GradeModule _grades;
     private readonly DeadlineModule _deadlines;
+    private readonly AdminModule _admins;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
         _grades = grades;
         _deadlines = deadlines;
+        _admins = admins;
         _logger = logger;
     }
 
@@ -63,6 +65,11 @@ public sealed class WebhookUpdateProcessor
             || data.StartsWith(CallbackData.DeadlineWizardNamespace + ":", StringComparison.Ordinal))
         {
             await _deadlines.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
+        }
+        else if (data.StartsWith(CallbackData.AdminViewNamespace + ":", StringComparison.Ordinal)
+            || data.StartsWith(CallbackData.AdminWizardNamespace + ":", StringComparison.Ordinal))
+        {
+            await _admins.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
         }
         else
         {
@@ -118,12 +125,28 @@ public sealed class WebhookUpdateProcessor
             case "/deadline_edit":
                 await _deadlines.StartEditAsync(chatId, telegramUserId, cancellationToken);
                 break;
+            case "/admin":
+                await _admins.ShowMenuAsync(chatId, telegramUserId, cancellationToken);
+                break;
+            case "/users":
+                await _admins.ShowUsersAsync(chatId, telegramUserId, 1, cancellationToken);
+                break;
+            case "/invites":
+                await _admins.ShowInvitesAsync(chatId, telegramUserId, cancellationToken);
+                break;
+            case "/audit":
+                await _admins.ShowAuditAsync(chatId, telegramUserId, 1, cancellationToken);
+                break;
+            case "/status":
+                await _admins.ShowStatusAsync(chatId, telegramUserId, cancellationToken);
+                break;
             case "/cancel":
                 await _grades.CancelAsync(chatId, cancellationToken);
                 break;
             default:
                 if (!await _grades.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken)
-                    && !await _deadlines.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken))
+                    && !await _deadlines.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken)
+                    && !await _admins.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken))
                 {
                     await _telegram.SendTextAsync(chatId, Text.Unknown, cancellationToken);
                 }
@@ -215,7 +238,13 @@ public sealed class WebhookUpdateProcessor
             "/next - your nearest deadline\n" +
             "/deadline_add - add a deadline\n" +
             "/deadline_edit - edit a deadline\n" +
-            "/cancel - cancel the current action";
+            "/cancel - cancel the current action\n\n" +
+            "Admin only:\n" +
+            "/admin - admin menu\n" +
+            "/users - manage users and roles\n" +
+            "/invites - manage invite codes\n" +
+            "/audit - view the audit log\n" +
+            "/status - system status";
 
         public const string Unknown =
             "Unknown command. Type /help to see what's available.";

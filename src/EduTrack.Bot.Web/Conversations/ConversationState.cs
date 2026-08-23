@@ -7,6 +7,8 @@ public static class ConversationFlow
     public const string GradeEdit = "grade_edit";
     public const string DeadlineAdd = "deadline_add";
     public const string DeadlineEdit = "deadline_edit";
+    public const string AdminSubjectAdd = "admin_subject_add";
+    public const string AdminSubjectRename = "admin_subject_rename";
 }
 
 /// <summary>Steps shared by the add/edit grade wizards.</summary>
@@ -33,9 +35,16 @@ public static class DeadlineStep
     public const string Confirm = "d_confirm";
 }
 
+/// <summary>Steps for the administrator subject wizards.</summary>
+public static class AdminStep
+{
+    public const string SubjectName = "a_subject_name";
+    public const string SubjectDescription = "a_subject_desc";
+    public const string SubjectNewName = "a_subject_newname";
+}
+
 /// <summary>
-/// Mutable, JSON-serializable snapshot of an in-progress wizard, stored per chat
-/// in the distributed cache between webhook calls.
+/// Mutable, JSON-serializable snapshot of an in-progress wizard
 /// </summary>
 public sealed class ConversationState
 {
