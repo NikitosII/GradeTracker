@@ -58,4 +58,11 @@ public class User
         UserRole role,
         DateTime nowUtc)
         => new(Guid.NewGuid(), telegramUserId, username, firstName, lastName, role, nowUtc);
+
+    /// <summary>Changes the user's role (administrator action).</summary>
+    public void ChangeRole(UserRole role, DateTime nowUtc)
+    {
+        Role = role;
+        UpdatedAt = nowUtc;
+    }
 }
