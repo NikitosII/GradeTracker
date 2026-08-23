@@ -28,8 +28,11 @@ public class WebhookUpdateProcessorTests
     private DeadlineModule CreateDeadlineModule() =>
         new(_sender, _telegram, _conversations, new FixedClock(Clock), NullLogger<DeadlineModule>.Instance);
 
+    private AdminModule CreateAdminModule() =>
+        new(_sender, _telegram, _conversations, NullLogger<AdminModule>.Instance);
+
     private WebhookUpdateProcessor CreateSut() =>
-        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), NullLogger<WebhookUpdateProcessor>.Instance);
+        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), CreateAdminModule(), NullLogger<WebhookUpdateProcessor>.Instance);
 
     private static Update MessageUpdate(long fromId, string text) => new()
     {
