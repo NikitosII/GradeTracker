@@ -26,4 +26,10 @@ public sealed class TelegramSender : ITelegramSender
 
     public Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default)
         => _botClient.AnswerCallbackQuery(callbackQueryId, text, cancellationToken: cancellationToken);
+
+    public async Task<int> SendNotificationAsync(long chatId, string text, CancellationToken cancellationToken = default)
+    {
+        var message = await _botClient.SendMessage(chatId, text, cancellationToken: cancellationToken);
+        return message.MessageId;
+    }
 }

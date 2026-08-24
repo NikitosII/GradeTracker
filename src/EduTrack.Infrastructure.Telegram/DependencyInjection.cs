@@ -10,7 +10,10 @@ namespace EduTrack.Infrastructure.Telegram;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddTelegramInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    /// <summary>
+    /// Registers the Telegram client and sender.
+    /// </summary>
+    public static IServiceCollection AddTelegramSender(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<TelegramOptions>()
             .Bind(configuration.GetSection(TelegramOptions.SectionName))
@@ -18,6 +21,7 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddHttpClient("telegram")
+            .RemoveAllLoggers()
             .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
             {
                 var options = sp.GetRequiredService<IOptions<TelegramOptions>>().Value;
@@ -25,8 +29,22 @@ public static class DependencyInjection
             });
 
         services.AddScoped<ITelegramSender, TelegramSender>();
-        services.AddHostedService<TelegramWebhookConfigurator>();
 
+        return services;
+    }
+
+    /// <summary>Registers the hosted service that publishes the webhook URL to Telegram on startup.</summary>
+    public static IServiceCollection AddTelegramWebhook(this IServiceCollection services)
+    {
+        services.AddHostedService<TelegramWebhookConfigurator>();
+        return services;
+    }
+
+    /// <summary>Web entry point: sender + webhook registration.</summary>
+    public static IServiceCollection AddTelegramInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddTelegramSender(configuration);
+        services.AddTelegramWebhook();
         return services;
     }
 }
