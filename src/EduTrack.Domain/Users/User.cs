@@ -65,4 +65,11 @@ public class User
         Role = role;
         UpdatedAt = nowUtc;
     }
+
+    /// <summary>Enables or disables non-critical notifications for this user.</summary>
+    public void SetNotificationsEnabled(bool enabled, DateTime nowUtc)
+    {
+        IsNotificationsEnabled = enabled;
+        UpdatedAt = nowUtc;
+    }
 }
