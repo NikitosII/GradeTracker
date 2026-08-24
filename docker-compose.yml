@@ -10,16 +10,44 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: "8080"
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ConnectionStrings__Redis: "redis:6379"
       Telegram__BotToken: "${TELEGRAM_BOT_TOKEN}"
       Telegram__WebhookSecret: "${TELEGRAM_WEBHOOK_SECRET}"
       Telegram__WebhookUrl: "${TELEGRAM_WEBHOOK_URL}"
       Bootstrap__AdminInviteCode: "${BOOTSTRAP_ADMIN_CODE}"
+      Bootstrap__Subjects__0: "Mathematics"
+      Bootstrap__Subjects__1: "Physics"
+      Bootstrap__Subjects__2: "Computer Science"
     ports:
       - "8080:8080"
+
+  bot-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    image: edutrack/bot-worker:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DOTNET_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Telegram__BotToken: "${TELEGRAM_BOT_TOKEN}"
+      Telegram__WebhookSecret: "${TELEGRAM_WEBHOOK_SECRET}"
+      RabbitMq__Host: "rabbitmq"
+      RabbitMq__Username: "${RABBITMQ_USER}"
+      RabbitMq__Password: "${RABBITMQ_PASSWORD}"
+      Notifications__QuietHoursStart: "22"
+      Notifications__QuietHoursEnd: "8"
 
   postgres:
     image: postgres:16
@@ -31,7 +59,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s

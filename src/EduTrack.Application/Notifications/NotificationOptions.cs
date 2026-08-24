@@ -1,6 +1,6 @@
 namespace EduTrack.Application.Notifications;
 
-/// <summary>Notification behaviour configuration (spec §25).</summary>
+/// <summary>Notification behaviour configuration.</summary>
 public sealed class NotificationOptions
 {
     public const string SectionName = "Notifications";

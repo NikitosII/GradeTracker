@@ -3,6 +3,7 @@ using EduTrack.Application.Admin;
 using EduTrack.Application.Admin.Commands.ChangeUserRole;
 using EduTrack.Application.Admin.Commands.CreateInviteCode;
 using EduTrack.Application.Admin.Commands.CreateSubject;
+using EduTrack.Application.Admin.Commands.SendAnnouncement;
 using EduTrack.Application.Admin.Commands.UpdateSubject;
 using EduTrack.Application.Admin.Queries.GetAllSubjects;
 using EduTrack.Application.Admin.Queries.GetAuditLog;
@@ -222,6 +223,36 @@ public sealed class AdminModule
         }
 
         await _telegram.SendKeyboardAsync(chatId, RenderStatus(result.Value), new List<IReadOnlyList<InlineButton>> { MenuRow() }, ct);
+    }
+
+    public async Task SendAnnouncementAsync(long chatId, long telegramUserId, string? text, CancellationToken ct)
+    {
+        if (!await EnsureAdminAsync(chatId, telegramUserId, ct))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            await _telegram.SendTextAsync(chatId, "Usage: /announce <message>\nBroadcasts a message to every user.", ct);
+            return;
+        }
+
+        try
+        {
+            var result = await _sender.Send(new SendAnnouncementCommand(telegramUserId, text), ct);
+            if (result.IsFailure)
+            {
+                await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+                return;
+            }
+
+            await _telegram.SendTextAsync(chatId, $"Announcement queued for {result.Value} user(s).", ct);
+        }
+        catch (ValidationException ex)
+        {
+            await _telegram.SendTextAsync(chatId, ValidationText(ex), ct);
+        }
     }
 
     public async Task CancelAsync(long chatId, CancellationToken ct)

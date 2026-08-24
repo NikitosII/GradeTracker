@@ -140,6 +140,9 @@ public sealed class WebhookUpdateProcessor
             case "/status":
                 await _admins.ShowStatusAsync(chatId, telegramUserId, cancellationToken);
                 break;
+            case "/announce":
+                await _admins.SendAnnouncementAsync(chatId, telegramUserId, argument, cancellationToken);
+                break;
             case "/cancel":
                 await _grades.CancelAsync(chatId, cancellationToken);
                 break;
@@ -244,7 +247,8 @@ public sealed class WebhookUpdateProcessor
             "/users - manage users and roles\n" +
             "/invites - manage invite codes\n" +
             "/audit - view the audit log\n" +
-            "/status - system status";
+            "/status - system status\n" +
+            "/announce <message> - broadcast to all users";
 
         public const string Unknown =
             "Unknown command. Type /help to see what's available.";
