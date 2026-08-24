@@ -1,8 +1,10 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Notifications;
 using EduTrack.Domain.Audit;
 using EduTrack.Domain.Common;
+using EduTrack.Domain.Notifications;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTrack.Application.Admin.Commands.ChangeUserRole;
@@ -54,6 +56,14 @@ internal sealed class ChangeUserRoleCommandHandler : ICommandHandler<ChangeUserR
                 oldValue: previousRole.ToString(),
                 newValue: request.NewRole.ToString(),
                 now));
+
+            OutboxWriter.Enqueue(_db, new UserNotificationRequested(
+                Guid.NewGuid(),
+                target.Id,
+                NotificationType.AdminDataChange,
+                "Your account was updated",
+                $"An administrator changed your role to {request.NewRole}.",
+                Important: true), now);
 
             await _db.SaveChangesAsync(cancellationToken);
         }

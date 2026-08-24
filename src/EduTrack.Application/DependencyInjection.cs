@@ -1,5 +1,7 @@
+using EduTrack.Application.Abstractions.Notifications;
 using EduTrack.Application.Common.Behaviors;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Notifications;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +23,10 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+
+        // Default options; a host (e.g. the worker) may bind these from configuration.
+        services.AddOptions<NotificationOptions>();
+        services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 
         return services;
     }

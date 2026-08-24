@@ -10,4 +10,6 @@ public interface ITelegramSender
     Task SendKeyboardAsync(long chatId, string text, IReadOnlyList<IReadOnlyList<InlineButton>> rows, CancellationToken cancellationToken = default);
 
     Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default);
+
+    Task<int> SendNotificationAsync(long chatId, string text, CancellationToken cancellationToken = default);
 }
