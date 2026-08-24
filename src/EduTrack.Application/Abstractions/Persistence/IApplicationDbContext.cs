@@ -1,4 +1,6 @@
 using EduTrack.Domain.Audit;
+using EduTrack.Domain.Notifications;
+using EduTrack.Domain.Outbox;
 using EduTrack.Domain.Studies;
 using EduTrack.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -17,5 +19,7 @@ public interface IApplicationDbContext
     DbSet<Grade> Grades { get; }
     DbSet<Assignment> Assignments { get; }
     DbSet<AuditLog> AuditLogs { get; }
+    DbSet<OutboxMessage> OutboxMessages { get; }
+    DbSet<NotificationLog> NotificationLogs { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

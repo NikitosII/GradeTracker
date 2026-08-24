@@ -1,5 +1,7 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Domain.Audit;
+using EduTrack.Domain.Notifications;
+using EduTrack.Domain.Outbox;
 using EduTrack.Domain.Studies;
 using EduTrack.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +25,8 @@ public class EduTrackDbContext : DbContext, IApplicationDbContext
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
