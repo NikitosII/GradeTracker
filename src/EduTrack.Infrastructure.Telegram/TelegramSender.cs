@@ -27,9 +27,17 @@ public sealed class TelegramSender : ITelegramSender
     public Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default)
         => _botClient.AnswerCallbackQuery(callbackQueryId, text, cancellationToken: cancellationToken);
 
-    public async Task<int> SendNotificationAsync(long chatId, string text, CancellationToken cancellationToken = default)
+    public async Task<int> SendNotificationAsync(
+        long chatId,
+        string text,
+        IReadOnlyList<IReadOnlyList<InlineButton>>? buttons = null,
+        CancellationToken cancellationToken = default)
     {
-        var message = await _botClient.SendMessage(chatId, text, cancellationToken: cancellationToken);
+        InlineKeyboardMarkup? markup = buttons is { Count: > 0 }
+            ? new InlineKeyboardMarkup(buttons.Select(row => row.Select(b => InlineKeyboardButton.WithCallbackData(b.Text, b.CallbackData))))
+            : null;
+
+        var message = await _botClient.SendMessage(chatId, text, replyMarkup: markup, cancellationToken: cancellationToken);
         return message.MessageId;
     }
 }
