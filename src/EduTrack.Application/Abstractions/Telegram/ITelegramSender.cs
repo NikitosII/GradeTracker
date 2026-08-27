@@ -11,5 +11,9 @@ public interface ITelegramSender
 
     Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default);
 
-    Task<int> SendNotificationAsync(long chatId, string text, CancellationToken cancellationToken = default);
+    Task<int> SendNotificationAsync(
+        long chatId,
+        string text,
+        IReadOnlyList<IReadOnlyList<InlineButton>>? buttons = null,
+        CancellationToken cancellationToken = default);
 }

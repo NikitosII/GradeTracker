@@ -3,8 +3,7 @@ using EduTrack.Domain.Notifications;
 namespace EduTrack.Application.Notifications;
 
 /// <summary>
-/// A request to deliver one notification to one user. Written to the outbox by a command
-/// handler, published to RabbitMQ, and consumed by the notification pipeline.
+/// A request to deliver one notification to one user. 
 /// </summary>
 public sealed record UserNotificationRequested(
     Guid NotificationId,
@@ -12,4 +11,5 @@ public sealed record UserNotificationRequested(
     NotificationType Type,
     string Title,
     string Body,
-    bool Important);
+    bool Important,
+    Guid? ReminderId = null);

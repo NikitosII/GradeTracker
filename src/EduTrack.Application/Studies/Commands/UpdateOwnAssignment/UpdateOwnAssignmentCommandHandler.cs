@@ -1,6 +1,7 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Reminders;
 using EduTrack.Application.Users;
 using EduTrack.Domain.Common;
 using Microsoft.EntityFrameworkCore;
@@ -41,14 +42,17 @@ internal sealed class UpdateOwnAssignmentCommandHandler : ICommandHandler<Update
             return Result.Failure<AssignmentDto>(AssignmentErrors.NotOwner);
         }
 
+        var now = _clock.UtcNow;
+
         assignment.Update(
             type: request.Type,
             title: request.Title,
             description: request.Description,
             dueAtUtc: request.DueAtUtc,
             updatedByUserId: user.Id,
-            nowUtc: _clock.UtcNow);
+            nowUtc: now);
 
+        await ReminderPlanner.SyncAsync(_db, assignment, now, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
 
         var subjectName = await _db.Subjects

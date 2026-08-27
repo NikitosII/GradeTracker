@@ -2,6 +2,7 @@ using EduTrack.Application.Abstractions.Notifications;
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Abstractions.Telegram;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Reminders;
 using EduTrack.Domain.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -29,7 +30,6 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
 
     public async Task DispatchAsync(UserNotificationRequested message, CancellationToken cancellationToken)
     {
-        // Idempotency: a log row already exists for this notification id.
         var alreadyHandled = await _db.NotificationLogs
             .AsNoTracking()
             .AnyAsync(l => l.Id == message.NotificationId, cancellationToken);
@@ -72,11 +72,40 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
         var text = string.IsNullOrWhiteSpace(message.Title)
             ? message.Body
             : $"{message.Title}\n\n{message.Body}";
-        var telegramMessageId = await _telegram.SendNotificationAsync(user.TelegramUserId, text, cancellationToken);
+        var buttons = BuildSnoozeButtons(message);
+        var telegramMessageId = await _telegram.SendNotificationAsync(user.TelegramUserId, text, buttons, cancellationToken);
 
         _db.NotificationLogs.Add(NotificationLog.Sent(
             message.NotificationId, message.UserId, message.Type, telegramMessageId, now));
         await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>Reminder notifications carry snooze buttons keyed by the reminder id.</summary>
+    private static IReadOnlyList<IReadOnlyList<InlineButton>>? BuildSnoozeButtons(UserNotificationRequested message)
+    {
+        if (message.ReminderId is not { } reminderId)
+        {
+            return null;
+        }
+
+        var isReminder = message.Type is NotificationType.AssignmentReminder24h
+            or NotificationType.AssignmentReminder2h
+            or NotificationType.AssignmentOverdue;
+
+        if (!isReminder)
+        {
+            return null;
+        }
+
+        return new[]
+        {
+            new[]
+            {
+                new InlineButton("1 hour", ReminderCallback.Snooze(reminderId, SnoozeOption.OneHour)),
+                new InlineButton("3 hours", ReminderCallback.Snooze(reminderId, SnoozeOption.ThreeHours)),
+                new InlineButton("Tomorrow", ReminderCallback.Snooze(reminderId, SnoozeOption.TomorrowMorning)),
+            },
+        };
     }
 
     private async Task SuppressAsync(UserNotificationRequested message, string reason, DateTime now, CancellationToken cancellationToken)

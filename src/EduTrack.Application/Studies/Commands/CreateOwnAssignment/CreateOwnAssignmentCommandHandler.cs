@@ -1,6 +1,7 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Reminders;
 using EduTrack.Application.Users;
 using EduTrack.Domain.Common;
 using EduTrack.Domain.Studies;
@@ -37,6 +38,8 @@ internal sealed class CreateOwnAssignmentCommandHandler : ICommandHandler<Create
             return Result.Failure<AssignmentDto>(AssignmentErrors.SubjectNotFound);
         }
 
+        var now = _clock.UtcNow;
+
         var assignment = Assignment.Create(
             ownerUserId: user.Id,
             subjectId: subject.Id,
@@ -45,9 +48,10 @@ internal sealed class CreateOwnAssignmentCommandHandler : ICommandHandler<Create
             description: request.Description,
             dueAtUtc: request.DueAtUtc,
             createdByUserId: user.Id,
-            nowUtc: _clock.UtcNow);
+            nowUtc: now);
 
         _db.Assignments.Add(assignment);
+        await ReminderPlanner.SyncAsync(_db, assignment, now, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
 
         return Result.Success(assignment.ToAssignmentDto(subject.Name));
