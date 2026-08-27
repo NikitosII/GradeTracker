@@ -1,4 +1,5 @@
 using EduTrack.Application.Abstractions.Telegram;
+using EduTrack.Application.Reminders;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Commands.BindUser;
 using EduTrack.Application.Users.Queries.GetUserProfile;
@@ -20,15 +21,17 @@ public sealed class WebhookUpdateProcessor
     private readonly GradeModule _grades;
     private readonly DeadlineModule _deadlines;
     private readonly AdminModule _admins;
+    private readonly ReminderModule _reminders;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
         _grades = grades;
         _deadlines = deadlines;
         _admins = admins;
+        _reminders = reminders;
         _logger = logger;
     }
 
@@ -70,6 +73,10 @@ public sealed class WebhookUpdateProcessor
             || data.StartsWith(CallbackData.AdminWizardNamespace + ":", StringComparison.Ordinal))
         {
             await _admins.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
+        }
+        else if (data.StartsWith(ReminderCallback.Namespace + ":", StringComparison.Ordinal))
+        {
+            await _reminders.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
         }
         else
         {

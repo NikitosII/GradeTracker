@@ -2,6 +2,7 @@ using EduTrack.Application;
 using EduTrack.Application.Notifications;
 using EduTrack.Infrastructure.Messaging;
 using EduTrack.Infrastructure.Persistence;
+using EduTrack.Infrastructure.Scheduling;
 using EduTrack.Infrastructure.Telegram;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddPersistenceInfrastructure(builder.Configuration, applyMigrat
 
 builder.Services.AddTelegramSender(builder.Configuration);
 builder.Services.AddMessagingInfrastructure(builder.Configuration);
+builder.Services.AddSchedulingInfrastructure(builder.Configuration);
 
 builder.Services.Configure<NotificationOptions>(
     builder.Configuration.GetSection(NotificationOptions.SectionName));
