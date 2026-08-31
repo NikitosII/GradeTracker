@@ -1,4 +1,5 @@
 using EduTrack.Application.Abstractions.Notifications;
+using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Abstractions.Telegram;
 using EduTrack.Application.Common.Time;
@@ -14,17 +15,20 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
     private readonly IApplicationDbContext _db;
     private readonly ITelegramSender _telegram;
     private readonly IDateTimeProvider _clock;
+    private readonly IApplicationMetrics _metrics;
     private readonly NotificationOptions _options;
 
     public NotificationDispatcher(
         IApplicationDbContext db,
         ITelegramSender telegram,
         IDateTimeProvider clock,
+        IApplicationMetrics metrics,
         IOptions<NotificationOptions> options)
     {
         _db = db;
         _telegram = telegram;
         _clock = clock;
+        _metrics = metrics;
         _options = options.Value;
     }
 
@@ -50,6 +54,7 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
             _db.NotificationLogs.Add(NotificationLog.Failed(
                 message.NotificationId, message.UserId, message.Type, "Recipient not found.", now));
             await _db.SaveChangesAsync(cancellationToken);
+            _metrics.NotificationFailed(message.Type);
             return;
         }
 
@@ -68,16 +73,24 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
             }
         }
 
-        // A send failure throws here so the broker can retry; nothing is persisted yet.
-        var text = string.IsNullOrWhiteSpace(message.Title)
-            ? message.Body
-            : $"{message.Title}\n\n{message.Body}";
+        var text = string.IsNullOrWhiteSpace(message.Title) ? message.Body : $"{message.Title}\n\n{message.Body}";
         var buttons = BuildSnoozeButtons(message);
-        var telegramMessageId = await _telegram.SendNotificationAsync(user.TelegramUserId, text, buttons, cancellationToken);
+
+        int telegramMessageId;
+        try
+        {
+            telegramMessageId = await _telegram.SendNotificationAsync(user.TelegramUserId, text, buttons, cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _metrics.NotificationFailed(message.Type);
+            throw;
+        }
 
         _db.NotificationLogs.Add(NotificationLog.Sent(
             message.NotificationId, message.UserId, message.Type, telegramMessageId, now));
         await _db.SaveChangesAsync(cancellationToken);
+        _metrics.NotificationSent(message.Type);
     }
 
     /// <summary>Reminder notifications carry snooze buttons keyed by the reminder id.</summary>
@@ -113,5 +126,6 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
         _db.NotificationLogs.Add(NotificationLog.Suppressed(
             message.NotificationId, message.UserId, message.Type, reason, now));
         await _db.SaveChangesAsync(cancellationToken);
+        _metrics.NotificationSuppressed(message.Type);
     }
 }
