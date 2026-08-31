@@ -6,6 +6,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.11" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
     <ProjectReference Include="..\EduTrack.Infrastructure.Messaging\EduTrack.Infrastructure.Messaging.csproj" />
     <ProjectReference Include="..\EduTrack.Infrastructure.Telegram\EduTrack.Infrastructure.Telegram.csproj" />
     <ProjectReference Include="..\EduTrack.Infrastructure.Scheduling\EduTrack.Infrastructure.Scheduling.csproj" />
+    <ProjectReference Include="..\EduTrack.Infrastructure.Observability\EduTrack.Infrastructure.Observability.csproj" />
     <ProjectReference Include="..\EduTrack.Application\EduTrack.Application.csproj" />
   </ItemGroup>
 

@@ -1,11 +1,15 @@
+using System.Diagnostics;
+using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Telegram;
 using EduTrack.Application.Reminders;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Commands.BindUser;
 using EduTrack.Application.Users.Queries.GetUserProfile;
 using EduTrack.Domain.Common;
+using EduTrack.Infrastructure.Observability;
 using FluentValidation;
 using MediatR;
+using Serilog.Context;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -22,9 +26,10 @@ public sealed class WebhookUpdateProcessor
     private readonly DeadlineModule _deadlines;
     private readonly AdminModule _admins;
     private readonly ReminderModule _reminders;
+    private readonly IApplicationMetrics _metrics;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
@@ -32,24 +37,44 @@ public sealed class WebhookUpdateProcessor
         _deadlines = deadlines;
         _admins = admins;
         _reminders = reminders;
+        _metrics = metrics;
         _logger = logger;
     }
 
     public async Task ProcessAsync(Update update, CancellationToken cancellationToken)
     {
-        if (update.CallbackQuery is { } callback)
-        {
-            await HandleCallbackAsync(callback, cancellationToken);
-            return;
-        }
+        using var _ = LogContext.PushProperty("TelegramUpdateId", update.Id);
+        using var activity = EduTrackTelemetry.ActivitySource.StartActivity("telegram.update");
+        activity?.SetTag("telegram.update_id", update.Id);
+        activity?.SetTag("telegram.update_type", update.Type.ToString());
 
-        if (update.Message is { } message && message.From is not null && !string.IsNullOrWhiteSpace(message.Text))
+        var stopwatch = Stopwatch.StartNew();
+        var success = false;
+        try
         {
-            await HandleMessageAsync(message, cancellationToken);
-            return;
-        }
+            if (update.CallbackQuery is { } callback)
+            {
+                await HandleCallbackAsync(callback, cancellationToken);
+            }
+            else if (update.Message is { } message && message.From is not null && !string.IsNullOrWhiteSpace(message.Text))
+            {
+                await HandleMessageAsync(message, cancellationToken);
+            }
+            else
+            {
+                _logger.LogDebug("Ignoring update {UpdateId} of type {UpdateType}", update.Id, update.Type);
+            }
 
-        _logger.LogDebug("Ignoring update {UpdateId} of type {UpdateType}", update.Id, update.Type);
+            success = true;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _metrics.WebhookProcessed(success);
+            _logger.LogInformation(
+                "Processed update {TelegramUpdateId} in {DurationMs} ms (success={Success})",
+                update.Id, stopwatch.ElapsedMilliseconds, success);
+        }
     }
 
     private async Task HandleCallbackAsync(CallbackQuery callback, CancellationToken cancellationToken)
@@ -89,6 +114,11 @@ public sealed class WebhookUpdateProcessor
         var chatId = message.Chat.Id;
         var telegramUserId = message.From!.Id;
         var (command, argument) = ParseCommand(message.Text!);
+
+        using var commandProperty = LogContext.PushProperty("CommandName", command);
+        using var userProperty = LogContext.PushProperty("TelegramUserId", telegramUserId);
+        Activity.Current?.SetTag("telegram.command", command);
+        Activity.Current?.SetTag("telegram.user_id", telegramUserId);
 
         switch (command)
         {

@@ -1,11 +1,19 @@
 using EduTrack.Application;
 using EduTrack.Bot.Web.Conversations;
 using EduTrack.Bot.Web.Telegram;
+using EduTrack.Infrastructure.Observability;
 using EduTrack.Infrastructure.Persistence;
 using EduTrack.Infrastructure.Telegram;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddEduTrackObservability(
+    "edutrack-bot-web",
+    configureTracing: tracing => tracing.AddAspNetCoreInstrumentation(),
+    configureMetrics: metrics => metrics.AddAspNetCoreInstrumentation());
 
 builder.Services.AddApplication();
 builder.Services.AddPersistenceInfrastructure(builder.Configuration);
@@ -32,6 +40,8 @@ builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" });
 
 var app = builder.Build();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.MapTelegramWebhook();
 
