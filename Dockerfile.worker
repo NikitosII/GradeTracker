@@ -11,19 +11,18 @@ COPY src/EduTrack.Infrastructure.Scheduling/EduTrack.Infrastructure.Scheduling.c
 COPY src/EduTrack.Infrastructure.Observability/EduTrack.Infrastructure.Observability.csproj src/EduTrack.Infrastructure.Observability/
 COPY src/EduTrack.Bot.Web/EduTrack.Bot.Web.csproj                                   src/EduTrack.Bot.Web/
 COPY src/EduTrack.Worker/EduTrack.Worker.csproj                                     src/EduTrack.Worker/
-RUN dotnet restore src/EduTrack.Bot.Web/EduTrack.Bot.Web.csproj
+RUN dotnet restore src/EduTrack.Worker/EduTrack.Worker.csproj
 
 COPY src/ src/
-RUN dotnet publish src/EduTrack.Bot.Web/EduTrack.Bot.Web.csproj \
+RUN dotnet publish src/EduTrack.Worker/EduTrack.Worker.csproj \
     -c Release -o /app --no-restore
 
+# aspnet base (not runtime): the worker references the health-check libraries that
+# live in the Microsoft.AspNetCore.App shared framework.
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
 USER $APP_UID
 
-ENV ASPNETCORE_HTTP_PORTS=8080
-EXPOSE 8080
-
 COPY --from=build /app ./
-ENTRYPOINT ["dotnet", "EduTrack.Bot.Web.dll"]
+ENTRYPOINT ["dotnet", "EduTrack.Worker.dll"]

@@ -13,6 +13,7 @@
     <ProjectReference Include="..\EduTrack.Infrastructure.Messaging\EduTrack.Infrastructure.Messaging.csproj" />
     <ProjectReference Include="..\EduTrack.Infrastructure.Telegram\EduTrack.Infrastructure.Telegram.csproj" />
     <ProjectReference Include="..\EduTrack.Infrastructure.Scheduling\EduTrack.Infrastructure.Scheduling.csproj" />
+    <ProjectReference Include="..\EduTrack.Infrastructure.Observability\EduTrack.Infrastructure.Observability.csproj" />
     <ProjectReference Include="..\EduTrack.Application\EduTrack.Application.csproj" />
   </ItemGroup>
 

@@ -1,11 +1,14 @@
 using EduTrack.Application;
 using EduTrack.Application.Notifications;
 using EduTrack.Infrastructure.Messaging;
+using EduTrack.Infrastructure.Observability;
 using EduTrack.Infrastructure.Persistence;
 using EduTrack.Infrastructure.Scheduling;
 using EduTrack.Infrastructure.Telegram;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+builder.AddEduTrackObservability("edutrack-worker");
 
 builder.Services.AddApplication();
 

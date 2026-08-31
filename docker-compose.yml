@@ -24,8 +24,12 @@ services:
       Bootstrap__Subjects__0: "Mathematics"
       Bootstrap__Subjects__1: "Physics"
       Bootstrap__Subjects__2: "Computer Science"
+      Observability__PrometheusEnabled: "true"
+      Observability__PrometheusHttpListenerPrefix: "http://+:9464/"
+      Observability__OtlpEndpoint: "${OTLP_ENDPOINT}"
     ports:
       - "8080:8080"
+      - "9464:9464"
 
   bot-worker:
     build:
@@ -48,6 +52,11 @@ services:
       RabbitMq__Password: "${RABBITMQ_PASSWORD}"
       Notifications__QuietHoursStart: "22"
       Notifications__QuietHoursEnd: "8"
+      Observability__PrometheusEnabled: "true"
+      Observability__PrometheusHttpListenerPrefix: "http://+:9464/"
+      Observability__OtlpEndpoint: "${OTLP_ENDPOINT}"
+    ports:
+      - "9465:9464"
 
   postgres:
     image: postgres:16
