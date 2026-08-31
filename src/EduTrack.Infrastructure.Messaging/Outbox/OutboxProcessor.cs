@@ -1,3 +1,4 @@
+using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Time;
 using EduTrack.Application.Notifications;
@@ -67,17 +68,22 @@ public sealed class OutboxProcessor : BackgroundService
         var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
         var publish = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
         var clock = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
+        var metrics = scope.ServiceProvider.GetRequiredService<IApplicationMetrics>();
+
+        var pendingCount = await db.OutboxMessages
+            .CountAsync(m => m.ProcessedAtUtc == null, cancellationToken);
+        metrics.RecordOutboxPending(pendingCount);
+
+        if (pendingCount == 0)
+        {
+            return;
+        }
 
         var pending = await db.OutboxMessages
             .Where(m => m.ProcessedAtUtc == null)
             .OrderBy(m => m.OccurredAtUtc)
             .Take(Math.Max(1, _options.OutboxBatchSize))
             .ToListAsync(cancellationToken);
-
-        if (pending.Count == 0)
-        {
-            return;
-        }
 
         foreach (var message in pending)
         {
