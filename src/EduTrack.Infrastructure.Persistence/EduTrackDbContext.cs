@@ -1,5 +1,6 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Domain.Audit;
+using EduTrack.Domain.Inbox;
 using EduTrack.Domain.Notifications;
 using EduTrack.Domain.Outbox;
 using EduTrack.Domain.Reminders;
@@ -29,6 +30,7 @@ public class EduTrackDbContext : DbContext, IApplicationDbContext
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
     public DbSet<Reminder> Reminders => Set<Reminder>();
+    public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

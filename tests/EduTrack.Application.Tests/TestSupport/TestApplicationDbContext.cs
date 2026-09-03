@@ -1,6 +1,10 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Time;
 using EduTrack.Domain.Audit;
+using EduTrack.Domain.Inbox;
+using EduTrack.Domain.Notifications;
+using EduTrack.Domain.Outbox;
+using EduTrack.Domain.Reminders;
 using EduTrack.Domain.Studies;
 using EduTrack.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +25,10 @@ public sealed class TestApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+    public DbSet<Reminder> Reminders => Set<Reminder>();
+    public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
 
     public static TestApplicationDbContext CreateInMemory() =>
         new(new DbContextOptionsBuilder<TestApplicationDbContext>()

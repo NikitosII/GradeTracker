@@ -52,6 +52,17 @@ public class CreateOwnAssignmentCommandHandlerTests
         assignment.OwnerUserId.Should().Be(user.Id);
         assignment.CreatedByUserId.Should().Be(user.Id);
         assignment.UpdatedByUserId.Should().Be(user.Id);
+
+        // 24h, 2h and overdue reminders are scheduled (all in the future for a deadline 3 days out).
+        var reminders = await _db.Reminders.ToListAsync();
+        reminders.Should().HaveCount(3);
+        reminders.Select(r => r.Kind).Should().BeEquivalentTo(new[]
+        {
+            EduTrack.Domain.Reminders.ReminderKind.Ahead24h,
+            EduTrack.Domain.Reminders.ReminderKind.Ahead2h,
+            EduTrack.Domain.Reminders.ReminderKind.Overdue,
+        });
+        reminders.Should().OnlyContain(r => r.Status == EduTrack.Domain.Reminders.ReminderStatus.Pending);
     }
 
     [Fact]

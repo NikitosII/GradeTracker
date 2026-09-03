@@ -26,10 +26,11 @@ public sealed class WebhookUpdateProcessor
     private readonly DeadlineModule _deadlines;
     private readonly AdminModule _admins;
     private readonly ReminderModule _reminders;
+    private readonly IInboxStore _inbox;
     private readonly IApplicationMetrics _metrics;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
@@ -37,6 +38,7 @@ public sealed class WebhookUpdateProcessor
         _deadlines = deadlines;
         _admins = admins;
         _reminders = reminders;
+        _inbox = inbox;
         _metrics = metrics;
         _logger = logger;
     }
@@ -47,6 +49,14 @@ public sealed class WebhookUpdateProcessor
         using var activity = EduTrackTelemetry.ActivitySource.StartActivity("telegram.update");
         activity?.SetTag("telegram.update_id", update.Id);
         activity?.SetTag("telegram.update_type", update.Type.ToString());
+
+        // Idempotency guard: register the update before handling it.
+        if (!await _inbox.TryRegisterAsync(update.Id, cancellationToken))
+        {
+            activity?.SetTag("telegram.duplicate", true);
+            _logger.LogInformation("Skipping duplicate Telegram update {TelegramUpdateId}", update.Id);
+            return;
+        }
 
         var stopwatch = Stopwatch.StartNew();
         var success = false;
@@ -66,6 +76,12 @@ public sealed class WebhookUpdateProcessor
             }
 
             success = true;
+            await _inbox.MarkProcessedAsync(update.Id, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            await MarkFailedSafelyAsync(update.Id, ex.Message, cancellationToken);
+            throw;
         }
         finally
         {
@@ -74,6 +90,18 @@ public sealed class WebhookUpdateProcessor
             _logger.LogInformation(
                 "Processed update {TelegramUpdateId} in {DurationMs} ms (success={Success})",
                 update.Id, stopwatch.ElapsedMilliseconds, success);
+        }
+    }
+
+    private async Task MarkFailedSafelyAsync(long updateId, string error, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _inbox.MarkFailedAsync(updateId, error, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not record inbox failure for update {TelegramUpdateId}", updateId);
         }
     }
 

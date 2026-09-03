@@ -1,3 +1,4 @@
+using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Telegram;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Commands.BindUser;
@@ -18,9 +19,16 @@ public class WebhookUpdateProcessorTests
 {
     private readonly ISender _sender = Substitute.For<ISender>();
     private readonly ITelegramSender _telegram = Substitute.For<ITelegramSender>();
+    private readonly IInboxStore _inbox = Substitute.For<IInboxStore>();
 
     private static readonly DateTime Clock = new(2026, 8, 21, 12, 0, 0, DateTimeKind.Utc);
     private readonly InMemoryConversationStore _conversations = new();
+
+    public WebhookUpdateProcessorTests()
+    {
+        // By default every update is treated as new; the dedup test overrides this.
+        _inbox.TryRegisterAsync(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns(true);
+    }
 
     private GradeModule CreateGradeModule() =>
         new(_sender, _telegram, _conversations, new FixedClock(Clock), NullLogger<GradeModule>.Instance);
@@ -31,8 +39,11 @@ public class WebhookUpdateProcessorTests
     private AdminModule CreateAdminModule() =>
         new(_sender, _telegram, _conversations, NullLogger<AdminModule>.Instance);
 
+    private ReminderModule CreateReminderModule() =>
+        new(_sender, _telegram, NullLogger<ReminderModule>.Instance);
+
     private WebhookUpdateProcessor CreateSut() =>
-        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), CreateAdminModule(), NullLogger<WebhookUpdateProcessor>.Instance);
+        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), CreateAdminModule(), CreateReminderModule(), _inbox, NullApplicationMetrics.Instance, NullLogger<WebhookUpdateProcessor>.Instance);
 
     private static Update MessageUpdate(long fromId, string text) => new()
     {
@@ -87,6 +98,38 @@ public class WebhookUpdateProcessorTests
             42,
             Arg.Is<string>(s => s.Contains("Account linked")),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Duplicate_update_is_skipped_and_not_handled()
+    {
+        _inbox.TryRegisterAsync(Arg.Any<long>(), Arg.Any<CancellationToken>()).Returns(false);
+
+        await CreateSut().ProcessAsync(MessageUpdate(42, "/start"), CancellationToken.None);
+
+        await _telegram.DidNotReceiveWithAnyArgs().SendTextAsync(default, default!, default);
+        await _inbox.DidNotReceiveWithAnyArgs().MarkProcessedAsync(default, default);
+    }
+
+    [Fact]
+    public async Task New_update_is_marked_processed()
+    {
+        await CreateSut().ProcessAsync(MessageUpdate(42, "/start"), CancellationToken.None);
+
+        await _inbox.Received(1).MarkProcessedAsync(1, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Failed_processing_marks_inbox_failed_and_rethrows()
+    {
+        _sender.Send(Arg.Any<GetUserProfileQuery>(), Arg.Any<CancellationToken>())
+            .Returns<Result<UserProfileDto>>(_ => throw new InvalidOperationException("boom"));
+
+        var act = () => CreateSut().ProcessAsync(MessageUpdate(42, "/profile"), CancellationToken.None);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        await _inbox.Received(1).MarkFailedAsync(1, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _inbox.DidNotReceiveWithAnyArgs().MarkProcessedAsync(default, default);
     }
 
     [Fact]

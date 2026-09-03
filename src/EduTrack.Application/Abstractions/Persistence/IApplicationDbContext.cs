@@ -1,4 +1,5 @@
 using EduTrack.Domain.Audit;
+using EduTrack.Domain.Inbox;
 using EduTrack.Domain.Notifications;
 using EduTrack.Domain.Outbox;
 using EduTrack.Domain.Reminders;
@@ -23,5 +24,6 @@ public interface IApplicationDbContext
     DbSet<OutboxMessage> OutboxMessages { get; }
     DbSet<NotificationLog> NotificationLogs { get; }
     DbSet<Reminder> Reminders { get; }
+    DbSet<InboxMessage> InboxMessages { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

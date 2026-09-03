@@ -41,6 +41,11 @@ public class ChangeUserRoleCommandHandlerTests
         audit.Action.Should().Be(AuditActions.UserRoleChanged);
         audit.OldValue.Should().Be(nameof(UserRole.Student));
         audit.NewValue.Should().Be(nameof(UserRole.Admin));
+
+        // The affected user is notified via the outbox.
+        var outbox = await _db.OutboxMessages.SingleAsync();
+        outbox.ProcessedAtUtc.Should().BeNull();
+        outbox.Payload.Should().Contain(student.Id.ToString());
     }
 
     [Fact]

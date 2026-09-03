@@ -1,4 +1,5 @@
 using EduTrack.Application.Abstractions.Persistence;
+using EduTrack.Application.Abstractions.Telegram;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,8 @@ public static class DependencyInjection
                 npgsql.MigrationsAssembly(typeof(EduTrackDbContext).Assembly.FullName)));
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<EduTrackDbContext>());
+
+        services.AddScoped<IInboxStore, InboxStore>();
 
         // Only one process should apply migrations; the web owns that.
         if (applyMigrations)
