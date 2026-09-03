@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EduTrack.Infrastructure.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EduTrack.Integration.Tests", "tests\EduTrack.Integration.Tests\EduTrack.Integration.Tests.csproj", "{6550C352-15BF-41BB-8F1E-E5154791EA5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EduTrack.Infrastructure.Observability", "src\EduTrack.Infrastructure.Observability\EduTrack.Infrastructure.Observability.csproj", "{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -185,6 +187,18 @@ Global
 		{6550C352-15BF-41BB-8F1E-E5154791EA5C}.Release|x64.Build.0 = Release|Any CPU
 		{6550C352-15BF-41BB-8F1E-E5154791EA5C}.Release|x86.ActiveCfg = Release|Any CPU
 		{6550C352-15BF-41BB-8F1E-E5154791EA5C}.Release|x86.Build.0 = Release|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Release|x64.Build.0 = Release|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -202,5 +216,6 @@ Global
 		{01456F11-EABA-4E97-869F-B767621E9516} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{A4F702BC-B182-4C33-9120-6CFA8316B7D6} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{6550C352-15BF-41BB-8F1E-E5154791EA5C} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{94862EBA-9EC7-444C-B0E5-EA4AA9F670FD} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

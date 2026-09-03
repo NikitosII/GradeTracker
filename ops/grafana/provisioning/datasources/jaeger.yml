@@ -1,0 +1,11 @@
+# Auto-provisioned Jaeger datasource so traces are queryable from Grafana
+# (Explore -> Jaeger) alongside the Prometheus metrics.
+apiVersion: 1
+
+datasources:
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    uid: jaeger
+    editable: false

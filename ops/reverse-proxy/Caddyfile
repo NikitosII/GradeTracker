@@ -1,0 +1,33 @@
+# Automatic HTTPS: Caddy provisions and renews a Let's Encrypt certificate for
+# {$DOMAIN} on first request and redirects http -> https. Only the Telegram
+# webhook and the liveness probe are exposed publicly; metrics (:9464) and the
+# data services are never routed through here.
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode gzip
+
+	# Telegram delivers updates here over HTTPS. The endpoint additionally
+	# checks the X-Telegram-Bot-Api-Secret-Token header inside the app.
+	handle /api/telegram/webhook {
+		reverse_proxy bot-web:8080
+	}
+
+	# Public liveness probe for uptime monitors.
+	handle /health/live {
+		reverse_proxy bot-web:8080
+	}
+
+	# Nothing else is served publicly.
+	handle {
+		respond "Not found" 404
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

@@ -1,0 +1,22 @@
+services:
+  bot-web:
+    ports:
+      - "8080:8080"   # HTTP (webhook + health + root)
+      - "9464:9464"   # Prometheus metrics
+
+  bot-worker:
+    ports:
+      - "9465:9464"   # Prometheus metrics
+
+  postgres:
+    ports:
+      - "5433:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # management UI
