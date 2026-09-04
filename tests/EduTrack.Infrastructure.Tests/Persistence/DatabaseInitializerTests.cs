@@ -12,8 +12,8 @@ namespace EduTrack.Infrastructure.Tests.Persistence;
 
 /// <summary>
 /// Verifies the startup initializer against a real Postgres engine: it applies
-/// the migrations from scratch and seeds the bootstrap admin invite code and
-/// subjects exactly once.
+/// the migrations from scratch and seeds the bootstrap admin invite code exactly
+/// once. Subjects are not seeded — an admin creates them through the bot.
 /// </summary>
 public sealed class DatabaseInitializerTests : IAsyncLifetime
 {
@@ -26,14 +26,12 @@ public sealed class DatabaseInitializerTests : IAsyncLifetime
     public Task DisposeAsync() => _container.DisposeAsync().AsTask();
 
     [Fact]
-    public async Task Applies_migrations_and_seeds_bootstrap_data()
+    public async Task Applies_migrations_and_seeds_admin_code_without_subjects()
     {
         const string adminCode = "INIT-ADMIN-CODE";
         await using var provider = BuildProvider(new Dictionary<string, string?>
         {
             [DatabaseInitializer.BootstrapAdminCodeKey] = adminCode,
-            ["Bootstrap:Subjects:0"] = "Algebra",
-            ["Bootstrap:Subjects:1"] = "Geometry",
         });
 
         var initializer = ActivatorUtilities.CreateInstance<DatabaseInitializer>(provider);
@@ -47,8 +45,8 @@ public sealed class DatabaseInitializerTests : IAsyncLifetime
         var invite = await db.InviteCodes.SingleAsync(c => c.Code == adminCode);
         invite.Role.Should().Be(UserRole.Admin);
 
-        var subjects = await db.Subjects.Select(s => s.Name).ToListAsync();
-        subjects.Should().Contain(new[] { "Algebra", "Geometry" });
+        // Subjects are no longer seeded — the admin adds them through the bot.
+        (await db.Subjects.AnyAsync()).Should().BeFalse();
     }
 
     [Fact]
@@ -57,7 +55,6 @@ public sealed class DatabaseInitializerTests : IAsyncLifetime
         await using var provider = BuildProvider(new Dictionary<string, string?>
         {
             [DatabaseInitializer.BootstrapAdminCodeKey] = "IDEMPOTENT-CODE",
-            ["Bootstrap:Subjects:0"] = "Physics",
         });
 
         var initializer = ActivatorUtilities.CreateInstance<DatabaseInitializer>(provider);
@@ -68,7 +65,6 @@ public sealed class DatabaseInitializerTests : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<EduTrackDbContext>();
 
         (await db.InviteCodes.CountAsync(c => c.Code == "IDEMPOTENT-CODE")).Should().Be(1);
-        (await db.Subjects.CountAsync(s => s.Name == "Physics")).Should().Be(1);
     }
 
     private ServiceProvider BuildProvider(Dictionary<string, string?> settings)

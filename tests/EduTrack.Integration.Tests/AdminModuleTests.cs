@@ -23,6 +23,7 @@ public class AdminModuleTests
 {
     private const long ChatId = 900;
     private const long UserId = 900;
+    private const int MessageId = 42;
 
     private readonly ISender _sender = Substitute.For<ISender>();
     private readonly ITelegramSender _telegram = Substitute.For<ITelegramSender>();
@@ -73,7 +74,7 @@ public class AdminModuleTests
             .Returns(Result.Success<IReadOnlyList<InviteCodeDto>>(new List<InviteCodeDto>()));
 
         await CreateSut().HandleCallbackAsync(
-            ChatId, UserId, "c1", CallbackData.AdminCodeExpiry((int)UserRole.Student, 7), CancellationToken.None);
+            ChatId, UserId, "c1", CallbackData.AdminCodeExpiry((int)UserRole.Student, 7), MessageId, CancellationToken.None);
 
         await _sender.Received(1).Send(
             Arg.Is<CreateInviteCodeCommand>(c =>
@@ -94,13 +95,13 @@ public class AdminModuleTests
 
         var sut = CreateSut();
 
-        await sut.HandleCallbackAsync(ChatId, UserId, "c1", CallbackData.AdminNewSubject, CancellationToken.None);
+        await sut.HandleCallbackAsync(ChatId, UserId, "c1", CallbackData.AdminNewSubject, MessageId, CancellationToken.None);
         _store.Peek(ChatId)!.Step.Should().Be(AdminStep.SubjectName);
 
         (await sut.TryHandleTextAsync(ChatId, UserId, "Chemistry", CancellationToken.None)).Should().BeTrue();
         _store.Peek(ChatId)!.Step.Should().Be(AdminStep.SubjectDescription);
 
-        await sut.HandleCallbackAsync(ChatId, UserId, "c2", CallbackData.AdminSubjectSkip, CancellationToken.None);
+        await sut.HandleCallbackAsync(ChatId, UserId, "c2", CallbackData.AdminSubjectSkip, MessageId, CancellationToken.None);
 
         await _sender.Received(1).Send(
             Arg.Is<CreateSubjectCommand>(c => c.Name == "Chemistry" && c.Description == null),

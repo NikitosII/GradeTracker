@@ -10,7 +10,12 @@ namespace EduTrack.Integration.Tests.TestSupport;
 /// </summary>
 public sealed class RecordingTelegramSender : ITelegramSender
 {
+    private int _nextMessageId;
+
     public ConcurrentQueue<string> Messages { get; } = new();
+
+    /// <summary>Message ids that <see cref="DeleteMessageAsync"/> was asked to remove.</summary>
+    public ConcurrentQueue<int> Deleted { get; } = new();
 
     public Task SendTextAsync(long chatId, string text, CancellationToken cancellationToken = default)
     {
@@ -18,9 +23,23 @@ public sealed class RecordingTelegramSender : ITelegramSender
         return Task.CompletedTask;
     }
 
-    public Task SendKeyboardAsync(long chatId, string text, IReadOnlyList<IReadOnlyList<InlineButton>> rows, CancellationToken cancellationToken = default)
+    public Task<int> SendKeyboardAsync(long chatId, string text, IReadOnlyList<IReadOnlyList<InlineButton>> rows, CancellationToken cancellationToken = default)
     {
         Messages.Enqueue(text);
+        return Task.FromResult(Interlocked.Increment(ref _nextMessageId));
+    }
+
+    public Task EditKeyboardAsync(long chatId, int messageId, string text, IReadOnlyList<IReadOnlyList<InlineButton>> rows, CancellationToken cancellationToken = default)
+    {
+        // Record the edited body too, so assertions on what the bot "said" hold
+        // whether a step was sent fresh or edited into the wizard message.
+        Messages.Enqueue(text);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteMessageAsync(long chatId, int messageId, CancellationToken cancellationToken = default)
+    {
+        Deleted.Enqueue(messageId);
         return Task.CompletedTask;
     }
 
