@@ -64,13 +64,12 @@ public sealed class GradeModule
             return;
         }
 
-        await _conversations.SetAsync(chatId, new ConversationState
+        var state = new ConversationState
         {
             Flow = ConversationFlow.GradeAdd,
             Step = GradeStep.Subject,
-        }, ct);
-
-        await _telegram.SendKeyboardAsync(chatId, "Add a grade.\nSelect a subject:", WithCancel(subjectRows), ct);
+        };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Add a grade.\nSelect a subject:", WithCancel(subjectRows), ct);
     }
 
     public async Task StartEditAsync(long chatId, long telegramUserId, CancellationToken ct)
@@ -82,19 +81,18 @@ public sealed class GradeModule
             return;
         }
 
-        await _conversations.SetAsync(chatId, new ConversationState
+        var state = new ConversationState
         {
             Flow = ConversationFlow.GradeEdit,
             Step = GradeStep.Subject,
-        }, ct);
-
-        await _telegram.SendKeyboardAsync(chatId, "Edit a grade.\nSelect a subject:", WithCancel(subjectRows), ct);
+        };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Edit a grade.\nSelect a subject:", WithCancel(subjectRows), ct);
     }
 
     public async Task CancelAsync(long chatId, CancellationToken ct)
     {
-        await _conversations.RemoveAsync(chatId, ct);
-        await _telegram.SendTextAsync(chatId, "Cancelled.", ct);
+        var state = await _conversations.GetAsync(chatId, ct);
+        await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, "Cancelled.", ct);
     }
 
     /// <summary>Feeds a plain text message into the active wizard.</summary>
@@ -123,7 +121,7 @@ public sealed class GradeModule
                 return true;
 
             case GradeStep.Date:
-                await _telegram.SendKeyboardAsync(chatId, "Please send a date as YYYY-MM-DD, or tap Skip.", SkipCancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send a date as YYYY-MM-DD, or tap Skip.", SkipCancelRows(), ct);
                 return true;
 
             case GradeStep.Weight when TryParseWeight(text, out var weight):
@@ -132,7 +130,7 @@ public sealed class GradeModule
                 return true;
 
             case GradeStep.Weight:
-                await _telegram.SendKeyboardAsync(chatId, "Please send a positive number for the weight, or tap Skip.", SkipCancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send a positive number for the weight, or tap Skip.", SkipCancelRows(), ct);
                 return true;
 
             default:
@@ -279,20 +277,17 @@ public sealed class GradeModule
             var gradesResult = await _sender.Send(new GetOwnGradesQuery(telegramUserId, subject.Id, 1, EditPickPageSize), ct);
             if (gradesResult.IsFailure)
             {
-                await _conversations.RemoveAsync(chatId, ct);
-                await _telegram.SendTextAsync(chatId, gradesResult.Error.Message, ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, gradesResult.Error.Message, ct);
                 return;
             }
 
             if (gradesResult.Value.Items.Count == 0)
             {
-                await _conversations.RemoveAsync(chatId, ct);
-                await _telegram.SendTextAsync(chatId, $"You have no grades in {subject.Name} yet.", ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"You have no grades in {subject.Name} yet.", ct);
                 return;
             }
 
             state.Step = GradeStep.Grade;
-            await _conversations.SetAsync(chatId, state, ct);
 
             var rows = gradesResult.Value.Items
                 .Select(g => (IReadOnlyList<InlineButton>)new[]
@@ -301,7 +296,7 @@ public sealed class GradeModule
                 })
                 .ToList();
 
-            await _telegram.SendKeyboardAsync(chatId, "Select the grade to edit:", WithCancel(rows), ct);
+            await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Select the grade to edit:", WithCancel(rows), ct);
             return;
         }
 
@@ -312,8 +307,7 @@ public sealed class GradeModule
     {
         state.Value = value;
         state.Step = GradeStep.Comment;
-        await _conversations.SetAsync(chatId, state, ct);
-        await _telegram.SendKeyboardAsync(chatId, "Send a comment for this grade, or tap Skip.", SkipCancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send a comment for this grade, or tap Skip.", SkipCancelRows(), ct);
     }
 
     private async Task OnSkipAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
@@ -343,34 +337,30 @@ public sealed class GradeModule
     private async Task AdvanceToValueAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = GradeStep.Value;
-        await _conversations.SetAsync(chatId, state, ct);
 
         var valueRow = Enumerable.Range(Domain.Studies.Grade.MinValue, Domain.Studies.Grade.MaxValue - Domain.Studies.Grade.MinValue + 1)
             .Select(v => new InlineButton(v.ToString(CultureInfo.InvariantCulture), CallbackData.WizardValue(v)))
             .ToArray();
 
         var rows = new List<IReadOnlyList<InlineButton>> { valueRow };
-        await _telegram.SendKeyboardAsync(chatId, "Choose the grade value:", WithCancel(rows), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Choose the grade value:", WithCancel(rows), ct);
     }
 
     private async Task AdvanceToDateAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = GradeStep.Date;
-        await _conversations.SetAsync(chatId, state, ct);
-        await _telegram.SendKeyboardAsync(chatId, "Send the date as YYYY-MM-DD, or tap Skip for today.", SkipCancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send the date as YYYY-MM-DD, or tap Skip for today.", SkipCancelRows(), ct);
     }
 
     private async Task AdvanceToWeightAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = GradeStep.Weight;
-        await _conversations.SetAsync(chatId, state, ct);
-        await _telegram.SendKeyboardAsync(chatId, "Send the grade weight (e.g. 1.0), or tap Skip for the default.", SkipCancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send the grade weight (e.g. 1.0), or tap Skip for the default.", SkipCancelRows(), ct);
     }
 
     private async Task AdvanceToConfirmAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
     {
         state.Step = GradeStep.Confirm;
-        await _conversations.SetAsync(chatId, state, ct);
 
         var summary =
             "Please confirm:\n" +
@@ -388,7 +378,7 @@ public sealed class GradeModule
                 new InlineButton("Cancel", CallbackData.WizardCancel),
             },
         };
-        await _telegram.SendKeyboardAsync(chatId, summary, rows, ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, summary, rows, ct);
     }
 
     private async Task ExecuteAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
@@ -407,20 +397,18 @@ public sealed class GradeModule
         catch (ValidationException ex)
         {
             var details = string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
-            await _telegram.SendTextAsync(chatId, $"Could not save the grade:\n{details}", ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"Could not save the grade:\n{details}", ct);
             return;
         }
 
-        await _conversations.RemoveAsync(chatId, ct);
-
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, result.Error.Message, ct);
             return;
         }
 
         var header = state.Flow == ConversationFlow.GradeEdit ? "Grade updated." : "Grade added.";
-        await _telegram.SendTextAsync(chatId, $"{header}\n\n{RenderGrade(result.Value)}", ct);
+        await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"{header}\n\n{RenderGrade(result.Value)}", ct);
     }
 
     // --- Rendering & helpers --- //

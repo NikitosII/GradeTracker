@@ -97,13 +97,12 @@ public sealed class DeadlineModule
             return;
         }
 
-        await _conversations.SetAsync(chatId, new ConversationState
+        var state = new ConversationState
         {
             Flow = ConversationFlow.DeadlineAdd,
             Step = DeadlineStep.Subject,
-        }, ct);
-
-        await _telegram.SendKeyboardAsync(chatId, "Add a deadline.\nSelect a subject:", WithCancel(subjectRows), ct);
+        };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Add a deadline.\nSelect a subject:", WithCancel(subjectRows), ct);
     }
 
     public async Task StartEditAsync(long chatId, long telegramUserId, CancellationToken ct)
@@ -115,19 +114,18 @@ public sealed class DeadlineModule
             return;
         }
 
-        await _conversations.SetAsync(chatId, new ConversationState
+        var state = new ConversationState
         {
             Flow = ConversationFlow.DeadlineEdit,
             Step = DeadlineStep.Subject,
-        }, ct);
-
-        await _telegram.SendKeyboardAsync(chatId, "Edit a deadline.\nSelect a subject:", WithCancel(subjectRows), ct);
+        };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Edit a deadline.\nSelect a subject:", WithCancel(subjectRows), ct);
     }
 
     public async Task CancelAsync(long chatId, CancellationToken ct)
     {
-        await _conversations.RemoveAsync(chatId, ct);
-        await _telegram.SendTextAsync(chatId, "Cancelled.", ct);
+        var state = await _conversations.GetAsync(chatId, ct);
+        await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, "Cancelled.", ct);
     }
 
     /// <summary>Feeds a plain text message into the active deadline wizard.</summary>
@@ -147,7 +145,7 @@ public sealed class DeadlineModule
                 return true;
 
             case DeadlineStep.Title:
-                await _telegram.SendKeyboardAsync(chatId, "Please send a non-empty title, or tap Cancel.", CancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send a non-empty title, or tap Cancel.", CancelRows(), ct);
                 return true;
 
             case DeadlineStep.Description:
@@ -161,7 +159,7 @@ public sealed class DeadlineModule
                 return true;
 
             case DeadlineStep.Due:
-                await _telegram.SendKeyboardAsync(chatId, "Please send the due date as YYYY-MM-DD HH:mm (or YYYY-MM-DD), or tap Cancel.", CancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send the due date as YYYY-MM-DD HH:mm (or YYYY-MM-DD), or tap Cancel.", CancelRows(), ct);
                 return true;
 
             default:
@@ -282,20 +280,17 @@ public sealed class DeadlineModule
                 new GetOwnAssignmentsQuery(telegramUserId, subject.Id, null, null, 1, EditPickPageSize), ct);
             if (listResult.IsFailure)
             {
-                await _conversations.RemoveAsync(chatId, ct);
-                await _telegram.SendTextAsync(chatId, listResult.Error.Message, ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, listResult.Error.Message, ct);
                 return;
             }
 
             if (listResult.Value.Items.Count == 0)
             {
-                await _conversations.RemoveAsync(chatId, ct);
-                await _telegram.SendTextAsync(chatId, $"You have no deadlines in {subject.Name} yet.", ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"You have no deadlines in {subject.Name} yet.", ct);
                 return;
             }
 
             state.Step = DeadlineStep.Item;
-            await _conversations.SetAsync(chatId, state, ct);
 
             var rows = listResult.Value.Items
                 .Select(a => (IReadOnlyList<InlineButton>)new[]
@@ -304,7 +299,7 @@ public sealed class DeadlineModule
                 })
                 .ToList();
 
-            await _telegram.SendKeyboardAsync(chatId, "Select the deadline to edit:", WithCancel(rows), ct);
+            await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Select the deadline to edit:", WithCancel(rows), ct);
             return;
         }
 
@@ -316,7 +311,6 @@ public sealed class DeadlineModule
     private async Task AdvanceToTypeAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = DeadlineStep.Type;
-        await _conversations.SetAsync(chatId, state, ct);
 
         var buttons = Enum.GetValues<AssignmentType>()
             .Select(t => new InlineButton(t.ToString(), CallbackData.DeadlineWizardType((int)t)))
@@ -328,34 +322,30 @@ public sealed class DeadlineModule
             rows.Add(buttons.Skip(i).Take(TypesPerRow).ToArray());
         }
 
-        await _telegram.SendKeyboardAsync(chatId, "Choose the event type:", WithCancel(rows), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Choose the event type:", WithCancel(rows), ct);
     }
 
     private async Task AdvanceToTitleAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = DeadlineStep.Title;
-        await _conversations.SetAsync(chatId, state, ct);
-        await _telegram.SendKeyboardAsync(chatId, "Send a title for this deadline:", CancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send a title for this deadline:", CancelRows(), ct);
     }
 
     private async Task AdvanceToDescriptionAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = DeadlineStep.Description;
-        await _conversations.SetAsync(chatId, state, ct);
-        await _telegram.SendKeyboardAsync(chatId, "Send a description, or tap Skip.", SkipCancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send a description, or tap Skip.", SkipCancelRows(), ct);
     }
 
     private async Task AdvanceToDueAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = DeadlineStep.Due;
-        await _conversations.SetAsync(chatId, state, ct);
-        await _telegram.SendKeyboardAsync(chatId, "Send the due date as YYYY-MM-DD HH:mm (UTC), or just YYYY-MM-DD.", CancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send the due date as YYYY-MM-DD HH:mm (UTC), or just YYYY-MM-DD.", CancelRows(), ct);
     }
 
     private async Task AdvanceToConfirmAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
     {
         state.Step = DeadlineStep.Confirm;
-        await _conversations.SetAsync(chatId, state, ct);
 
         var type = (AssignmentType)(state.AssignmentType ?? 0);
         var summary =
@@ -374,7 +364,7 @@ public sealed class DeadlineModule
                 new InlineButton("Cancel", CallbackData.DeadlineWizardCancel),
             },
         };
-        await _telegram.SendKeyboardAsync(chatId, summary, rows, ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, summary, rows, ct);
     }
 
     private async Task ExecuteAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
@@ -393,20 +383,18 @@ public sealed class DeadlineModule
         catch (ValidationException ex)
         {
             var details = string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
-            await _telegram.SendTextAsync(chatId, $"Could not save the deadline:\n{details}", ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"Could not save the deadline:\n{details}", ct);
             return;
         }
 
-        await _conversations.RemoveAsync(chatId, ct);
-
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, result.Error.Message, ct);
             return;
         }
 
         var header = state.Flow == ConversationFlow.DeadlineEdit ? "Deadline updated." : "Deadline added.";
-        await _telegram.SendTextAsync(chatId, $"{header}\n\n{RenderDeadline(result.Value)}", ct);
+        await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"{header}\n\n{RenderDeadline(result.Value)}", ct);
     }
 
     // --- Rendering & helpers --- //

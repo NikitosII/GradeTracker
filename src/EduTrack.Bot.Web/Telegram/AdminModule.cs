@@ -255,10 +255,13 @@ public sealed class AdminModule
         }
     }
 
-    public async Task CancelAsync(long chatId, CancellationToken ct)
+    public async Task CancelAsync(long chatId, int messageId, CancellationToken ct)
     {
+        // The Cancel button always sits on the message we want to replace — edit
+        // it to the outcome and drop any wizard state (there is none for the
+        // stateless code/role pickers).
         await _conversations.RemoveAsync(chatId, ct);
-        await _telegram.SendTextAsync(chatId, "Cancelled.", ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, "Cancelled.", NoKeyboard, ct);
     }
 
     /// <summary>Feeds a plain text message into the active admin subject wizard.</summary>
@@ -278,7 +281,7 @@ public sealed class AdminModule
                 return true;
 
             case AdminStep.SubjectName:
-                await _telegram.SendKeyboardAsync(chatId, "Please send a non-empty subject name, or tap Cancel.", CancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send a non-empty subject name, or tap Cancel.", CancelRows(), ct);
                 return true;
 
             case AdminStep.SubjectDescription:
@@ -291,7 +294,7 @@ public sealed class AdminModule
                 return true;
 
             case AdminStep.SubjectNewName:
-                await _telegram.SendKeyboardAsync(chatId, "Please send a non-empty name, or tap Cancel.", CancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send a non-empty name, or tap Cancel.", CancelRows(), ct);
                 return true;
 
             default:
@@ -300,7 +303,7 @@ public sealed class AdminModule
         }
     }
 
-    public async Task HandleCallbackAsync(long chatId, long telegramUserId, string callbackQueryId, string data, CancellationToken ct)
+    public async Task HandleCallbackAsync(long chatId, long telegramUserId, string callbackQueryId, string data, int messageId, CancellationToken ct)
     {
         try
         {
@@ -318,7 +321,7 @@ public sealed class AdminModule
             }
             else if (ns == CallbackData.AdminWizardNamespace)
             {
-                await HandleWizardCallbackAsync(chatId, telegramUserId, parts, ct);
+                await HandleWizardCallbackAsync(chatId, telegramUserId, parts, messageId, ct);
             }
         }
         catch (Exception ex)
@@ -363,30 +366,30 @@ public sealed class AdminModule
 
     // --- Wizard / mutating callbacks --- //
 
-    private async Task HandleWizardCallbackAsync(long chatId, long telegramUserId, string[] parts, CancellationToken ct)
+    private async Task HandleWizardCallbackAsync(long chatId, long telegramUserId, string[] parts, int messageId, CancellationToken ct)
     {
         var action = parts.Length > 1 ? parts[1] : string.Empty;
 
         switch (action)
         {
             case "x":
-                await CancelAsync(chatId, ct);
+                await CancelAsync(chatId, messageId, ct);
                 break;
 
             case "role" when parts.Length >= 4 && Guid.TryParse(parts[2], out var userId) && TryParseRole(parts[3], out var role):
-                await ChangeRoleAsync(chatId, telegramUserId, userId, role, ct);
+                await ChangeRoleAsync(chatId, telegramUserId, userId, role, messageId, ct);
                 break;
 
             case "newcode":
-                await ShowCodeRolePickerAsync(chatId, ct);
+                await ShowCodeRolePickerAsync(chatId, messageId, ct);
                 break;
 
             case "coderole" when parts.Length >= 3 && TryParseRole(parts[2], out var codeRole):
-                await ShowCodeExpiryPickerAsync(chatId, codeRole, ct);
+                await ShowCodeExpiryPickerAsync(chatId, codeRole, messageId, ct);
                 break;
 
             case "codeexp" when parts.Length >= 4 && TryParseRole(parts[2], out var expRole) && int.TryParse(parts[3], out var days):
-                await CreateCodeAsync(chatId, telegramUserId, expRole, days, ct);
+                await CreateCodeAsync(chatId, telegramUserId, expRole, days, messageId, ct);
                 break;
 
             case "newsubject":
@@ -411,21 +414,23 @@ public sealed class AdminModule
         }
     }
 
-    private async Task ChangeRoleAsync(long chatId, long telegramUserId, Guid targetUserId, UserRole role, CancellationToken ct)
+    private async Task ChangeRoleAsync(long chatId, long telegramUserId, Guid targetUserId, UserRole role, int messageId, CancellationToken ct)
     {
         var result = await _sender.Send(new ChangeUserRoleCommand(telegramUserId, targetUserId, role), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.EditKeyboardAsync(chatId, messageId, result.Error.Message, NoKeyboard, ct);
             return;
         }
 
         var user = result.Value;
-        await _telegram.SendTextAsync(chatId, $"Role updated: {DisplayName(user.FullName, user.Username)} is now {user.Role}.", ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, $"Role updated: {DisplayName(user.FullName, user.Username)} is now {user.Role}.", NoKeyboard, ct);
+
+        // Auto-refresh: re-show the user list with the updated role.
         await ShowUsersAsync(chatId, telegramUserId, 1, ct);
     }
 
-    private async Task ShowCodeRolePickerAsync(long chatId, CancellationToken ct)
+    private async Task ShowCodeRolePickerAsync(long chatId, int messageId, CancellationToken ct)
     {
         var rows = new List<IReadOnlyList<InlineButton>>
         {
@@ -436,10 +441,10 @@ public sealed class AdminModule
             },
             CancelRow(),
         };
-        await _telegram.SendKeyboardAsync(chatId, "New invite code.\nWhich role should it grant?", rows, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, "New invite code.\nWhich role should it grant?", rows, ct);
     }
 
-    private async Task ShowCodeExpiryPickerAsync(long chatId, UserRole role, CancellationToken ct)
+    private async Task ShowCodeExpiryPickerAsync(long chatId, UserRole role, int messageId, CancellationToken ct)
     {
         var rows = new List<IReadOnlyList<InlineButton>>
         {
@@ -452,10 +457,10 @@ public sealed class AdminModule
             new[] { new InlineButton("Never", CallbackData.AdminCodeExpiry((int)role, 0)) },
             CancelRow(),
         };
-        await _telegram.SendKeyboardAsync(chatId, $"Role: {role}.\nWhen should the code expire?", rows, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, $"Role: {role}.\nWhen should the code expire?", rows, ct);
     }
 
-    private async Task CreateCodeAsync(long chatId, long telegramUserId, UserRole role, int days, CancellationToken ct)
+    private async Task CreateCodeAsync(long chatId, long telegramUserId, UserRole role, int days, int messageId, CancellationToken ct)
     {
         int? expiresInDays = days <= 0 ? null : days;
 
@@ -464,20 +469,21 @@ public sealed class AdminModule
             var result = await _sender.Send(new CreateInviteCodeCommand(telegramUserId, role, expiresInDays), ct);
             if (result.IsFailure)
             {
-                await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+                await _telegram.EditKeyboardAsync(chatId, messageId, result.Error.Message, NoKeyboard, ct);
                 return;
             }
 
             var code = result.Value;
             var expiry = code.ExpiresAt is { } e ? $"expires {e:yyyy-MM-dd HH:mm} UTC" : "no expiry";
-            await _telegram.SendTextAsync(chatId, $"Invite code created:\n\n{code.Code}\nRole: {code.Role}\n{expiry}", ct);
+            await _telegram.EditKeyboardAsync(chatId, messageId, $"Invite code created:\n\n{code.Code}\nRole: {code.Role}\n{expiry}", NoKeyboard, ct);
         }
         catch (ValidationException ex)
         {
-            await _telegram.SendTextAsync(chatId, ValidationText(ex), ct);
+            await _telegram.EditKeyboardAsync(chatId, messageId, ValidationText(ex), NoKeyboard, ct);
             return;
         }
 
+        // Auto-refresh: re-show the invite list with the new code.
         await ShowInvitesAsync(chatId, telegramUserId, ct);
     }
 
@@ -485,19 +491,17 @@ public sealed class AdminModule
 
     private async Task StartSubjectAddAsync(long chatId, CancellationToken ct)
     {
-        await _conversations.SetAsync(chatId, new ConversationState
+        var state = new ConversationState
         {
             Flow = ConversationFlow.AdminSubjectAdd,
             Step = AdminStep.SubjectName,
-        }, ct);
-
-        await _telegram.SendKeyboardAsync(chatId, "New subject.\nSend the subject name:", CancelRows(), ct);
+        };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "New subject.\nSend the subject name:", CancelRows(), ct);
     }
 
     private async Task AdvanceToSubjectDescriptionAsync(long chatId, ConversationState state, CancellationToken ct)
     {
         state.Step = AdminStep.SubjectDescription;
-        await _conversations.SetAsync(chatId, state, ct);
 
         var rows = new List<IReadOnlyList<InlineButton>>
         {
@@ -507,7 +511,7 @@ public sealed class AdminModule
                 new InlineButton("Cancel", CallbackData.AdminCancel),
             },
         };
-        await _telegram.SendKeyboardAsync(chatId, "Send a description, or tap Skip.", rows, ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send a description, or tap Skip.", rows, ct);
     }
 
     private async Task SkipSubjectDescriptionAsync(long chatId, long telegramUserId, CancellationToken ct)
@@ -529,20 +533,18 @@ public sealed class AdminModule
         try
         {
             var result = await _sender.Send(new CreateSubjectCommand(telegramUserId, name, state.Description), ct);
-            await _conversations.RemoveAsync(chatId, ct);
 
             if (result.IsFailure)
             {
-                await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, result.Error.Message, ct);
                 return;
             }
 
-            await _telegram.SendTextAsync(chatId, $"Subject added: {result.Value.Name}.", ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"Subject added: {result.Value.Name}.", ct);
         }
         catch (ValidationException ex)
         {
-            await _conversations.RemoveAsync(chatId, ct);
-            await _telegram.SendTextAsync(chatId, ValidationText(ex), ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, ValidationText(ex), ct);
             return;
         }
 
@@ -558,14 +560,13 @@ public sealed class AdminModule
             return;
         }
 
-        await _conversations.SetAsync(chatId, new ConversationState
+        var state = new ConversationState
         {
             Flow = ConversationFlow.AdminSubjectRename,
             Step = AdminStep.SubjectNewName,
             SubjectId = subjectId,
-        }, ct);
-
-        await _telegram.SendKeyboardAsync(chatId, $"Rename \"{detail.Value.Name}\".\nSend the new name:", CancelRows(), ct);
+        };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, $"Rename \"{detail.Value.Name}\".\nSend the new name:", CancelRows(), ct);
     }
 
     private async Task RenameSubjectAsync(long chatId, long telegramUserId, ConversationState state, string newName, CancellationToken ct)
@@ -575,8 +576,7 @@ public sealed class AdminModule
         var detail = await _sender.Send(new GetSubjectDetailQuery(telegramUserId, subjectId), ct);
         if (detail.IsFailure)
         {
-            await _conversations.RemoveAsync(chatId, ct);
-            await _telegram.SendTextAsync(chatId, detail.Error.Message, ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, detail.Error.Message, ct);
             return;
         }
 
@@ -584,20 +584,18 @@ public sealed class AdminModule
         {
             var result = await _sender.Send(
                 new UpdateSubjectCommand(telegramUserId, subjectId, newName, detail.Value.Description, detail.Value.IsActive), ct);
-            await _conversations.RemoveAsync(chatId, ct);
 
             if (result.IsFailure)
             {
-                await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, result.Error.Message, ct);
                 return;
             }
 
-            await _telegram.SendTextAsync(chatId, $"Subject renamed to {result.Value.Name}.", ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"Subject renamed to {result.Value.Name}.", ct);
         }
         catch (ValidationException ex)
         {
-            await _conversations.RemoveAsync(chatId, ct);
-            await _telegram.SendTextAsync(chatId, ValidationText(ex), ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, ValidationText(ex), ct);
             return;
         }
 
@@ -683,6 +681,9 @@ public sealed class AdminModule
 
     private static string ValidationText(ValidationException ex) =>
         "Invalid input:\n" + string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
+
+    private static readonly IReadOnlyList<IReadOnlyList<InlineButton>> NoKeyboard =
+        Array.Empty<IReadOnlyList<InlineButton>>();
 
     private static List<IReadOnlyList<InlineButton>> CancelRows() => new()
     {

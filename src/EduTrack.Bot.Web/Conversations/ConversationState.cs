@@ -50,6 +50,11 @@ public sealed class ConversationState
 {
     public string Flow { get; set; } = string.Empty;
     public string Step { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Telegram id of the single message this wizard renders into. 
+    /// </summary>
+    public int? WizardMessageId { get; set; }
     public Guid? SubjectId { get; set; }
     public string? SubjectName { get; set; }
     public Guid? GradeId { get; set; }

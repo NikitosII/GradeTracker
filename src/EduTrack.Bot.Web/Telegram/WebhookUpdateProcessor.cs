@@ -125,7 +125,7 @@ public sealed class WebhookUpdateProcessor
         else if (data.StartsWith(CallbackData.AdminViewNamespace + ":", StringComparison.Ordinal)
             || data.StartsWith(CallbackData.AdminWizardNamespace + ":", StringComparison.Ordinal))
         {
-            await _admins.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
+            await _admins.HandleCallbackAsync(chatId, userId, callback.Id, data, callback.Message.MessageId, cancellationToken);
         }
         else if (data.StartsWith(ReminderCallback.Namespace + ":", StringComparison.Ordinal))
         {
@@ -148,6 +148,8 @@ public sealed class WebhookUpdateProcessor
         Activity.Current?.SetTag("telegram.command", command);
         Activity.Current?.SetTag("telegram.user_id", telegramUserId);
 
+        var deleteUserMessage = false;
+
         switch (command)
         {
             case "/start":
@@ -168,9 +170,11 @@ public sealed class WebhookUpdateProcessor
                 break;
             case "/grade_add":
                 await _grades.StartAddAsync(chatId, telegramUserId, cancellationToken);
+                deleteUserMessage = true;
                 break;
             case "/grade_edit":
                 await _grades.StartEditAsync(chatId, telegramUserId, cancellationToken);
+                deleteUserMessage = true;
                 break;
             case "/deadlines":
                 await _deadlines.ShowDeadlinesAsync(chatId, telegramUserId, DeadlineModule.ScopeAll, 1, cancellationToken);
@@ -186,9 +190,11 @@ public sealed class WebhookUpdateProcessor
                 break;
             case "/deadline_add":
                 await _deadlines.StartAddAsync(chatId, telegramUserId, cancellationToken);
+                deleteUserMessage = true;
                 break;
             case "/deadline_edit":
                 await _deadlines.StartEditAsync(chatId, telegramUserId, cancellationToken);
+                deleteUserMessage = true;
                 break;
             case "/admin":
                 await _admins.ShowMenuAsync(chatId, telegramUserId, cancellationToken);
@@ -210,16 +216,27 @@ public sealed class WebhookUpdateProcessor
                 break;
             case "/cancel":
                 await _grades.CancelAsync(chatId, cancellationToken);
+                deleteUserMessage = true;
                 break;
             default:
-                if (!await _grades.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken)
-                    && !await _deadlines.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken)
-                    && !await _admins.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken))
+                var consumedByWizard = await _grades.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken)
+                    || await _deadlines.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken)
+                    || await _admins.TryHandleTextAsync(chatId, telegramUserId, message.Text!, cancellationToken);
+                if (consumedByWizard)
+                {
+                    deleteUserMessage = true;
+                }
+                else
                 {
                     await _telegram.SendTextAsync(chatId, Text.Unknown, cancellationToken);
                 }
 
                 break;
+        }
+
+        if (deleteUserMessage)
+        {
+            await _telegram.DeleteMessageAsync(chatId, message.MessageId, cancellationToken);
         }
 
         _logger.LogInformation("Handled {Command} from Telegram user {TelegramUserId}", command, telegramUserId);
