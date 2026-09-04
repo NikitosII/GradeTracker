@@ -4,7 +4,7 @@ services:
   bot-web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     image: edutrack/bot-web:latest
     restart: unless-stopped
     depends_on:
@@ -21,9 +21,6 @@ services:
       Telegram__WebhookSecret: "${TELEGRAM_WEBHOOK_SECRET}"
       Telegram__WebhookUrl: "${TELEGRAM_WEBHOOK_URL}"
       Bootstrap__AdminInviteCode: "${BOOTSTRAP_ADMIN_CODE}"
-      Bootstrap__Subjects__0: "Mathematics"
-      Bootstrap__Subjects__1: "Physics"
-      Bootstrap__Subjects__2: "Computer Science"
       Observability__PrometheusEnabled: "true"
       Observability__PrometheusHttpListenerPrefix: "http://+:9464/"
       Observability__OtlpEndpoint: "${OTLP_ENDPOINT}"
@@ -37,7 +34,7 @@ services:
   bot-worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: docker/Dockerfile.worker
     image: edutrack/bot-worker:latest
     restart: unless-stopped
     depends_on:
