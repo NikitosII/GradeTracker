@@ -9,3 +9,15 @@ datasources:
     url: http://jaeger:16686
     uid: jaeger
     editable: false
+    jsonData:
+      # Trace-to-logs: from any span, jump to the Loki logs for that trace.
+      # The app stamps TraceId into every JSON log line (ActivityEnricher), so we
+      # filter Loki by it. The time window is widened around the span.
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: '-5m'
+        spanEndTimeShift: '5m'
+        filterByTraceID: false
+        filterBySpanID: false
+        customQuery: true
+        query: '{job="edutrack"} | json | TraceId="${__trace.traceId}"'

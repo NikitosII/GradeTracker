@@ -1,0 +1,14 @@
+# Auto-loads any dashboard JSON in this folder on Grafana startup, so the
+# GradeTracker dashboard is version-controlled and needs no manual import.
+apiVersion: 1
+
+providers:
+  - name: EduTrack
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

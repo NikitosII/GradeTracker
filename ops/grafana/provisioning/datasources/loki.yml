@@ -1,0 +1,20 @@
+# Auto-provisioned Loki datasource — the log store Grafana queries, and the
+# target of the Jaeger datasource's trace-to-logs links.
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    uid: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      # Logs-to-trace: turn the TraceId in each JSON log line into a link that
+      # opens the matching trace in Jaeger.
+      derivedFields:
+        - name: TraceID
+          matcherRegex: '"TraceId":"(\w+)"'
+          url: '$${__value.raw}'
+          datasourceUid: jaeger
+          urlDisplayLabel: 'View trace in Jaeger'
