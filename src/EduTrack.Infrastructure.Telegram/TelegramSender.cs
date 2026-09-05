@@ -50,8 +50,17 @@ public sealed class TelegramSender : ITelegramSender
         }
     }
 
-    public Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default)
-        => _botClient.AnswerCallbackQuery(callbackQueryId, text, cancellationToken: cancellationToken);
+    public async Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _botClient.AnswerCallbackQuery(callbackQueryId, text, cancellationToken: cancellationToken);
+        }
+        catch (ApiRequestException)
+        {
+            // Query too old or already answered.
+        }
+    }
 
     // Empty rows -> null markup, which drops the inline keyboard on edit.
     private static InlineKeyboardMarkup? ToMarkup(IReadOnlyList<IReadOnlyList<InlineButton>> rows)

@@ -24,13 +24,15 @@ public class NotificationDispatcherTests
         new(_db, _telegram, new FixedClock(now), _metrics,
             Options.Create(new NotificationOptions { QuietHoursStart = 22, QuietHoursEnd = 8 }));
 
-    private async Task<User> SeedUserAsync(bool notificationsEnabled = true)
+    private async Task<User> SeedUserAsync(bool notificationsEnabled = true, Action<User>? configure = null)
     {
         var user = User.Register(500, "nick", "Ada", null, UserRole.Student, Noon);
         if (!notificationsEnabled)
         {
             user.SetNotificationsEnabled(false, Noon);
         }
+
+        configure?.Invoke(user);
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
@@ -73,6 +75,31 @@ public class NotificationDispatcherTests
         var user = await SeedUserAsync();
 
         await CreateSut(Night).DispatchAsync(Message(user.Id, important: false), CancellationToken.None);
+
+        await _telegram.DidNotReceive().SendNotificationAsync(Arg.Any<long>(), Arg.Any<string>(), Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>?>(), Arg.Any<CancellationToken>());
+        (await _db.NotificationLogs.SingleAsync()).Status.Should().Be(NotificationStatus.Suppressed);
+    }
+
+    [Fact]
+    public async Task Suppresses_a_reminder_type_the_user_turned_off()
+    {
+        var user = await SeedUserAsync(configure: u => u.SetReminder24hEnabled(false, Noon));
+
+        await CreateSut(Noon).DispatchAsync(
+            Message(user.Id, important: false, NotificationType.AssignmentReminder24h), CancellationToken.None);
+
+        await _telegram.DidNotReceive().SendNotificationAsync(Arg.Any<long>(), Arg.Any<string>(), Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>?>(), Arg.Any<CancellationToken>());
+        (await _db.NotificationLogs.SingleAsync()).Status.Should().Be(NotificationStatus.Suppressed);
+    }
+
+    [Fact]
+    public async Task Uses_per_user_quiet_hours_over_the_global_default()
+    {
+        // Global quiet hours are 22-8, so noon would normally send; the user's
+        // custom 8-18 window covers noon and must suppress it.
+        var user = await SeedUserAsync(configure: u => u.SetQuietHours(8, 18, Noon));
+
+        await CreateSut(Noon).DispatchAsync(Message(user.Id, important: false), CancellationToken.None);
 
         await _telegram.DidNotReceive().SendNotificationAsync(Arg.Any<long>(), Arg.Any<string>(), Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>?>(), Arg.Any<CancellationToken>());
         (await _db.NotificationLogs.SingleAsync()).Status.Should().Be(NotificationStatus.Suppressed);

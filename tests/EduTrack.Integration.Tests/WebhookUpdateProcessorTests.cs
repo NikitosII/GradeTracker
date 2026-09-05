@@ -42,8 +42,11 @@ public class WebhookUpdateProcessorTests
     private ReminderModule CreateReminderModule() =>
         new(_sender, _telegram, NullLogger<ReminderModule>.Instance);
 
+    private SettingsModule CreateSettingsModule() =>
+        new(_sender, _telegram, NullLogger<SettingsModule>.Instance);
+
     private WebhookUpdateProcessor CreateSut() =>
-        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), CreateAdminModule(), CreateReminderModule(), _inbox, NullApplicationMetrics.Instance, NullLogger<WebhookUpdateProcessor>.Instance);
+        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), CreateAdminModule(), CreateReminderModule(), CreateSettingsModule(), _inbox, NullApplicationMetrics.Instance, NullLogger<WebhookUpdateProcessor>.Instance);
 
     private static Update MessageUpdate(long fromId, string text) => new()
     {

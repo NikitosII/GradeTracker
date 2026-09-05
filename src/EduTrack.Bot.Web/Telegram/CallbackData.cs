@@ -72,5 +72,27 @@ public static class CallbackData
     public const string AdminSubjectSkip = "aw:subskip";
     public const string AdminCancel = "aw:x";
 
+    // --- Settings --- //
+
+    public const string SettingsNamespace = "st";
+
+    public const string SettingsMenu = "st:menu";
+
+    public static string SettingsToggle(string key) => $"st:toggle:{key}";
+
+    public const string SettingsTimeZone = "st:tz";
+
+    public static string SettingsSetTimeZone(string id) => $"st:tz:{id}";
+
+    public const string SettingsLanguage = "st:lang";
+
+    public static string SettingsSetLanguage(string language) => $"st:lang:{language}";
+
+    public const string SettingsQuiet = "st:quiet";
+
+    public const string SettingsQuietOff = "st:quiet:off";
+
+    public static string SettingsSetQuiet(int start, int end) => $"st:quiet:{start}:{end}";
+
     public static string[] Parts(string data) => data.Split(':');
 }

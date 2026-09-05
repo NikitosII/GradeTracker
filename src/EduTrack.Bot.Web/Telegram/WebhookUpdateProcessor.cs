@@ -26,11 +26,12 @@ public sealed class WebhookUpdateProcessor
     private readonly DeadlineModule _deadlines;
     private readonly AdminModule _admins;
     private readonly ReminderModule _reminders;
+    private readonly SettingsModule _settings;
     private readonly IInboxStore _inbox;
     private readonly IApplicationMetrics _metrics;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
@@ -38,6 +39,7 @@ public sealed class WebhookUpdateProcessor
         _deadlines = deadlines;
         _admins = admins;
         _reminders = reminders;
+        _settings = settings;
         _inbox = inbox;
         _metrics = metrics;
         _logger = logger;
@@ -131,6 +133,10 @@ public sealed class WebhookUpdateProcessor
         {
             await _reminders.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
         }
+        else if (data.StartsWith(SettingsModule.Namespace + ":", StringComparison.Ordinal))
+        {
+            await _settings.HandleCallbackAsync(chatId, userId, callback.Id, data, callback.Message.MessageId, cancellationToken);
+        }
         else
         {
             await _grades.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
@@ -163,6 +169,9 @@ public sealed class WebhookUpdateProcessor
                 break;
             case "/profile":
                 await _telegram.SendTextAsync(chatId, await HandleProfileAsync(telegramUserId, cancellationToken), cancellationToken);
+                break;
+            case "/settings":
+                await _settings.ShowSettingsAsync(chatId, telegramUserId, cancellationToken);
                 break;
             case "/grades":
             case "/subjects":
@@ -323,6 +332,7 @@ public sealed class WebhookUpdateProcessor
             "/next - your nearest deadline\n" +
             "/deadline_add - add a deadline\n" +
             "/deadline_edit - edit a deadline\n" +
+            "/settings - notifications, quiet hours, time zone, language\n" +
             "/cancel - cancel the current action\n\n" +
             "Admin only:\n" +
             "/admin - admin menu\n" +

@@ -30,6 +30,11 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.TimeZone).HasMaxLength(64).IsRequired();
         builder.Property(u => u.Language).HasMaxLength(8).IsRequired();
         builder.Property(u => u.IsNotificationsEnabled).IsRequired();
+        builder.Property(u => u.MorningDigestEnabled).IsRequired();
+        builder.Property(u => u.Reminder24hEnabled).IsRequired();
+        builder.Property(u => u.Reminder2hEnabled).IsRequired();
+        builder.Property(u => u.QuietHoursStart);
+        builder.Property(u => u.QuietHoursEnd);
         builder.Property(u => u.CreatedAt).IsRequired();
         builder.Property(u => u.UpdatedAt).IsRequired();
     }

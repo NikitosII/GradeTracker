@@ -42,7 +42,7 @@ public sealed class SendMorningDigestJob : IJob
 
         var users = await _db.Users
             .AsNoTracking()
-            .Where(u => u.IsNotificationsEnabled)
+            .Where(u => u.IsNotificationsEnabled && u.MorningDigestEnabled)
             .ToListAsync(context.CancellationToken);
 
         var sent = 0;
