@@ -66,7 +66,15 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
                 return;
             }
 
-            if (QuietHours.IsWithin(now, user.TimeZone, _options.QuietHoursStart, _options.QuietHoursEnd))
+            if (IsMutedByPreference(user, message.Type))
+            {
+                await SuppressAsync(message, "Muted by user settings.", now, cancellationToken);
+                return;
+            }
+
+            var quietStart = user.QuietHoursStart ?? _options.QuietHoursStart;
+            var quietEnd = user.QuietHoursEnd ?? _options.QuietHoursEnd;
+            if (QuietHours.IsWithin(now, user.TimeZone, quietStart, quietEnd))
             {
                 await SuppressAsync(message, "Quiet hours.", now, cancellationToken);
                 return;
@@ -92,6 +100,15 @@ internal sealed class NotificationDispatcher : INotificationDispatcher
         await _db.SaveChangesAsync(cancellationToken);
         _metrics.NotificationSent(message.Type);
     }
+
+    /// <summary>Whether the user has switched off this specific kind of non-critical notification.</summary>
+    private static bool IsMutedByPreference(Domain.Users.User user, NotificationType type) => type switch
+    {
+        NotificationType.AssignmentReminder24h => !user.Reminder24hEnabled,
+        NotificationType.AssignmentReminder2h => !user.Reminder2hEnabled,
+        NotificationType.MorningDigest => !user.MorningDigestEnabled,
+        _ => false,
+    };
 
     /// <summary>Reminder notifications carry snooze buttons keyed by the reminder id.</summary>
     private static IReadOnlyList<IReadOnlyList<InlineButton>>? BuildSnoozeButtons(UserNotificationRequested message)

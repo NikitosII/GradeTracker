@@ -27,6 +27,9 @@ public class User
         TimeZone = DefaultTimeZone;
         Language = DefaultLanguage;
         IsNotificationsEnabled = true;
+        MorningDigestEnabled = true;
+        Reminder24hEnabled = true;
+        Reminder2hEnabled = true;
         CreatedAt = nowUtc;
         UpdatedAt = nowUtc;
     }
@@ -39,7 +42,14 @@ public class User
     public UserRole Role { get; private set; }
     public string TimeZone { get; private set; } = DefaultTimeZone;
     public string Language { get; private set; } = DefaultLanguage;
+
     public bool IsNotificationsEnabled { get; private set; } = true;
+    public bool MorningDigestEnabled { get; private set; } = true;
+    public bool Reminder24hEnabled { get; private set; } = true;
+    public bool Reminder2hEnabled { get; private set; } = true;
+    public int? QuietHoursStart { get; private set; }
+    public int? QuietHoursEnd { get; private set; }
+
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -70,6 +80,49 @@ public class User
     public void SetNotificationsEnabled(bool enabled, DateTime nowUtc)
     {
         IsNotificationsEnabled = enabled;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Sets the preferred display time zone (IANA id).</summary>
+    public void SetTimeZone(string timeZone, DateTime nowUtc)
+    {
+        TimeZone = timeZone;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Sets the preferred language code.</summary>
+    public void SetLanguage(string language, DateTime nowUtc)
+    {
+        Language = language;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Enables or disables the daily morning digest.</summary>
+    public void SetMorningDigestEnabled(bool enabled, DateTime nowUtc)
+    {
+        MorningDigestEnabled = enabled;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Enables or disables the 24-hours-ahead deadline reminder.</summary>
+    public void SetReminder24hEnabled(bool enabled, DateTime nowUtc)
+    {
+        Reminder24hEnabled = enabled;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Enables or disables the 2-hours-ahead deadline reminder.</summary>
+    public void SetReminder2hEnabled(bool enabled, DateTime nowUtc)
+    {
+        Reminder2hEnabled = enabled;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Sets custom quiet hours, or clears them (both null) to use the global default.</summary>
+    public void SetQuietHours(int? startHour, int? endHour, DateTime nowUtc)
+    {
+        QuietHoursStart = startHour;
+        QuietHoursEnd = endHour;
         UpdatedAt = nowUtc;
     }
 }

@@ -8,6 +8,7 @@ public static class AuditActions
     public const string SubjectCreated = "SubjectCreated";
     public const string SubjectUpdated = "SubjectUpdated";
     public const string AnnouncementSent = "AnnouncementSent";
+    public const string SettingsUpdated = "SettingsUpdated";
 }
 
 /// <summary>Entity type names written to the audit log.</summary>

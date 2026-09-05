@@ -14,4 +14,14 @@ internal static class UserMappings
         user.Language,
         user.IsNotificationsEnabled,
         user.CreatedAt);
+
+    public static UserSettingsDto ToSettingsDto(this User user) => new(
+        user.TimeZone,
+        user.Language,
+        user.IsNotificationsEnabled,
+        user.MorningDigestEnabled,
+        user.Reminder24hEnabled,
+        user.Reminder2hEnabled,
+        user.QuietHoursStart,
+        user.QuietHoursEnd);
 }
