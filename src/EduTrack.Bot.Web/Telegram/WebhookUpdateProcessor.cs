@@ -27,11 +27,12 @@ public sealed class WebhookUpdateProcessor
     private readonly AdminModule _admins;
     private readonly ReminderModule _reminders;
     private readonly SettingsModule _settings;
+    private readonly StatsModule _stats;
     private readonly IInboxStore _inbox;
     private readonly IApplicationMetrics _metrics;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, StatsModule stats, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
@@ -40,6 +41,7 @@ public sealed class WebhookUpdateProcessor
         _admins = admins;
         _reminders = reminders;
         _settings = settings;
+        _stats = stats;
         _inbox = inbox;
         _metrics = metrics;
         _logger = logger;
@@ -208,6 +210,9 @@ public sealed class WebhookUpdateProcessor
             case "/export":
                 await _deadlines.ExportAsync(chatId, telegramUserId, cancellationToken);
                 break;
+            case "/stats":
+                await _stats.ShowStatsAsync(chatId, telegramUserId, cancellationToken);
+                break;
             case "/admin":
                 await _admins.ShowMenuAsync(chatId, telegramUserId, cancellationToken);
                 break;
@@ -337,6 +342,7 @@ public sealed class WebhookUpdateProcessor
             "/deadline_edit - edit a deadline\n" +
             "/settings - notifications, quiet hours, time zone, language\n" +
             "/export - export your deadlines to a calendar (.ics)\n" +
+            "/stats - your grade statistics\n" +
             "/cancel - cancel the current action\n\n" +
             "Admin only:\n" +
             "/admin - admin menu\n" +

@@ -2,6 +2,8 @@ using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Telegram;
 using EduTrack.Application.Studies;
 using EduTrack.Application.Studies.Queries.ExportCalendar;
+using EduTrack.Application.Studies.Queries.GetStudentStats;
+using EduTrack.Application.Studies.Stats;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Commands.BindUser;
 using EduTrack.Application.Users.Queries.GetUserProfile;
@@ -47,8 +49,11 @@ public class WebhookUpdateProcessorTests
     private SettingsModule CreateSettingsModule() =>
         new(_sender, _telegram, NullLogger<SettingsModule>.Instance);
 
+    private StatsModule CreateStatsModule() =>
+        new(_sender, _telegram);
+
     private WebhookUpdateProcessor CreateSut() =>
-        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), CreateAdminModule(), CreateReminderModule(), CreateSettingsModule(), _inbox, NullApplicationMetrics.Instance, NullLogger<WebhookUpdateProcessor>.Instance);
+        new(_sender, _telegram, CreateGradeModule(), CreateDeadlineModule(), CreateAdminModule(), CreateReminderModule(), CreateSettingsModule(), CreateStatsModule(), _inbox, NullApplicationMetrics.Instance, NullLogger<WebhookUpdateProcessor>.Instance);
 
     private static Update MessageUpdate(long fromId, string text) => new()
     {
@@ -159,6 +164,21 @@ public class WebhookUpdateProcessorTests
 
         await _telegram.DidNotReceiveWithAnyArgs().SendDocumentAsync(default, default!, default!, default, default);
         await _telegram.Received(1).SendTextAsync(42, Arg.Is<string>(s => s.Contains("no deadlines")), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Stats_sends_a_summary()
+    {
+        _sender.Send(Arg.Any<GetStudentStatsQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new StudentStatsDto(
+                OverallGpa: 4.25, WeekAverage: 4.5, WeekCount: 2, MonthAverage: 4.2, MonthCount: 8,
+                Subjects: new[] { new SubjectStatDto("Math", 4.6, 5) },
+                WorstSubject: "Math", WorstSubjectAverage: 4.6, UpcomingDeadlines: 1, TotalGrades: 8)));
+
+        await CreateSut().ProcessAsync(MessageUpdate(42, "/stats"), CancellationToken.None);
+
+        await _telegram.Received(1).SendTextAsync(
+            42, Arg.Is<string>(s => s.Contains("GPA") && s.Contains("Math")), Arg.Any<CancellationToken>());
     }
 
     [Fact]

@@ -35,6 +35,7 @@ builder.Services.AddScoped<DeadlineModule>();
 builder.Services.AddScoped<AdminModule>();
 builder.Services.AddScoped<ReminderModule>();
 builder.Services.AddScoped<SettingsModule>();
+builder.Services.AddScoped<StatsModule>();
 builder.Services.AddScoped<WebhookUpdateProcessor>();
 
 builder.Services.AddHealthChecks()
