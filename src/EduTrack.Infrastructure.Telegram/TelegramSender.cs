@@ -2,6 +2,7 @@ using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Telegram;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace EduTrack.Infrastructure.Telegram;
@@ -62,7 +63,12 @@ public sealed class TelegramSender : ITelegramSender
         }
     }
 
-    // Empty rows -> null markup, which drops the inline keyboard on edit.
+    public async Task SendDocumentAsync(long chatId, string fileName, byte[] content, string? caption = null, CancellationToken cancellationToken = default)
+    {
+        using var stream = new MemoryStream(content);
+        await _botClient.SendDocument(chatId, InputFile.FromStream(stream, fileName), caption: caption, cancellationToken: cancellationToken);
+    }
+
     private static InlineKeyboardMarkup? ToMarkup(IReadOnlyList<IReadOnlyList<InlineButton>> rows)
         => rows.Count == 0
             ? null

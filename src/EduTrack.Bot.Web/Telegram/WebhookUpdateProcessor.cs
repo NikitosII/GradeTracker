@@ -205,6 +205,9 @@ public sealed class WebhookUpdateProcessor
                 await _deadlines.StartEditAsync(chatId, telegramUserId, cancellationToken);
                 deleteUserMessage = true;
                 break;
+            case "/export":
+                await _deadlines.ExportAsync(chatId, telegramUserId, cancellationToken);
+                break;
             case "/admin":
                 await _admins.ShowMenuAsync(chatId, telegramUserId, cancellationToken);
                 break;
@@ -333,6 +336,7 @@ public sealed class WebhookUpdateProcessor
             "/deadline_add - add a deadline\n" +
             "/deadline_edit - edit a deadline\n" +
             "/settings - notifications, quiet hours, time zone, language\n" +
+            "/export - export your deadlines to a calendar (.ics)\n" +
             "/cancel - cancel the current action\n\n" +
             "Admin only:\n" +
             "/admin - admin menu\n" +

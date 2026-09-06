@@ -4,6 +4,7 @@ using EduTrack.Application.Common.Time;
 using EduTrack.Application.Studies;
 using EduTrack.Application.Studies.Commands.CreateOwnAssignment;
 using EduTrack.Application.Studies.Commands.UpdateOwnAssignment;
+using EduTrack.Application.Studies.Queries.ExportCalendar;
 using EduTrack.Application.Studies.Queries.GetOwnAssignments;
 using EduTrack.Application.Studies.Queries.GetSubjects;
 using EduTrack.Bot.Web.Conversations;
@@ -49,6 +50,31 @@ public sealed class DeadlineModule
     }
 
     // --- Entry points from the update router --- //
+
+    /// <summary>/export: send the caller's deadlines as an iCalendar (.ics) file.</summary>
+    public async Task ExportAsync(long chatId, long telegramUserId, CancellationToken ct)
+    {
+        var result = await _sender.Send(new ExportCalendarQuery(telegramUserId), ct);
+        if (result.IsFailure)
+        {
+            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            return;
+        }
+
+        var export = result.Value;
+        if (export.EventCount == 0)
+        {
+            await _telegram.SendTextAsync(chatId, "You have no deadlines to export.", ct);
+            return;
+        }
+
+        await _telegram.SendDocumentAsync(
+            chatId,
+            export.FileName,
+            export.Content,
+            "Your EduTrack deadlines. Import this into Google, Apple or Outlook Calendar.",
+            ct);
+    }
 
     /// <summary>/deadlines, /today, /week, /next: list the caller's upcoming deadlines.</summary>
     public async Task ShowDeadlinesAsync(long chatId, long telegramUserId, string scope, int page, CancellationToken ct)

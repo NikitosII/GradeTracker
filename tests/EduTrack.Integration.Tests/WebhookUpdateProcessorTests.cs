@@ -1,5 +1,7 @@
 using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Telegram;
+using EduTrack.Application.Studies;
+using EduTrack.Application.Studies.Queries.ExportCalendar;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Commands.BindUser;
 using EduTrack.Application.Users.Queries.GetUserProfile;
@@ -133,6 +135,30 @@ public class WebhookUpdateProcessorTests
         await act.Should().ThrowAsync<InvalidOperationException>();
         await _inbox.Received(1).MarkFailedAsync(1, Arg.Any<string>(), Arg.Any<CancellationToken>());
         await _inbox.DidNotReceiveWithAnyArgs().MarkProcessedAsync(default, default);
+    }
+
+    [Fact]
+    public async Task Export_sends_the_ics_document()
+    {
+        _sender.Send(Arg.Any<ExportCalendarQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new CalendarExportDto("edutrack-deadlines.ics", new byte[] { 1, 2, 3 }, 2)));
+
+        await CreateSut().ProcessAsync(MessageUpdate(42, "/export"), CancellationToken.None);
+
+        await _telegram.Received(1).SendDocumentAsync(
+            42, "edutrack-deadlines.ics", Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Export_with_no_deadlines_sends_a_text_message()
+    {
+        _sender.Send(Arg.Any<ExportCalendarQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new CalendarExportDto("edutrack-deadlines.ics", Array.Empty<byte>(), 0)));
+
+        await CreateSut().ProcessAsync(MessageUpdate(42, "/export"), CancellationToken.None);
+
+        await _telegram.DidNotReceiveWithAnyArgs().SendDocumentAsync(default, default!, default!, default, default);
+        await _telegram.Received(1).SendTextAsync(42, Arg.Is<string>(s => s.Contains("no deadlines")), Arg.Any<CancellationToken>());
     }
 
     [Fact]

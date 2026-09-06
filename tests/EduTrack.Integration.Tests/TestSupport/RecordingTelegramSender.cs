@@ -17,6 +17,9 @@ public sealed class RecordingTelegramSender : ITelegramSender
     /// <summary>Message ids that <see cref="DeleteMessageAsync"/> was asked to remove.</summary>
     public ConcurrentQueue<int> Deleted { get; } = new();
 
+    /// <summary>Documents that <see cref="SendDocumentAsync"/> was asked to send.</summary>
+    public ConcurrentQueue<(string FileName, byte[] Content)> Documents { get; } = new();
+
     public Task SendTextAsync(long chatId, string text, CancellationToken cancellationToken = default)
     {
         Messages.Enqueue(text);
@@ -45,6 +48,17 @@ public sealed class RecordingTelegramSender : ITelegramSender
 
     public Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default)
         => Task.CompletedTask;
+
+    public Task SendDocumentAsync(long chatId, string fileName, byte[] content, string? caption = null, CancellationToken cancellationToken = default)
+    {
+        Documents.Enqueue((fileName, content));
+        if (!string.IsNullOrEmpty(caption))
+        {
+            Messages.Enqueue(caption);
+        }
+
+        return Task.CompletedTask;
+    }
 
     public Task<int> SendNotificationAsync(long chatId, string text, IReadOnlyList<IReadOnlyList<InlineButton>>? buttons = null, CancellationToken cancellationToken = default)
     {

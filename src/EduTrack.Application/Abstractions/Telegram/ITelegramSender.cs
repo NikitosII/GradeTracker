@@ -20,6 +20,9 @@ public interface ITelegramSender
 
     Task AnswerCallbackAsync(string callbackQueryId, string? text = null, CancellationToken cancellationToken = default);
 
+    /// <summary>Sends a file as a Telegram document.</summary>
+    Task SendDocumentAsync(long chatId, string fileName, byte[] content, string? caption = null, CancellationToken cancellationToken = default);
+
     Task<int> SendNotificationAsync(
         long chatId,
         string text,
