@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="welcome" xml:space="preserve">
+    <value>Добро пожаловать в GradeTracker!
+
+Этот бот помогает отслеживать оценки, дедлайны и средний балл.
+Чтобы начать, привяжите аккаунт с помощью кода-приглашения:
+/bind &lt;код&gt;
+
+Введите /help, чтобы увидеть доступные команды.</value>
+  </data>
+  <data name="help" xml:space="preserve">
+    <value>GradeTracker — доступные команды:
+/start — начало работы
+/help — эта справка
+/bind &lt;код&gt; — привязать аккаунт
+/profile — ваш профиль
+/grades — оценки по предметам
+/subjects — список предметов
+/grade_add — добавить оценку
+/grade_edit — изменить оценку
+/deadlines — ближайшие дедлайны
+/today — дедлайны на сегодня
+/week — дедлайны на неделю
+/next — ближайший дедлайн
+/deadline_add — добавить дедлайн
+/deadline_edit — изменить дедлайн
+/settings — уведомления, тихие часы, часовой пояс, язык
+/export — экспорт дедлайнов в календарь (.ics)
+/stats — статистика по оценкам
+/cancel — отменить текущее действие
+
+Только для администратора:
+/admin — меню администратора
+/users — управление пользователями и ролями
+/invites — управление кодами-приглашениями
+/audit — журнал действий
+/status — состояние системы
+/announce &lt;сообщение&gt; — рассылка всем пользователям</value>
+  </data>
+  <data name="unknown" xml:space="preserve">
+    <value>Неизвестная команда. Введите /help, чтобы увидеть доступные команды.</value>
+  </data>
+  <data name="bind.usage" xml:space="preserve">
+    <value>Использование: /bind &lt;код&gt;
+Введите полученный код-приглашение.</value>
+  </data>
+  <data name="bind.invalid" xml:space="preserve">
+    <value>Код недействителен:
+{0}</value>
+  </data>
+  <data name="bind.linked" xml:space="preserve">
+    <value>Аккаунт привязан!
+
+{0}</value>
+  </data>
+  <data name="profile.title" xml:space="preserve">
+    <value>Профиль</value>
+  </data>
+  <data name="profile.name" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="profile.username" xml:space="preserve">
+    <value>Имя пользователя</value>
+  </data>
+  <data name="profile.role" xml:space="preserve">
+    <value>Роль</value>
+  </data>
+  <data name="profile.timezone" xml:space="preserve">
+    <value>Часовой пояс</value>
+  </data>
+  <data name="profile.language" xml:space="preserve">
+    <value>Язык</value>
+  </data>
+  <data name="settings.title" xml:space="preserve">
+    <value>Настройки
+
+Нажмите на пункт, чтобы изменить его.</value>
+  </data>
+  <data name="settings.notif_off_note" xml:space="preserve">
+    <value>
+
+Уведомления выключены — доставляются только важные оповещения.</value>
+  </data>
+  <data name="settings.notifications" xml:space="preserve">
+    <value>Уведомления</value>
+  </data>
+  <data name="settings.digest" xml:space="preserve">
+    <value>Утренняя сводка</value>
+  </data>
+  <data name="settings.r24" xml:space="preserve">
+    <value>Напоминания за 24 ч</value>
+  </data>
+  <data name="settings.r2" xml:space="preserve">
+    <value>Напоминания за 2 ч</value>
+  </data>
+  <data name="settings.timezone" xml:space="preserve">
+    <value>Часовой пояс</value>
+  </data>
+  <data name="settings.quiet" xml:space="preserve">
+    <value>Тихие часы</value>
+  </data>
+  <data name="settings.language" xml:space="preserve">
+    <value>Язык</value>
+  </data>
+  <data name="settings.on" xml:space="preserve">
+    <value>вкл ✅</value>
+  </data>
+  <data name="settings.off" xml:space="preserve">
+    <value>выкл ⛔</value>
+  </data>
+  <data name="settings.quiet_off" xml:space="preserve">
+    <value>выкл</value>
+  </data>
+  <data name="settings.back" xml:space="preserve">
+    <value>⬅ Назад</value>
+  </data>
+  <data name="settings.choose_tz" xml:space="preserve">
+    <value>Выберите часовой пояс:</value>
+  </data>
+  <data name="settings.choose_lang" xml:space="preserve">
+    <value>Выберите язык:</value>
+  </data>
+  <data name="settings.choose_quiet" xml:space="preserve">
+    <value>Тихие часы — в это время уведомления не приходят:</value>
+  </data>
+  <data name="settings.error" xml:space="preserve">
+    <value>Что-то пошло не так. Попробуйте ещё раз.</value>
+  </data>
+  <data name="settings.invalid" xml:space="preserve">
+    <value>Некорректные данные:
+{0}</value>
+  </data>
+  <data name="error.Users.NotBound" xml:space="preserve">
+    <value>Вы ещё не привязаны. Используйте /bind &lt;код&gt;, чтобы привязать аккаунт.</value>
+  </data>
+  <data name="error.Users.AlreadyBound" xml:space="preserve">
+    <value>Этот аккаунт Telegram уже привязан к профилю.</value>
+  </data>
+  <data name="error.Users.InvalidCode" xml:space="preserve">
+    <value>Код-приглашение не найден.</value>
+  </data>
+  <data name="error.Users.CodeNotUsable" xml:space="preserve">
+    <value>Этот код-приглашение истёк или уже использован.</value>
+  </data>
+  <data name="common.cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="common.skip" xml:space="preserve">
+    <value>Пропустить</value>
+  </data>
+  <data name="common.confirm" xml:space="preserve">
+    <value>Подтвердить</value>
+  </data>
+  <data name="common.prev" xml:space="preserve">
+    <value>◀ Назад</value>
+  </data>
+  <data name="common.next" xml:space="preserve">
+    <value>Вперёд ▶</value>
+  </data>
+  <data name="common.none" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="common.use_buttons" xml:space="preserve">
+    <value>Пожалуйста, используйте кнопки выше.</value>
+  </data>
+  <data name="common.something_wrong" xml:space="preserve">
+    <value>Что-то пошло не так. Попробуйте ещё раз.</value>
+  </data>
+  <data name="common.no_subjects" xml:space="preserve">
+    <value>Пока нет доступных предметов.</value>
+  </data>
+  <data name="common.no_subjects_admin" xml:space="preserve">
+    <value>Пока нет доступных предметов. Попросите администратора добавить их.</value>
+  </data>
+  <data name="common.cancelled" xml:space="preserve">
+    <value>Отменено.</value>
+  </data>
+  <data name="common.subject_gone" xml:space="preserve">
+    <value>Этот предмет больше недоступен.</value>
+  </data>
+  <data name="common.confirm_header" xml:space="preserve">
+    <value>Пожалуйста, подтвердите:</value>
+  </data>
+  <data name="common.page" xml:space="preserve">
+    <value>Страница {0}/{1}</value>
+  </data>
+  <data name="label.subject" xml:space="preserve">
+    <value>Предмет</value>
+  </data>
+  <data name="label.grade" xml:space="preserve">
+    <value>Оценка</value>
+  </data>
+  <data name="label.weight" xml:space="preserve">
+    <value>Вес</value>
+  </data>
+  <data name="label.comment" xml:space="preserve">
+    <value>Комментарий</value>
+  </data>
+  <data name="label.date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="label.type" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="label.title" xml:space="preserve">
+    <value>Название</value>
+  </data>
+  <data name="label.description" xml:space="preserve">
+    <value>Описание</value>
+  </data>
+  <data name="label.due" xml:space="preserve">
+    <value>Срок</value>
+  </data>
+  <data name="grade.choose_subject_view" xml:space="preserve">
+    <value>Выберите предмет для просмотра оценок:</value>
+  </data>
+  <data name="grade.add_select_subject" xml:space="preserve">
+    <value>Добавление оценки.
+Выберите предмет:</value>
+  </data>
+  <data name="grade.edit_select_subject" xml:space="preserve">
+    <value>Изменение оценки.
+Выберите предмет:</value>
+  </data>
+  <data name="grade.wizard_expired" xml:space="preserve">
+    <value>Мастер устарел. Начните заново: /grade_add или /grade_edit.</value>
+  </data>
+  <data name="grade.select_to_edit" xml:space="preserve">
+    <value>Выберите оценку для изменения:</value>
+  </data>
+  <data name="grade.none_in_subject" xml:space="preserve">
+    <value>У вас пока нет оценок по предмету {0}.</value>
+  </data>
+  <data name="grade.choose_value" xml:space="preserve">
+    <value>Выберите значение оценки:</value>
+  </data>
+  <data name="grade.send_comment" xml:space="preserve">
+    <value>Отправьте комментарий к оценке или нажмите «Пропустить».</value>
+  </data>
+  <data name="grade.send_date" xml:space="preserve">
+    <value>Отправьте дату в формате ГГГГ-ММ-ДД или нажмите «Пропустить» для сегодняшней.</value>
+  </data>
+  <data name="grade.bad_date" xml:space="preserve">
+    <value>Пожалуйста, отправьте дату в формате ГГГГ-ММ-ДД или нажмите «Пропустить».</value>
+  </data>
+  <data name="grade.send_weight" xml:space="preserve">
+    <value>Отправьте вес оценки (например, 1.0) или нажмите «Пропустить» для значения по умолчанию.</value>
+  </data>
+  <data name="grade.bad_weight" xml:space="preserve">
+    <value>Пожалуйста, отправьте положительное число для веса или нажмите «Пропустить».</value>
+  </data>
+  <data name="grade.nothing_to_skip" xml:space="preserve">
+    <value>Здесь нечего пропускать.</value>
+  </data>
+  <data name="grade.added" xml:space="preserve">
+    <value>Оценка добавлена.</value>
+  </data>
+  <data name="grade.updated" xml:space="preserve">
+    <value>Оценка обновлена.</value>
+  </data>
+  <data name="grade.could_not_save" xml:space="preserve">
+    <value>Не удалось сохранить оценку:
+{0}</value>
+  </data>
+  <data name="grade.none_yet" xml:space="preserve">
+    <value>Оценок пока нет.</value>
+  </data>
+  <data name="grade.average" xml:space="preserve">
+    <value>Средний балл: {0}</value>
+  </data>
+  <data name="grade.all_title" xml:space="preserve">
+    <value>Все оценки</value>
+  </data>
+  <data name="grade.title_fallback" xml:space="preserve">
+    <value>Оценки</value>
+  </data>
+  <data name="deadline.no_export" xml:space="preserve">
+    <value>У вас нет дедлайнов для экспорта.</value>
+  </data>
+  <data name="deadline.export_caption" xml:space="preserve">
+    <value>Ваши дедлайны EduTrack. Импортируйте их в Google, Apple или Outlook Календарь.</value>
+  </data>
+  <data name="deadline.add_select_subject" xml:space="preserve">
+    <value>Добавление дедлайна.
+Выберите предмет:</value>
+  </data>
+  <data name="deadline.edit_select_subject" xml:space="preserve">
+    <value>Изменение дедлайна.
+Выберите предмет:</value>
+  </data>
+  <data name="deadline.wizard_expired" xml:space="preserve">
+    <value>Мастер устарел. Начните заново: /deadline_add или /deadline_edit.</value>
+  </data>
+  <data name="deadline.select_to_edit" xml:space="preserve">
+    <value>Выберите дедлайн для изменения:</value>
+  </data>
+  <data name="deadline.none_in_subject" xml:space="preserve">
+    <value>У вас пока нет дедлайнов по предмету {0}.</value>
+  </data>
+  <data name="deadline.choose_type" xml:space="preserve">
+    <value>Выберите тип события:</value>
+  </data>
+  <data name="deadline.send_title" xml:space="preserve">
+    <value>Отправьте название дедлайна:</value>
+  </data>
+  <data name="deadline.bad_title" xml:space="preserve">
+    <value>Пожалуйста, отправьте непустое название или нажмите «Отмена».</value>
+  </data>
+  <data name="deadline.send_description" xml:space="preserve">
+    <value>Отправьте описание или нажмите «Пропустить».</value>
+  </data>
+  <data name="deadline.send_due" xml:space="preserve">
+    <value>Отправьте срок в формате ГГГГ-ММ-ДД ЧЧ:ММ (UTC) или просто ГГГГ-ММ-ДД.</value>
+  </data>
+  <data name="deadline.bad_due" xml:space="preserve">
+    <value>Пожалуйста, отправьте срок в формате ГГГГ-ММ-ДД ЧЧ:ММ (или ГГГГ-ММ-ДД) или нажмите «Отмена».</value>
+  </data>
+  <data name="deadline.added" xml:space="preserve">
+    <value>Дедлайн добавлен.</value>
+  </data>
+  <data name="deadline.updated" xml:space="preserve">
+    <value>Дедлайн обновлён.</value>
+  </data>
+  <data name="deadline.could_not_save" xml:space="preserve">
+    <value>Не удалось сохранить дедлайн:
+{0}</value>
+  </data>
+  <data name="deadline.none_upcoming" xml:space="preserve">
+    <value>Нет предстоящих дедлайнов.</value>
+  </data>
+  <data name="deadline.scope_today" xml:space="preserve">
+    <value>События на сегодня</value>
+  </data>
+  <data name="deadline.scope_week" xml:space="preserve">
+    <value>На этой неделе</value>
+  </data>
+  <data name="deadline.scope_next" xml:space="preserve">
+    <value>Ближайший дедлайн</value>
+  </data>
+  <data name="deadline.scope_upcoming" xml:space="preserve">
+    <value>Предстоящие дедлайны</value>
+  </data>
+  <data name="remaining.overdue" xml:space="preserve">
+    <value>просрочено</value>
+  </data>
+  <data name="remaining.days" xml:space="preserve">
+    <value>через {0}д</value>
+  </data>
+  <data name="remaining.hours" xml:space="preserve">
+    <value>через {0}ч</value>
+  </data>
+  <data name="remaining.minutes" xml:space="preserve">
+    <value>через {0}м</value>
+  </data>
+  <data name="type.homework" xml:space="preserve">
+    <value>Домашнее задание</value>
+  </data>
+  <data name="type.test" xml:space="preserve">
+    <value>Контрольная</value>
+  </data>
+  <data name="type.exam" xml:space="preserve">
+    <value>Экзамен</value>
+  </data>
+  <data name="type.project" xml:space="preserve">
+    <value>Проект</value>
+  </data>
+  <data name="type.quiz" xml:space="preserve">
+    <value>Тест</value>
+  </data>
+  <data name="type.lab" xml:space="preserve">
+    <value>Лабораторная</value>
+  </data>
+  <data name="error.Grades.SubjectNotFound" xml:space="preserve">
+    <value>Предмет не найден или неактивен.</value>
+  </data>
+  <data name="error.Grades.NotFound" xml:space="preserve">
+    <value>Оценка не найдена.</value>
+  </data>
+  <data name="error.Grades.NotOwner" xml:space="preserve">
+    <value>Вы можете изменять только свои оценки.</value>
+  </data>
+  <data name="error.Deadlines.SubjectNotFound" xml:space="preserve">
+    <value>Предмет не найден или неактивен.</value>
+  </data>
+  <data name="error.Deadlines.NotFound" xml:space="preserve">
+    <value>Дедлайн не найден.</value>
+  </data>
+  <data name="error.Deadlines.NotOwner" xml:space="preserve">
+    <value>Вы можете изменять только свои дедлайны.</value>
+  </data>
+</root>

@@ -2,6 +2,7 @@ using EduTrack.Application.Abstractions.Notifications;
 using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Common.Behaviors;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Notifications;
 using EduTrack.Application.Reminders.Digests;
 using FluentValidation;
@@ -27,6 +28,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
         services.TryAddSingleton<IApplicationMetrics>(NullApplicationMetrics.Instance);
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+        services.AddSingleton<ITranslator, ResxTranslator>();
         services.AddOptions<NotificationOptions>();
         services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
         services.AddScoped<IMorningDigestComposer, MorningDigestComposer>();

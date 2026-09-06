@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using EduTrack.Application.Abstractions.Observability;
 using EduTrack.Application.Abstractions.Telegram;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Reminders;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Commands.BindUser;
 using EduTrack.Application.Users.Queries.GetUserProfile;
+using EduTrack.Bot.Web.Localization;
 using EduTrack.Domain.Common;
 using EduTrack.Infrastructure.Observability;
 using FluentValidation;
@@ -28,11 +30,13 @@ public sealed class WebhookUpdateProcessor
     private readonly ReminderModule _reminders;
     private readonly SettingsModule _settings;
     private readonly StatsModule _stats;
+    private readonly IUiText _text;
+    private readonly ILanguageContext _language;
     private readonly IInboxStore _inbox;
     private readonly IApplicationMetrics _metrics;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, StatsModule stats, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, StatsModule stats, IUiText text, ILanguageContext language, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
@@ -42,6 +46,8 @@ public sealed class WebhookUpdateProcessor
         _reminders = reminders;
         _settings = settings;
         _stats = stats;
+        _text = text;
+        _language = language;
         _inbox = inbox;
         _metrics = metrics;
         _logger = logger;
@@ -66,6 +72,8 @@ public sealed class WebhookUpdateProcessor
         var success = false;
         try
         {
+            await ResolveLanguageAsync(update, cancellationToken);
+
             if (update.CallbackQuery is { } callback)
             {
                 await HandleCallbackAsync(callback, cancellationToken);
@@ -95,6 +103,41 @@ public sealed class WebhookUpdateProcessor
                 "Processed update {TelegramUpdateId} in {DurationMs} ms (success={Success})",
                 update.Id, stopwatch.ElapsedMilliseconds, success);
         }
+    }
+
+    /// <summary>
+    /// Resolves the language for this update
+    /// </summary>
+    private async Task ResolveLanguageAsync(Update update, CancellationToken cancellationToken)
+    {
+        var from = update.Message?.From ?? update.CallbackQuery?.From;
+        if (from is null)
+        {
+            return;
+        }
+
+        var profile = await _sender.Send(new GetUserProfileQuery(from.Id), cancellationToken);
+        _language.Language = profile is { IsSuccess: true }
+            ? Normalize(profile.Value.Language)
+            : Normalize(from.LanguageCode);
+    }
+
+    private static string Normalize(string? code)
+    {
+        if (!string.IsNullOrWhiteSpace(code))
+        {
+            if (code.StartsWith("ru", StringComparison.OrdinalIgnoreCase))
+            {
+                return "ru";
+            }
+
+            if (code.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+            {
+                return "en";
+            }
+        }
+
+        return "ru";
     }
 
     private async Task MarkFailedSafelyAsync(long updateId, string error, CancellationToken cancellationToken)
@@ -161,10 +204,10 @@ public sealed class WebhookUpdateProcessor
         switch (command)
         {
             case "/start":
-                await _telegram.SendTextAsync(chatId, Text.Welcome, cancellationToken);
+                await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.Welcome), cancellationToken);
                 break;
             case "/help":
-                await _telegram.SendTextAsync(chatId, Text.Help, cancellationToken);
+                await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.Help), cancellationToken);
                 break;
             case "/bind":
                 await _telegram.SendTextAsync(chatId, await HandleBindAsync(message, argument, cancellationToken), cancellationToken);
@@ -245,7 +288,7 @@ public sealed class WebhookUpdateProcessor
                 }
                 else
                 {
-                    await _telegram.SendTextAsync(chatId, Text.Unknown, cancellationToken);
+                    await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.Unknown), cancellationToken);
                 }
 
                 break;
@@ -263,7 +306,7 @@ public sealed class WebhookUpdateProcessor
     {
         if (string.IsNullOrWhiteSpace(code))
         {
-            return "Usage: /bind <code>\nEnter the invite code you received.";
+            return _text.Get(TextKeys.BindUsage);
         }
 
         var from = message.From!;
@@ -277,12 +320,12 @@ public sealed class WebhookUpdateProcessor
         catch (ValidationException ex)
         {
             var details = string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
-            return $"The code is not valid:\n{details}";
+            return _text.Get(TextKeys.BindInvalid, details);
         }
 
         return result.IsSuccess
-            ? $"Account linked!\n\n{RenderProfile(result.Value)}"
-            : result.Error.Message;
+            ? _text.Get(TextKeys.BindLinked, RenderProfile(result.Value))
+            : _text.Error(result.Error);
     }
 
     private async Task<string> HandleProfileAsync(long telegramUserId, CancellationToken cancellationToken)
@@ -290,7 +333,7 @@ public sealed class WebhookUpdateProcessor
         var result = await _sender.Send(new GetUserProfileQuery(telegramUserId), cancellationToken);
         return result.IsSuccess
             ? RenderProfile(result.Value)
-            : result.Error.Message;
+            : _text.Error(result.Error);
     }
 
     private static (string Command, string? Argument) ParseCommand(string text)
@@ -307,52 +350,11 @@ public sealed class WebhookUpdateProcessor
         return (command, argument);
     }
 
-    private static string RenderProfile(UserProfileDto p) =>
-        "Profile\n" +
-        $"Name: {p.FullName ?? "-"}\n" +
-        $"Username: {(p.Username is null ? "-" : "@" + p.Username)}\n" +
-        $"Role: {p.Role}\n" +
-        $"Time zone: {p.TimeZone}\n" +
-        $"Language: {p.Language}";
-
-    private static class Text
-    {
-        public const string Welcome =
-            "Welcome to GradeTracker!\n\n" +
-            "This bot helps you track your grades, deadlines and GPA.\n" +
-            "To get started, link your account with an invite code:\n" +
-            "/bind <code>\n\n" +
-            "Type /help to see available commands.";
-
-        public const string Help =
-            "GradeTracker - available commands:\n" +
-            "/start - getting started\n" +
-            "/help - this help\n" +
-            "/bind <code> - link your account\n" +
-            "/profile - your profile\n" +
-            "/grades - view your grades by subject\n" +
-            "/subjects - list subjects\n" +
-            "/grade_add - add a grade\n" +
-            "/grade_edit - edit a grade\n" +
-            "/deadlines - your upcoming deadlines\n" +
-            "/today - deadlines due today\n" +
-            "/week - deadlines due this week\n" +
-            "/next - your nearest deadline\n" +
-            "/deadline_add - add a deadline\n" +
-            "/deadline_edit - edit a deadline\n" +
-            "/settings - notifications, quiet hours, time zone, language\n" +
-            "/export - export your deadlines to a calendar (.ics)\n" +
-            "/stats - your grade statistics\n" +
-            "/cancel - cancel the current action\n\n" +
-            "Admin only:\n" +
-            "/admin - admin menu\n" +
-            "/users - manage users and roles\n" +
-            "/invites - manage invite codes\n" +
-            "/audit - view the audit log\n" +
-            "/status - system status\n" +
-            "/announce <message> - broadcast to all users";
-
-        public const string Unknown =
-            "Unknown command. Type /help to see what's available.";
-    }
+    private string RenderProfile(UserProfileDto p) =>
+        _text.Get(TextKeys.ProfileTitle) + "\n" +
+        $"{_text.Get(TextKeys.ProfileName)}: {p.FullName ?? "-"}\n" +
+        $"{_text.Get(TextKeys.ProfileUsername)}: {(p.Username is null ? "-" : "@" + p.Username)}\n" +
+        $"{_text.Get(TextKeys.ProfileRole)}: {p.Role}\n" +
+        $"{_text.Get(TextKeys.ProfileTimeZone)}: {p.TimeZone}\n" +
+        $"{_text.Get(TextKeys.ProfileLanguage)}: {p.Language}";
 }

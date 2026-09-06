@@ -1,5 +1,6 @@
 using EduTrack.Application;
 using EduTrack.Bot.Web.Conversations;
+using EduTrack.Bot.Web.Localization;
 using EduTrack.Bot.Web.Telegram;
 using EduTrack.Infrastructure.Observability;
 using EduTrack.Infrastructure.Persistence;
@@ -29,6 +30,8 @@ else
     builder.Services.AddDistributedMemoryCache();
 }
 
+builder.Services.AddScoped<ILanguageContext, LanguageContext>();
+builder.Services.AddScoped<IUiText, UiText>();
 builder.Services.AddScoped<IConversationStore, ConversationStore>();
 builder.Services.AddScoped<GradeModule>();
 builder.Services.AddScoped<DeadlineModule>();

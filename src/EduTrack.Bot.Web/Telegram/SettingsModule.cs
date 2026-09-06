@@ -1,7 +1,9 @@
 using EduTrack.Application.Abstractions.Telegram;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Commands.UpdateSettings;
 using EduTrack.Application.Users.Queries.GetUserSettings;
+using EduTrack.Bot.Web.Localization;
 using FluentValidation;
 using MediatR;
 
@@ -38,12 +40,16 @@ public sealed class SettingsModule
 
     private readonly ISender _sender;
     private readonly ITelegramSender _telegram;
+    private readonly IUiText _text;
+    private readonly ILanguageContext _language;
     private readonly ILogger<SettingsModule> _logger;
 
-    public SettingsModule(ISender sender, ITelegramSender telegram, ILogger<SettingsModule> logger)
+    public SettingsModule(ISender sender, ITelegramSender telegram, IUiText text, ILanguageContext language, ILogger<SettingsModule> logger)
     {
         _sender = sender;
         _telegram = telegram;
+        _text = text;
+        _language = language;
         _logger = logger;
     }
 
@@ -108,7 +114,7 @@ public sealed class SettingsModule
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to handle settings callback {Data} from {TelegramUserId}", data, telegramUserId);
-            await _telegram.EditKeyboardAsync(chatId, messageId, "Something went wrong. Please try again.", NoKeyboard, ct);
+            await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.SettingsError), NoKeyboard, ct);
         }
         finally
         {
@@ -147,15 +153,17 @@ public sealed class SettingsModule
             var result = await _sender.Send(ToCommand(telegramUserId, desired), ct);
             if (result.IsFailure)
             {
-                await _telegram.EditKeyboardAsync(chatId, messageId, result.Error.Message, NoKeyboard, ct);
+                await _telegram.EditKeyboardAsync(chatId, messageId, _text.Error(result.Error), NoKeyboard, ct);
                 return;
             }
 
+            // Honour a just-changed language immediately when re-rendering.
+            _language.Language = result.Value.Language;
             await _telegram.EditKeyboardAsync(chatId, messageId, Render(result.Value), BuildMenu(result.Value), ct);
         }
         catch (ValidationException ex)
         {
-            await _telegram.EditKeyboardAsync(chatId, messageId, ValidationText(ex), NoKeyboard, ct);
+            await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.SettingsInvalid, Details(ex)), NoKeyboard, ct);
         }
     }
 
@@ -179,7 +187,7 @@ public sealed class SettingsModule
         }
 
         rows.Add(BackRow());
-        await _telegram.EditKeyboardAsync(chatId, messageId, "Choose your time zone:", rows, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.SettingsChooseTimeZone), rows, ct);
     }
 
     private async Task ShowLanguagePickerAsync(long chatId, int messageId, CancellationToken ct)
@@ -193,7 +201,7 @@ public sealed class SettingsModule
             },
             BackRow(),
         };
-        await _telegram.EditKeyboardAsync(chatId, messageId, "Choose your language:", rows, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.SettingsChooseLanguage), rows, ct);
     }
 
     private async Task ShowQuietPickerAsync(long chatId, int messageId, CancellationToken ct)
@@ -205,10 +213,10 @@ public sealed class SettingsModule
         var rows = new List<IReadOnlyList<InlineButton>>
         {
             presets,
-            new[] { new InlineButton("Off", CallbackData.SettingsQuietOff) },
+            new[] { new InlineButton(_text.Get(TextKeys.SettingsQuietOff), CallbackData.SettingsQuietOff) },
             BackRow(),
         };
-        await _telegram.EditKeyboardAsync(chatId, messageId, "Quiet hours — no notifications during this window:", rows, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.SettingsChooseQuiet), rows, ct);
     }
 
     private async Task<UserSettingsDto?> LoadAsync(long chatId, long telegramUserId, CancellationToken ct)
@@ -216,10 +224,12 @@ public sealed class SettingsModule
         var result = await _sender.Send(new GetUserSettingsQuery(telegramUserId), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return null;
         }
 
+        // Render the settings menu in the user's stored language.
+        _language.Language = result.Value.Language;
         return result.Value;
     }
 
@@ -234,35 +244,35 @@ public sealed class SettingsModule
         s.QuietHoursStart,
         s.QuietHoursEnd);
 
-    private static List<IReadOnlyList<InlineButton>> BuildMenu(UserSettingsDto s) => new()
+    private List<IReadOnlyList<InlineButton>> BuildMenu(UserSettingsDto s) => new()
     {
-        new[] { new InlineButton($"Notifications: {OnOff(s.NotificationsEnabled)}", CallbackData.SettingsToggle("notif")) },
-        new[] { new InlineButton($"Morning digest: {OnOff(s.MorningDigestEnabled)}", CallbackData.SettingsToggle("digest")) },
-        new[] { new InlineButton($"24h reminders: {OnOff(s.Reminder24hEnabled)}", CallbackData.SettingsToggle("r24")) },
-        new[] { new InlineButton($"2h reminders: {OnOff(s.Reminder2hEnabled)}", CallbackData.SettingsToggle("r2")) },
-        new[] { new InlineButton($"Time zone: {s.TimeZone}", CallbackData.SettingsTimeZone) },
-        new[] { new InlineButton($"Quiet hours: {QuietLabel(s)}", CallbackData.SettingsQuiet) },
-        new[] { new InlineButton($"Language: {s.Language}", CallbackData.SettingsLanguage) },
+        new[] { new InlineButton($"{_text.Get(TextKeys.SettingsNotifications)}: {OnOff(s.NotificationsEnabled)}", CallbackData.SettingsToggle("notif")) },
+        new[] { new InlineButton($"{_text.Get(TextKeys.SettingsDigest)}: {OnOff(s.MorningDigestEnabled)}", CallbackData.SettingsToggle("digest")) },
+        new[] { new InlineButton($"{_text.Get(TextKeys.SettingsReminder24h)}: {OnOff(s.Reminder24hEnabled)}", CallbackData.SettingsToggle("r24")) },
+        new[] { new InlineButton($"{_text.Get(TextKeys.SettingsReminder2h)}: {OnOff(s.Reminder2hEnabled)}", CallbackData.SettingsToggle("r2")) },
+        new[] { new InlineButton($"{_text.Get(TextKeys.SettingsTimeZone)}: {s.TimeZone}", CallbackData.SettingsTimeZone) },
+        new[] { new InlineButton($"{_text.Get(TextKeys.SettingsQuiet)}: {QuietLabel(s)}", CallbackData.SettingsQuiet) },
+        new[] { new InlineButton($"{_text.Get(TextKeys.SettingsLanguage)}: {s.Language}", CallbackData.SettingsLanguage) },
     };
 
-    private static string Render(UserSettingsDto s)
+    private string Render(UserSettingsDto s)
     {
-        var master = s.NotificationsEnabled ? string.Empty : "\n\nNotifications are off — only critical alerts are delivered.";
-        return "Settings\n\nTap an item to change it." + master;
+        var note = s.NotificationsEnabled ? string.Empty : _text.Get(TextKeys.SettingsNotifOffNote);
+        return _text.Get(TextKeys.SettingsTitle) + note;
     }
 
-    private static IReadOnlyList<InlineButton> BackRow() => new[]
+    private IReadOnlyList<InlineButton> BackRow() => new[]
     {
-        new InlineButton("⬅ Back", CallbackData.SettingsMenu),
+        new InlineButton(_text.Get(TextKeys.SettingsBack), CallbackData.SettingsMenu),
     };
 
-    private static string OnOff(bool enabled) => enabled ? "on ✅" : "off ⛔";
+    private string OnOff(bool enabled) => enabled ? _text.Get(TextKeys.SettingsOn) : _text.Get(TextKeys.SettingsOff);
 
-    private static string QuietLabel(UserSettingsDto s) =>
-        s.QuietHoursStart is { } start && s.QuietHoursEnd is { } end ? FormatQuiet(start, end) : "off";
+    private string QuietLabel(UserSettingsDto s) =>
+        s.QuietHoursStart is { } start && s.QuietHoursEnd is { } end ? FormatQuiet(start, end) : _text.Get(TextKeys.SettingsQuietOff);
 
     private static string FormatQuiet(int start, int end) => $"{start:00}:00–{end:00}:00";
 
-    private static string ValidationText(ValidationException ex) =>
-        "Invalid input:\n" + string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
+    private static string Details(ValidationException ex) =>
+        string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
 }

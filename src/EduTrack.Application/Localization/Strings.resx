@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="welcome" xml:space="preserve">
+    <value>Welcome to GradeTracker!
+
+This bot helps you track your grades, deadlines and GPA.
+To get started, link your account with an invite code:
+/bind &lt;code&gt;
+
+Type /help to see available commands.</value>
+  </data>
+  <data name="help" xml:space="preserve">
+    <value>GradeTracker - available commands:
+/start - getting started
+/help - this help
+/bind &lt;code&gt; - link your account
+/profile - your profile
+/grades - view your grades by subject
+/subjects - list subjects
+/grade_add - add a grade
+/grade_edit - edit a grade
+/deadlines - your upcoming deadlines
+/today - deadlines due today
+/week - deadlines due this week
+/next - your nearest deadline
+/deadline_add - add a deadline
+/deadline_edit - edit a deadline
+/settings - notifications, quiet hours, time zone, language
+/export - export your deadlines to a calendar (.ics)
+/stats - your grade statistics
+/cancel - cancel the current action
+
+Admin only:
+/admin - admin menu
+/users - manage users and roles
+/invites - manage invite codes
+/audit - view the audit log
+/status - system status
+/announce &lt;message&gt; - broadcast to all users</value>
+  </data>
+  <data name="unknown" xml:space="preserve">
+    <value>Unknown command. Type /help to see what's available.</value>
+  </data>
+  <data name="bind.usage" xml:space="preserve">
+    <value>Usage: /bind &lt;code&gt;
+Enter the invite code you received.</value>
+  </data>
+  <data name="bind.invalid" xml:space="preserve">
+    <value>The code is not valid:
+{0}</value>
+  </data>
+  <data name="bind.linked" xml:space="preserve">
+    <value>Account linked!
+
+{0}</value>
+  </data>
+  <data name="profile.title" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="profile.name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="profile.username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="profile.role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="profile.timezone" xml:space="preserve">
+    <value>Time zone</value>
+  </data>
+  <data name="profile.language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="settings.title" xml:space="preserve">
+    <value>Settings
+
+Tap an item to change it.</value>
+  </data>
+  <data name="settings.notif_off_note" xml:space="preserve">
+    <value>
+
+Notifications are off — only critical alerts are delivered.</value>
+  </data>
+  <data name="settings.notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="settings.digest" xml:space="preserve">
+    <value>Morning digest</value>
+  </data>
+  <data name="settings.r24" xml:space="preserve">
+    <value>24h reminders</value>
+  </data>
+  <data name="settings.r2" xml:space="preserve">
+    <value>2h reminders</value>
+  </data>
+  <data name="settings.timezone" xml:space="preserve">
+    <value>Time zone</value>
+  </data>
+  <data name="settings.quiet" xml:space="preserve">
+    <value>Quiet hours</value>
+  </data>
+  <data name="settings.language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="settings.on" xml:space="preserve">
+    <value>on ✅</value>
+  </data>
+  <data name="settings.off" xml:space="preserve">
+    <value>off ⛔</value>
+  </data>
+  <data name="settings.quiet_off" xml:space="preserve">
+    <value>off</value>
+  </data>
+  <data name="settings.back" xml:space="preserve">
+    <value>⬅ Back</value>
+  </data>
+  <data name="settings.choose_tz" xml:space="preserve">
+    <value>Choose your time zone:</value>
+  </data>
+  <data name="settings.choose_lang" xml:space="preserve">
+    <value>Choose your language:</value>
+  </data>
+  <data name="settings.choose_quiet" xml:space="preserve">
+    <value>Quiet hours — no notifications during this window:</value>
+  </data>
+  <data name="settings.error" xml:space="preserve">
+    <value>Something went wrong. Please try again.</value>
+  </data>
+  <data name="settings.invalid" xml:space="preserve">
+    <value>Invalid input:
+{0}</value>
+  </data>
+  <data name="error.Users.NotBound" xml:space="preserve">
+    <value>You are not linked yet. Use /bind &lt;code&gt; to link your account.</value>
+  </data>
+  <data name="error.Users.AlreadyBound" xml:space="preserve">
+    <value>This Telegram account is already linked to a profile.</value>
+  </data>
+  <data name="error.Users.InvalidCode" xml:space="preserve">
+    <value>Invite code not found.</value>
+  </data>
+  <data name="error.Users.CodeNotUsable" xml:space="preserve">
+    <value>This invite code has expired or has already been used.</value>
+  </data>
+  <data name="common.cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="common.skip" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="common.confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="common.prev" xml:space="preserve">
+    <value>◀ Prev</value>
+  </data>
+  <data name="common.next" xml:space="preserve">
+    <value>Next ▶</value>
+  </data>
+  <data name="common.none" xml:space="preserve">
+    <value>-</value>
+  </data>
+  <data name="common.use_buttons" xml:space="preserve">
+    <value>Please use the buttons above.</value>
+  </data>
+  <data name="common.something_wrong" xml:space="preserve">
+    <value>Something went wrong. Please try again.</value>
+  </data>
+  <data name="common.no_subjects" xml:space="preserve">
+    <value>No subjects are available yet.</value>
+  </data>
+  <data name="common.no_subjects_admin" xml:space="preserve">
+    <value>No subjects are available yet. Ask an administrator to add some.</value>
+  </data>
+  <data name="common.cancelled" xml:space="preserve">
+    <value>Cancelled.</value>
+  </data>
+  <data name="common.subject_gone" xml:space="preserve">
+    <value>That subject is no longer available.</value>
+  </data>
+  <data name="common.confirm_header" xml:space="preserve">
+    <value>Please confirm:</value>
+  </data>
+  <data name="common.page" xml:space="preserve">
+    <value>Page {0}/{1}</value>
+  </data>
+  <data name="label.subject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="label.grade" xml:space="preserve">
+    <value>Grade</value>
+  </data>
+  <data name="label.weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="label.comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="label.date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="label.type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="label.title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="label.description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="label.due" xml:space="preserve">
+    <value>Due</value>
+  </data>
+  <data name="grade.choose_subject_view" xml:space="preserve">
+    <value>Choose a subject to view your grades:</value>
+  </data>
+  <data name="grade.add_select_subject" xml:space="preserve">
+    <value>Add a grade.
+Select a subject:</value>
+  </data>
+  <data name="grade.edit_select_subject" xml:space="preserve">
+    <value>Edit a grade.
+Select a subject:</value>
+  </data>
+  <data name="grade.wizard_expired" xml:space="preserve">
+    <value>This wizard has expired. Start again with /grade_add or /grade_edit.</value>
+  </data>
+  <data name="grade.select_to_edit" xml:space="preserve">
+    <value>Select the grade to edit:</value>
+  </data>
+  <data name="grade.none_in_subject" xml:space="preserve">
+    <value>You have no grades in {0} yet.</value>
+  </data>
+  <data name="grade.choose_value" xml:space="preserve">
+    <value>Choose the grade value:</value>
+  </data>
+  <data name="grade.send_comment" xml:space="preserve">
+    <value>Send a comment for this grade, or tap Skip.</value>
+  </data>
+  <data name="grade.send_date" xml:space="preserve">
+    <value>Send the date as YYYY-MM-DD, or tap Skip for today.</value>
+  </data>
+  <data name="grade.bad_date" xml:space="preserve">
+    <value>Please send a date as YYYY-MM-DD, or tap Skip.</value>
+  </data>
+  <data name="grade.send_weight" xml:space="preserve">
+    <value>Send the grade weight (e.g. 1.0), or tap Skip for the default.</value>
+  </data>
+  <data name="grade.bad_weight" xml:space="preserve">
+    <value>Please send a positive number for the weight, or tap Skip.</value>
+  </data>
+  <data name="grade.nothing_to_skip" xml:space="preserve">
+    <value>Nothing to skip here.</value>
+  </data>
+  <data name="grade.added" xml:space="preserve">
+    <value>Grade added.</value>
+  </data>
+  <data name="grade.updated" xml:space="preserve">
+    <value>Grade updated.</value>
+  </data>
+  <data name="grade.could_not_save" xml:space="preserve">
+    <value>Could not save the grade:
+{0}</value>
+  </data>
+  <data name="grade.none_yet" xml:space="preserve">
+    <value>No grades yet.</value>
+  </data>
+  <data name="grade.average" xml:space="preserve">
+    <value>Average grade: {0}</value>
+  </data>
+  <data name="grade.all_title" xml:space="preserve">
+    <value>All grades</value>
+  </data>
+  <data name="grade.title_fallback" xml:space="preserve">
+    <value>Grades</value>
+  </data>
+  <data name="deadline.no_export" xml:space="preserve">
+    <value>You have no deadlines to export.</value>
+  </data>
+  <data name="deadline.export_caption" xml:space="preserve">
+    <value>Your EduTrack deadlines. Import this into Google, Apple or Outlook Calendar.</value>
+  </data>
+  <data name="deadline.add_select_subject" xml:space="preserve">
+    <value>Add a deadline.
+Select a subject:</value>
+  </data>
+  <data name="deadline.edit_select_subject" xml:space="preserve">
+    <value>Edit a deadline.
+Select a subject:</value>
+  </data>
+  <data name="deadline.wizard_expired" xml:space="preserve">
+    <value>This wizard has expired. Start again with /deadline_add or /deadline_edit.</value>
+  </data>
+  <data name="deadline.select_to_edit" xml:space="preserve">
+    <value>Select the deadline to edit:</value>
+  </data>
+  <data name="deadline.none_in_subject" xml:space="preserve">
+    <value>You have no deadlines in {0} yet.</value>
+  </data>
+  <data name="deadline.choose_type" xml:space="preserve">
+    <value>Choose the event type:</value>
+  </data>
+  <data name="deadline.send_title" xml:space="preserve">
+    <value>Send a title for this deadline:</value>
+  </data>
+  <data name="deadline.bad_title" xml:space="preserve">
+    <value>Please send a non-empty title, or tap Cancel.</value>
+  </data>
+  <data name="deadline.send_description" xml:space="preserve">
+    <value>Send a description, or tap Skip.</value>
+  </data>
+  <data name="deadline.send_due" xml:space="preserve">
+    <value>Send the due date as YYYY-MM-DD HH:mm (UTC), or just YYYY-MM-DD.</value>
+  </data>
+  <data name="deadline.bad_due" xml:space="preserve">
+    <value>Please send the due date as YYYY-MM-DD HH:mm (or YYYY-MM-DD), or tap Cancel.</value>
+  </data>
+  <data name="deadline.added" xml:space="preserve">
+    <value>Deadline added.</value>
+  </data>
+  <data name="deadline.updated" xml:space="preserve">
+    <value>Deadline updated.</value>
+  </data>
+  <data name="deadline.could_not_save" xml:space="preserve">
+    <value>Could not save the deadline:
+{0}</value>
+  </data>
+  <data name="deadline.none_upcoming" xml:space="preserve">
+    <value>No upcoming deadlines.</value>
+  </data>
+  <data name="deadline.scope_today" xml:space="preserve">
+    <value>Today's events</value>
+  </data>
+  <data name="deadline.scope_week" xml:space="preserve">
+    <value>This week</value>
+  </data>
+  <data name="deadline.scope_next" xml:space="preserve">
+    <value>Next deadline</value>
+  </data>
+  <data name="deadline.scope_upcoming" xml:space="preserve">
+    <value>Upcoming deadlines</value>
+  </data>
+  <data name="remaining.overdue" xml:space="preserve">
+    <value>overdue</value>
+  </data>
+  <data name="remaining.days" xml:space="preserve">
+    <value>in {0}d</value>
+  </data>
+  <data name="remaining.hours" xml:space="preserve">
+    <value>in {0}h</value>
+  </data>
+  <data name="remaining.minutes" xml:space="preserve">
+    <value>in {0}m</value>
+  </data>
+  <data name="type.homework" xml:space="preserve">
+    <value>Homework</value>
+  </data>
+  <data name="type.test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="type.exam" xml:space="preserve">
+    <value>Exam</value>
+  </data>
+  <data name="type.project" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="type.quiz" xml:space="preserve">
+    <value>Quiz</value>
+  </data>
+  <data name="type.lab" xml:space="preserve">
+    <value>Lab</value>
+  </data>
+  <data name="error.Grades.SubjectNotFound" xml:space="preserve">
+    <value>Subject not found or inactive.</value>
+  </data>
+  <data name="error.Grades.NotFound" xml:space="preserve">
+    <value>Grade not found.</value>
+  </data>
+  <data name="error.Grades.NotOwner" xml:space="preserve">
+    <value>You can only change your own grades.</value>
+  </data>
+  <data name="error.Deadlines.SubjectNotFound" xml:space="preserve">
+    <value>Subject not found or inactive.</value>
+  </data>
+  <data name="error.Deadlines.NotFound" xml:space="preserve">
+    <value>Deadline not found.</value>
+  </data>
+  <data name="error.Deadlines.NotOwner" xml:space="preserve">
+    <value>You can only change your own deadlines.</value>
+  </data>
+</root>
