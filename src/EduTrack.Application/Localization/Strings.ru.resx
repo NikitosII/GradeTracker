@@ -447,4 +447,245 @@
   <data name="error.Deadlines.NotOwner" xml:space="preserve">
     <value>Вы можете изменять только свои дедлайны.</value>
   </data>
+  <data name="role.student" xml:space="preserve">
+    <value>Студент</value>
+  </data>
+  <data name="role.admin" xml:space="preserve">
+    <value>Администратор</value>
+  </data>
+  <data name="admin.menu_title" xml:space="preserve">
+    <value>Меню администратора
+Выберите раздел:</value>
+  </data>
+  <data name="admin.btn_users" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+  <data name="admin.btn_invites" xml:space="preserve">
+    <value>Коды-приглашения</value>
+  </data>
+  <data name="admin.btn_subjects" xml:space="preserve">
+    <value>Предметы</value>
+  </data>
+  <data name="admin.btn_audit" xml:space="preserve">
+    <value>Журнал</value>
+  </data>
+  <data name="admin.btn_status" xml:space="preserve">
+    <value>Состояние системы</value>
+  </data>
+  <data name="admin.btn_menu" xml:space="preserve">
+    <value>⬅ Меню</value>
+  </data>
+  <data name="admin.btn_new_code" xml:space="preserve">
+    <value>➕ Новый код</value>
+  </data>
+  <data name="admin.btn_new_subject" xml:space="preserve">
+    <value>➕ Новый предмет</value>
+  </data>
+  <data name="admin.btn_deactivate" xml:space="preserve">
+    <value>⏻ Отключить</value>
+  </data>
+  <data name="admin.btn_activate" xml:space="preserve">
+    <value>⏻ Включить</value>
+  </data>
+  <data name="admin.announce_usage" xml:space="preserve">
+    <value>Использование: /announce &lt;сообщение&gt;
+Рассылает сообщение всем пользователям.</value>
+  </data>
+  <data name="admin.announce_queued" xml:space="preserve">
+    <value>Объявление поставлено в очередь для {0} польз.</value>
+  </data>
+  <data name="admin.role_picker" xml:space="preserve">
+    <value>Новый код-приглашение.
+Какую роль он должен давать?</value>
+  </data>
+  <data name="admin.expiry_1day" xml:space="preserve">
+    <value>1 день</value>
+  </data>
+  <data name="admin.expiry_7days" xml:space="preserve">
+    <value>7 дней</value>
+  </data>
+  <data name="admin.expiry_30days" xml:space="preserve">
+    <value>30 дней</value>
+  </data>
+  <data name="admin.expiry_never" xml:space="preserve">
+    <value>Никогда</value>
+  </data>
+  <data name="admin.expiry_picker" xml:space="preserve">
+    <value>Роль: {0}.
+Когда код должен истечь?</value>
+  </data>
+  <data name="admin.code_created" xml:space="preserve">
+    <value>Код-приглашение создан:
+
+{0}
+Роль: {1}
+{2}</value>
+  </data>
+  <data name="admin.code_expires" xml:space="preserve">
+    <value>истекает {0} UTC</value>
+  </data>
+  <data name="admin.code_no_expiry" xml:space="preserve">
+    <value>без срока</value>
+  </data>
+  <data name="admin.role_updated" xml:space="preserve">
+    <value>Роль обновлена: {0} теперь {1}.</value>
+  </data>
+  <data name="admin.new_subject_prompt" xml:space="preserve">
+    <value>Новый предмет.
+Отправьте название предмета:</value>
+  </data>
+  <data name="admin.subject_desc_prompt" xml:space="preserve">
+    <value>Отправьте описание или нажмите «Пропустить».</value>
+  </data>
+  <data name="admin.subject_name_empty" xml:space="preserve">
+    <value>Пожалуйста, отправьте непустое название предмета или нажмите «Отмена».</value>
+  </data>
+  <data name="admin.subject_newname_empty" xml:space="preserve">
+    <value>Пожалуйста, отправьте непустое название или нажмите «Отмена».</value>
+  </data>
+  <data name="admin.subject_added" xml:space="preserve">
+    <value>Предмет добавлен: {0}.</value>
+  </data>
+  <data name="admin.subject_rename_prompt" xml:space="preserve">
+    <value>Переименование «{0}».
+Отправьте новое название:</value>
+  </data>
+  <data name="admin.subject_renamed" xml:space="preserve">
+    <value>Предмет переименован в {0}.</value>
+  </data>
+  <data name="admin.subject_activated" xml:space="preserve">
+    <value>Предмет {0} включён.</value>
+  </data>
+  <data name="admin.subject_deactivated" xml:space="preserve">
+    <value>Предмет {0} отключён.</value>
+  </data>
+  <data name="admin.validation" xml:space="preserve">
+    <value>Некорректные данные:
+{0}</value>
+  </data>
+  <data name="admin.no_name" xml:space="preserve">
+    <value>(без имени)</value>
+  </data>
+  <data name="admin.users_empty" xml:space="preserve">
+    <value>Пользователи
+
+Пока нет пользователей.</value>
+  </data>
+  <data name="admin.users_title" xml:space="preserve">
+    <value>Пользователи ({0})</value>
+  </data>
+  <data name="admin.users_tap" xml:space="preserve">
+    <value>Нажмите на пользователя, чтобы изменить его роль.</value>
+  </data>
+  <data name="admin.invites_title" xml:space="preserve">
+    <value>Коды-приглашения</value>
+  </data>
+  <data name="admin.invites_empty" xml:space="preserve">
+    <value>Коды-приглашения
+
+Пока нет кодов. Нажмите «Новый код», чтобы создать.</value>
+  </data>
+  <data name="admin.invite_used" xml:space="preserve">
+    <value>использован</value>
+  </data>
+  <data name="admin.invite_available" xml:space="preserve">
+    <value>доступен</value>
+  </data>
+  <data name="admin.invite_expires" xml:space="preserve">
+    <value>, истекает {0}</value>
+  </data>
+  <data name="admin.subjects_title" xml:space="preserve">
+    <value>Предметы</value>
+  </data>
+  <data name="admin.subjects_empty" xml:space="preserve">
+    <value>Предметы
+
+Пока нет предметов. Нажмите «Новый предмет», чтобы добавить.</value>
+  </data>
+  <data name="admin.subject_active" xml:space="preserve">
+    <value>активен</value>
+  </data>
+  <data name="admin.subject_inactive" xml:space="preserve">
+    <value>неактивен</value>
+  </data>
+  <data name="admin.audit_empty" xml:space="preserve">
+    <value>Журнал действий
+
+Пока нет записей.</value>
+  </data>
+  <data name="admin.audit_title" xml:space="preserve">
+    <value>Журнал действий ({0})</value>
+  </data>
+  <data name="admin.audit_system" xml:space="preserve">
+    <value>система</value>
+  </data>
+  <data name="admin.status_title" xml:space="preserve">
+    <value>Состояние системы</value>
+  </data>
+  <data name="admin.status_users" xml:space="preserve">
+    <value>Пользователи: {0} (админов: {1}, студентов: {2})</value>
+  </data>
+  <data name="admin.status_subjects" xml:space="preserve">
+    <value>Предметы: {0} (активных: {1})</value>
+  </data>
+  <data name="admin.status_grades" xml:space="preserve">
+    <value>Оценки: {0}</value>
+  </data>
+  <data name="admin.status_deadlines" xml:space="preserve">
+    <value>Дедлайны: {0}</value>
+  </data>
+  <data name="admin.status_invites" xml:space="preserve">
+    <value>Коды-приглашения: {0} (доступно: {1})</value>
+  </data>
+  <data name="admin.status_audit" xml:space="preserve">
+    <value>Записей в журнале: {0}</value>
+  </data>
+  <data name="admin.status_asof" xml:space="preserve">
+    <value>По состоянию на {0} UTC</value>
+  </data>
+  <data name="error.Admin.NotAdmin" xml:space="preserve">
+    <value>Эта команда доступна только администраторам.</value>
+  </data>
+  <data name="error.Admin.UserNotFound" xml:space="preserve">
+    <value>Пользователь не найден.</value>
+  </data>
+  <data name="error.Admin.SubjectNotFound" xml:space="preserve">
+    <value>Предмет не найден.</value>
+  </data>
+  <data name="error.Admin.SubjectNameTaken" xml:space="preserve">
+    <value>Предмет с таким названием уже существует.</value>
+  </data>
+  <data name="error.Admin.CannotDemoteSelf" xml:space="preserve">
+    <value>Вы не можете изменить свою собственную роль.</value>
+  </data>
+  <data name="stats.title" xml:space="preserve">
+    <value>Ваша статистика</value>
+  </data>
+  <data name="stats.no_grades" xml:space="preserve">
+    <value>Оценок пока нет. Добавьте оценку: /grade_add.</value>
+  </data>
+  <data name="stats.gpa" xml:space="preserve">
+    <value>Средний балл (за всё время): {0}</value>
+  </data>
+  <data name="stats.week" xml:space="preserve">
+    <value>За неделю: {0} (оценок: {1})</value>
+  </data>
+  <data name="stats.month" xml:space="preserve">
+    <value>За месяц: {0} (оценок: {1})</value>
+  </data>
+  <data name="stats.by_subject" xml:space="preserve">
+    <value>По предметам:</value>
+  </data>
+  <data name="stats.subject_line" xml:space="preserve">
+    <value>• {0}: {1} ({2})</value>
+  </data>
+  <data name="stats.needs_attention" xml:space="preserve">
+    <value>Требует внимания: {0} ({1})</value>
+  </data>
+  <data name="stats.upcoming" xml:space="preserve">
+    <value>Предстоящих дедлайнов: {0}</value>
+  </data>
+  <data name="stats.recorded" xml:space="preserve">
+    <value>Всего оценок: {0}</value>
+  </data>
 </root>

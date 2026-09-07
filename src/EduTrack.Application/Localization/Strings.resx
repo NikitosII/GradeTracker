@@ -447,4 +447,245 @@ Select a subject:</value>
   <data name="error.Deadlines.NotOwner" xml:space="preserve">
     <value>You can only change your own deadlines.</value>
   </data>
+  <data name="role.student" xml:space="preserve">
+    <value>Student</value>
+  </data>
+  <data name="role.admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="admin.menu_title" xml:space="preserve">
+    <value>Admin menu
+Choose a section:</value>
+  </data>
+  <data name="admin.btn_users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="admin.btn_invites" xml:space="preserve">
+    <value>Invite Codes</value>
+  </data>
+  <data name="admin.btn_subjects" xml:space="preserve">
+    <value>Subjects</value>
+  </data>
+  <data name="admin.btn_audit" xml:space="preserve">
+    <value>Audit</value>
+  </data>
+  <data name="admin.btn_status" xml:space="preserve">
+    <value>System Status</value>
+  </data>
+  <data name="admin.btn_menu" xml:space="preserve">
+    <value>⬅ Menu</value>
+  </data>
+  <data name="admin.btn_new_code" xml:space="preserve">
+    <value>➕ New code</value>
+  </data>
+  <data name="admin.btn_new_subject" xml:space="preserve">
+    <value>➕ New subject</value>
+  </data>
+  <data name="admin.btn_deactivate" xml:space="preserve">
+    <value>⏻ Deactivate</value>
+  </data>
+  <data name="admin.btn_activate" xml:space="preserve">
+    <value>⏻ Activate</value>
+  </data>
+  <data name="admin.announce_usage" xml:space="preserve">
+    <value>Usage: /announce &lt;message&gt;
+Broadcasts a message to every user.</value>
+  </data>
+  <data name="admin.announce_queued" xml:space="preserve">
+    <value>Announcement queued for {0} user(s).</value>
+  </data>
+  <data name="admin.role_picker" xml:space="preserve">
+    <value>New invite code.
+Which role should it grant?</value>
+  </data>
+  <data name="admin.expiry_1day" xml:space="preserve">
+    <value>1 day</value>
+  </data>
+  <data name="admin.expiry_7days" xml:space="preserve">
+    <value>7 days</value>
+  </data>
+  <data name="admin.expiry_30days" xml:space="preserve">
+    <value>30 days</value>
+  </data>
+  <data name="admin.expiry_never" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="admin.expiry_picker" xml:space="preserve">
+    <value>Role: {0}.
+When should the code expire?</value>
+  </data>
+  <data name="admin.code_created" xml:space="preserve">
+    <value>Invite code created:
+
+{0}
+Role: {1}
+{2}</value>
+  </data>
+  <data name="admin.code_expires" xml:space="preserve">
+    <value>expires {0} UTC</value>
+  </data>
+  <data name="admin.code_no_expiry" xml:space="preserve">
+    <value>no expiry</value>
+  </data>
+  <data name="admin.role_updated" xml:space="preserve">
+    <value>Role updated: {0} is now {1}.</value>
+  </data>
+  <data name="admin.new_subject_prompt" xml:space="preserve">
+    <value>New subject.
+Send the subject name:</value>
+  </data>
+  <data name="admin.subject_desc_prompt" xml:space="preserve">
+    <value>Send a description, or tap Skip.</value>
+  </data>
+  <data name="admin.subject_name_empty" xml:space="preserve">
+    <value>Please send a non-empty subject name, or tap Cancel.</value>
+  </data>
+  <data name="admin.subject_newname_empty" xml:space="preserve">
+    <value>Please send a non-empty name, or tap Cancel.</value>
+  </data>
+  <data name="admin.subject_added" xml:space="preserve">
+    <value>Subject added: {0}.</value>
+  </data>
+  <data name="admin.subject_rename_prompt" xml:space="preserve">
+    <value>Rename "{0}".
+Send the new name:</value>
+  </data>
+  <data name="admin.subject_renamed" xml:space="preserve">
+    <value>Subject renamed to {0}.</value>
+  </data>
+  <data name="admin.subject_activated" xml:space="preserve">
+    <value>Subject {0} activated.</value>
+  </data>
+  <data name="admin.subject_deactivated" xml:space="preserve">
+    <value>Subject {0} deactivated.</value>
+  </data>
+  <data name="admin.validation" xml:space="preserve">
+    <value>Invalid input:
+{0}</value>
+  </data>
+  <data name="admin.no_name" xml:space="preserve">
+    <value>(no name)</value>
+  </data>
+  <data name="admin.users_empty" xml:space="preserve">
+    <value>Users
+
+No users yet.</value>
+  </data>
+  <data name="admin.users_title" xml:space="preserve">
+    <value>Users ({0})</value>
+  </data>
+  <data name="admin.users_tap" xml:space="preserve">
+    <value>Tap a user to change their role.</value>
+  </data>
+  <data name="admin.invites_title" xml:space="preserve">
+    <value>Invite codes</value>
+  </data>
+  <data name="admin.invites_empty" xml:space="preserve">
+    <value>Invite codes
+
+No codes yet. Tap "New code" to create one.</value>
+  </data>
+  <data name="admin.invite_used" xml:space="preserve">
+    <value>used</value>
+  </data>
+  <data name="admin.invite_available" xml:space="preserve">
+    <value>available</value>
+  </data>
+  <data name="admin.invite_expires" xml:space="preserve">
+    <value>, expires {0}</value>
+  </data>
+  <data name="admin.subjects_title" xml:space="preserve">
+    <value>Subjects</value>
+  </data>
+  <data name="admin.subjects_empty" xml:space="preserve">
+    <value>Subjects
+
+No subjects yet. Tap "New subject" to add one.</value>
+  </data>
+  <data name="admin.subject_active" xml:space="preserve">
+    <value>active</value>
+  </data>
+  <data name="admin.subject_inactive" xml:space="preserve">
+    <value>inactive</value>
+  </data>
+  <data name="admin.audit_empty" xml:space="preserve">
+    <value>Audit log
+
+No entries yet.</value>
+  </data>
+  <data name="admin.audit_title" xml:space="preserve">
+    <value>Audit log ({0})</value>
+  </data>
+  <data name="admin.audit_system" xml:space="preserve">
+    <value>system</value>
+  </data>
+  <data name="admin.status_title" xml:space="preserve">
+    <value>System status</value>
+  </data>
+  <data name="admin.status_users" xml:space="preserve">
+    <value>Users: {0} (admins: {1}, students: {2})</value>
+  </data>
+  <data name="admin.status_subjects" xml:space="preserve">
+    <value>Subjects: {0} (active: {1})</value>
+  </data>
+  <data name="admin.status_grades" xml:space="preserve">
+    <value>Grades: {0}</value>
+  </data>
+  <data name="admin.status_deadlines" xml:space="preserve">
+    <value>Deadlines: {0}</value>
+  </data>
+  <data name="admin.status_invites" xml:space="preserve">
+    <value>Invite codes: {0} (available: {1})</value>
+  </data>
+  <data name="admin.status_audit" xml:space="preserve">
+    <value>Audit entries: {0}</value>
+  </data>
+  <data name="admin.status_asof" xml:space="preserve">
+    <value>As of {0} UTC</value>
+  </data>
+  <data name="error.Admin.NotAdmin" xml:space="preserve">
+    <value>This command is only available to administrators.</value>
+  </data>
+  <data name="error.Admin.UserNotFound" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
+  <data name="error.Admin.SubjectNotFound" xml:space="preserve">
+    <value>Subject not found.</value>
+  </data>
+  <data name="error.Admin.SubjectNameTaken" xml:space="preserve">
+    <value>A subject with this name already exists.</value>
+  </data>
+  <data name="error.Admin.CannotDemoteSelf" xml:space="preserve">
+    <value>You cannot change your own role.</value>
+  </data>
+  <data name="stats.title" xml:space="preserve">
+    <value>Your stats</value>
+  </data>
+  <data name="stats.no_grades" xml:space="preserve">
+    <value>No grades yet. Add one with /grade_add.</value>
+  </data>
+  <data name="stats.gpa" xml:space="preserve">
+    <value>GPA (all time): {0}</value>
+  </data>
+  <data name="stats.week" xml:space="preserve">
+    <value>This week: {0} ({1} grades)</value>
+  </data>
+  <data name="stats.month" xml:space="preserve">
+    <value>This month: {0} ({1} grades)</value>
+  </data>
+  <data name="stats.by_subject" xml:space="preserve">
+    <value>By subject:</value>
+  </data>
+  <data name="stats.subject_line" xml:space="preserve">
+    <value>• {0}: {1} ({2})</value>
+  </data>
+  <data name="stats.needs_attention" xml:space="preserve">
+    <value>Needs attention: {0} ({1})</value>
+  </data>
+  <data name="stats.upcoming" xml:space="preserve">
+    <value>Upcoming deadlines: {0}</value>
+  </data>
+  <data name="stats.recorded" xml:space="preserve">
+    <value>Grades recorded: {0}</value>
+  </data>
 </root>

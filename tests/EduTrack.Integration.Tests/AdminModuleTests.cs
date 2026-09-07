@@ -30,7 +30,7 @@ public class AdminModuleTests
     private readonly InMemoryConversationStore _store = new();
 
     private AdminModule CreateSut() =>
-        new(_sender, _telegram, _store, NullLogger<AdminModule>.Instance);
+        new(_sender, _telegram, _store, new TestUiText(), NullLogger<AdminModule>.Instance);
 
     private void StubProfile(string role) =>
         _sender.Send(Arg.Any<GetUserProfileQuery>(), Arg.Any<CancellationToken>())
@@ -59,6 +59,25 @@ public class AdminModuleTests
         await _telegram.Received(1).SendKeyboardAsync(
             ChatId,
             Arg.Is<string>(s => s.Contains("Admin menu")),
+            Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Menu_is_shown_in_russian_for_a_russian_admin()
+    {
+        StubProfile(nameof(UserRole.Admin));
+
+        var russian = new AdminModule(
+            _sender, _telegram, _store,
+            new TestUiText(new TestLanguageContext { Language = "ru" }),
+            NullLogger<AdminModule>.Instance);
+
+        await russian.ShowMenuAsync(ChatId, UserId, CancellationToken.None);
+
+        await _telegram.Received(1).SendKeyboardAsync(
+            ChatId,
+            Arg.Is<string>(s => s.Contains("Меню администратора")),
             Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>>(),
             Arg.Any<CancellationToken>());
     }

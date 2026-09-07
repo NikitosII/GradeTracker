@@ -11,8 +11,10 @@ using EduTrack.Application.Admin.Queries.GetInviteCodes;
 using EduTrack.Application.Admin.Queries.GetSubjectDetail;
 using EduTrack.Application.Admin.Queries.GetSystemStatus;
 using EduTrack.Application.Admin.Queries.GetUsers;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Users.Queries.GetUserProfile;
 using EduTrack.Bot.Web.Conversations;
+using EduTrack.Bot.Web.Localization;
 using EduTrack.Domain.Users;
 using FluentValidation;
 using MediatR;
@@ -27,20 +29,26 @@ public sealed class AdminModule
     private const int UsersPageSize = 8;
     private const int AuditPageSize = 8;
 
+    private static readonly IReadOnlyList<IReadOnlyList<InlineButton>> NoKeyboard =
+        Array.Empty<IReadOnlyList<InlineButton>>();
+
     private readonly ISender _sender;
     private readonly ITelegramSender _telegram;
     private readonly IConversationStore _conversations;
+    private readonly IUiText _text;
     private readonly ILogger<AdminModule> _logger;
 
     public AdminModule(
         ISender sender,
         ITelegramSender telegram,
         IConversationStore conversations,
+        IUiText text,
         ILogger<AdminModule> logger)
     {
         _sender = sender;
         _telegram = telegram;
         _conversations = conversations;
+        _text = text;
         _logger = logger;
     }
 
@@ -55,14 +63,14 @@ public sealed class AdminModule
 
         var rows = new List<IReadOnlyList<InlineButton>>
         {
-            new[] { new InlineButton("Users", CallbackData.AdminUsers(1)) },
-            new[] { new InlineButton("Invite Codes", CallbackData.AdminInvites) },
-            new[] { new InlineButton("Subjects", CallbackData.AdminSubjects) },
-            new[] { new InlineButton("Audit", CallbackData.AdminAudit(1)) },
-            new[] { new InlineButton("System Status", CallbackData.AdminStatus) },
+            new[] { new InlineButton(_text.Get(TextKeys.AdminBtnUsers), CallbackData.AdminUsers(1)) },
+            new[] { new InlineButton(_text.Get(TextKeys.AdminBtnInvites), CallbackData.AdminInvites) },
+            new[] { new InlineButton(_text.Get(TextKeys.AdminBtnSubjects), CallbackData.AdminSubjects) },
+            new[] { new InlineButton(_text.Get(TextKeys.AdminBtnAudit), CallbackData.AdminAudit(1)) },
+            new[] { new InlineButton(_text.Get(TextKeys.AdminBtnStatus), CallbackData.AdminStatus) },
         };
 
-        await _telegram.SendKeyboardAsync(chatId, "Admin menu\nChoose a section:", rows, ct);
+        await _telegram.SendKeyboardAsync(chatId, _text.Get(TextKeys.AdminMenuTitle), rows, ct);
     }
 
     public async Task ShowUsersAsync(long chatId, long telegramUserId, int page, CancellationToken ct)
@@ -75,7 +83,7 @@ public sealed class AdminModule
         var result = await _sender.Send(new GetUsersQuery(telegramUserId, page, UsersPageSize), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return;
         }
 
@@ -91,19 +99,19 @@ public sealed class AdminModule
 
             var isAdmin = user.Role == nameof(UserRole.Admin);
             var targetRole = isAdmin ? UserRole.Student : UserRole.Admin;
-            var label = $"{DisplayName(user.FullName, user.Username)}: → {targetRole}";
+            var label = $"{DisplayName(user.FullName, user.Username)}: → {RoleLabel(targetRole.ToString())}";
             rows.Add(new[] { new InlineButton(label, CallbackData.AdminSetRole(user.Id, (int)targetRole)) });
         }
 
         var nav = new List<InlineButton>();
         if (data.HasPrevious)
         {
-            nav.Add(new InlineButton("◀ Prev", CallbackData.AdminUsers(page - 1)));
+            nav.Add(new InlineButton(_text.Get(TextKeys.CommonPrev), CallbackData.AdminUsers(page - 1)));
         }
 
         if (data.HasNext)
         {
-            nav.Add(new InlineButton("Next ▶", CallbackData.AdminUsers(page + 1)));
+            nav.Add(new InlineButton(_text.Get(TextKeys.CommonNext), CallbackData.AdminUsers(page + 1)));
         }
 
         if (nav.Count > 0)
@@ -126,13 +134,13 @@ public sealed class AdminModule
         var result = await _sender.Send(new GetInviteCodesQuery(telegramUserId), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return;
         }
 
         var rows = new List<IReadOnlyList<InlineButton>>
         {
-            new[] { new InlineButton("➕ New code", CallbackData.AdminNewCode) },
+            new[] { new InlineButton(_text.Get(TextKeys.AdminBtnNewCode), CallbackData.AdminNewCode) },
             MenuRow(),
         };
 
@@ -149,14 +157,14 @@ public sealed class AdminModule
         var result = await _sender.Send(new GetAllSubjectsQuery(telegramUserId), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return;
         }
 
         var rows = new List<IReadOnlyList<InlineButton>>();
         foreach (var subject in result.Value)
         {
-            var toggle = subject.IsActive ? "⏻ Deactivate" : "⏻ Activate";
+            var toggle = subject.IsActive ? _text.Get(TextKeys.AdminBtnDeactivate) : _text.Get(TextKeys.AdminBtnActivate);
             rows.Add(new[]
             {
                 new InlineButton($"✏ {subject.Name}", CallbackData.AdminSubjectRename(subject.Id)),
@@ -164,7 +172,7 @@ public sealed class AdminModule
             });
         }
 
-        rows.Add(new[] { new InlineButton("➕ New subject", CallbackData.AdminNewSubject) });
+        rows.Add(new[] { new InlineButton(_text.Get(TextKeys.AdminBtnNewSubject), CallbackData.AdminNewSubject) });
         rows.Add(MenuRow());
 
         await _telegram.SendKeyboardAsync(chatId, RenderSubjects(result.Value), rows, ct);
@@ -180,7 +188,7 @@ public sealed class AdminModule
         var result = await _sender.Send(new GetAuditLogQuery(telegramUserId, page, AuditPageSize), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return;
         }
 
@@ -190,12 +198,12 @@ public sealed class AdminModule
         var nav = new List<InlineButton>();
         if (data.HasPrevious)
         {
-            nav.Add(new InlineButton("◀ Prev", CallbackData.AdminAudit(page - 1)));
+            nav.Add(new InlineButton(_text.Get(TextKeys.CommonPrev), CallbackData.AdminAudit(page - 1)));
         }
 
         if (data.HasNext)
         {
-            nav.Add(new InlineButton("Next ▶", CallbackData.AdminAudit(page + 1)));
+            nav.Add(new InlineButton(_text.Get(TextKeys.CommonNext), CallbackData.AdminAudit(page + 1)));
         }
 
         if (nav.Count > 0)
@@ -218,7 +226,7 @@ public sealed class AdminModule
         var result = await _sender.Send(new GetSystemStatusQuery(telegramUserId), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return;
         }
 
@@ -234,7 +242,7 @@ public sealed class AdminModule
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await _telegram.SendTextAsync(chatId, "Usage: /announce <message>\nBroadcasts a message to every user.", ct);
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.AdminAnnounceUsage), ct);
             return;
         }
 
@@ -243,11 +251,11 @@ public sealed class AdminModule
             var result = await _sender.Send(new SendAnnouncementCommand(telegramUserId, text), ct);
             if (result.IsFailure)
             {
-                await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+                await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
                 return;
             }
 
-            await _telegram.SendTextAsync(chatId, $"Announcement queued for {result.Value} user(s).", ct);
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.AdminAnnounceQueued, result.Value), ct);
         }
         catch (ValidationException ex)
         {
@@ -261,7 +269,7 @@ public sealed class AdminModule
         // it to the outcome and drop any wizard state (there is none for the
         // stateless code/role pickers).
         await _conversations.RemoveAsync(chatId, ct);
-        await _telegram.EditKeyboardAsync(chatId, messageId, "Cancelled.", NoKeyboard, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.CommonCancelled), NoKeyboard, ct);
     }
 
     /// <summary>Feeds a plain text message into the active admin subject wizard.</summary>
@@ -281,7 +289,7 @@ public sealed class AdminModule
                 return true;
 
             case AdminStep.SubjectName:
-                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send a non-empty subject name, or tap Cancel.", CancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.AdminSubjectNameEmpty), CancelRows(), ct);
                 return true;
 
             case AdminStep.SubjectDescription:
@@ -294,11 +302,11 @@ public sealed class AdminModule
                 return true;
 
             case AdminStep.SubjectNewName:
-                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Please send a non-empty name, or tap Cancel.", CancelRows(), ct);
+                await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.AdminSubjectNewNameEmpty), CancelRows(), ct);
                 return true;
 
             default:
-                await _telegram.SendTextAsync(chatId, "Please use the buttons above.", ct);
+                await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.CommonUseButtons), ct);
                 return true;
         }
     }
@@ -327,7 +335,7 @@ public sealed class AdminModule
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to handle admin callback {Data} from {TelegramUserId}", data, telegramUserId);
-            await _telegram.SendTextAsync(chatId, "Something went wrong. Please try again.", ct);
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.CommonSomethingWrong), ct);
         }
         finally
         {
@@ -409,7 +417,7 @@ public sealed class AdminModule
                 break;
 
             default:
-                await _telegram.SendTextAsync(chatId, "Please use the buttons above.", ct);
+                await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.CommonUseButtons), ct);
                 break;
         }
     }
@@ -419,12 +427,12 @@ public sealed class AdminModule
         var result = await _sender.Send(new ChangeUserRoleCommand(telegramUserId, targetUserId, role), ct);
         if (result.IsFailure)
         {
-            await _telegram.EditKeyboardAsync(chatId, messageId, result.Error.Message, NoKeyboard, ct);
+            await _telegram.EditKeyboardAsync(chatId, messageId, _text.Error(result.Error), NoKeyboard, ct);
             return;
         }
 
         var user = result.Value;
-        await _telegram.EditKeyboardAsync(chatId, messageId, $"Role updated: {DisplayName(user.FullName, user.Username)} is now {user.Role}.", NoKeyboard, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.AdminRoleUpdated, DisplayName(user.FullName, user.Username), RoleLabel(user.Role)), NoKeyboard, ct);
 
         // Auto-refresh: re-show the user list with the updated role.
         await ShowUsersAsync(chatId, telegramUserId, 1, ct);
@@ -436,12 +444,12 @@ public sealed class AdminModule
         {
             new[]
             {
-                new InlineButton("Student", CallbackData.AdminCodeRole((int)UserRole.Student)),
-                new InlineButton("Admin", CallbackData.AdminCodeRole((int)UserRole.Admin)),
+                new InlineButton(RoleLabel(nameof(UserRole.Student)), CallbackData.AdminCodeRole((int)UserRole.Student)),
+                new InlineButton(RoleLabel(nameof(UserRole.Admin)), CallbackData.AdminCodeRole((int)UserRole.Admin)),
             },
             CancelRow(),
         };
-        await _telegram.EditKeyboardAsync(chatId, messageId, "New invite code.\nWhich role should it grant?", rows, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.AdminRolePicker), rows, ct);
     }
 
     private async Task ShowCodeExpiryPickerAsync(long chatId, UserRole role, int messageId, CancellationToken ct)
@@ -450,14 +458,14 @@ public sealed class AdminModule
         {
             new[]
             {
-                new InlineButton("1 day", CallbackData.AdminCodeExpiry((int)role, 1)),
-                new InlineButton("7 days", CallbackData.AdminCodeExpiry((int)role, 7)),
-                new InlineButton("30 days", CallbackData.AdminCodeExpiry((int)role, 30)),
+                new InlineButton(_text.Get(TextKeys.AdminExpiry1Day), CallbackData.AdminCodeExpiry((int)role, 1)),
+                new InlineButton(_text.Get(TextKeys.AdminExpiry7Days), CallbackData.AdminCodeExpiry((int)role, 7)),
+                new InlineButton(_text.Get(TextKeys.AdminExpiry30Days), CallbackData.AdminCodeExpiry((int)role, 30)),
             },
-            new[] { new InlineButton("Never", CallbackData.AdminCodeExpiry((int)role, 0)) },
+            new[] { new InlineButton(_text.Get(TextKeys.AdminExpiryNever), CallbackData.AdminCodeExpiry((int)role, 0)) },
             CancelRow(),
         };
-        await _telegram.EditKeyboardAsync(chatId, messageId, $"Role: {role}.\nWhen should the code expire?", rows, ct);
+        await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.AdminExpiryPicker, RoleLabel(role.ToString())), rows, ct);
     }
 
     private async Task CreateCodeAsync(long chatId, long telegramUserId, UserRole role, int days, int messageId, CancellationToken ct)
@@ -469,13 +477,15 @@ public sealed class AdminModule
             var result = await _sender.Send(new CreateInviteCodeCommand(telegramUserId, role, expiresInDays), ct);
             if (result.IsFailure)
             {
-                await _telegram.EditKeyboardAsync(chatId, messageId, result.Error.Message, NoKeyboard, ct);
+                await _telegram.EditKeyboardAsync(chatId, messageId, _text.Error(result.Error), NoKeyboard, ct);
                 return;
             }
 
             var code = result.Value;
-            var expiry = code.ExpiresAt is { } e ? $"expires {e:yyyy-MM-dd HH:mm} UTC" : "no expiry";
-            await _telegram.EditKeyboardAsync(chatId, messageId, $"Invite code created:\n\n{code.Code}\nRole: {code.Role}\n{expiry}", NoKeyboard, ct);
+            var expiry = code.ExpiresAt is { } e
+                ? _text.Get(TextKeys.AdminCodeExpires, e.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture))
+                : _text.Get(TextKeys.AdminCodeNoExpiry);
+            await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.AdminCodeCreated, code.Code, RoleLabel(code.Role.ToString()), expiry), NoKeyboard, ct);
         }
         catch (ValidationException ex)
         {
@@ -496,7 +506,7 @@ public sealed class AdminModule
             Flow = ConversationFlow.AdminSubjectAdd,
             Step = AdminStep.SubjectName,
         };
-        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "New subject.\nSend the subject name:", CancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.AdminNewSubjectPrompt), CancelRows(), ct);
     }
 
     private async Task AdvanceToSubjectDescriptionAsync(long chatId, ConversationState state, CancellationToken ct)
@@ -507,11 +517,11 @@ public sealed class AdminModule
         {
             new[]
             {
-                new InlineButton("Skip", CallbackData.AdminSubjectSkip),
-                new InlineButton("Cancel", CallbackData.AdminCancel),
+                new InlineButton(_text.Get(TextKeys.CommonSkip), CallbackData.AdminSubjectSkip),
+                new InlineButton(_text.Get(TextKeys.CommonCancel), CallbackData.AdminCancel),
             },
         };
-        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, "Send a description, or tap Skip.", rows, ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.AdminSubjectDescPrompt), rows, ct);
     }
 
     private async Task SkipSubjectDescriptionAsync(long chatId, long telegramUserId, CancellationToken ct)
@@ -536,11 +546,11 @@ public sealed class AdminModule
 
             if (result.IsFailure)
             {
-                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, result.Error.Message, ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Error(result.Error), ct);
                 return;
             }
 
-            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"Subject added: {result.Value.Name}.", ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.AdminSubjectAdded, result.Value.Name), ct);
         }
         catch (ValidationException ex)
         {
@@ -556,7 +566,7 @@ public sealed class AdminModule
         var detail = await _sender.Send(new GetSubjectDetailQuery(telegramUserId, subjectId), ct);
         if (detail.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, detail.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(detail.Error), ct);
             return;
         }
 
@@ -566,7 +576,7 @@ public sealed class AdminModule
             Step = AdminStep.SubjectNewName,
             SubjectId = subjectId,
         };
-        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, $"Rename \"{detail.Value.Name}\".\nSend the new name:", CancelRows(), ct);
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.AdminSubjectRenamePrompt, detail.Value.Name), CancelRows(), ct);
     }
 
     private async Task RenameSubjectAsync(long chatId, long telegramUserId, ConversationState state, string newName, CancellationToken ct)
@@ -576,7 +586,7 @@ public sealed class AdminModule
         var detail = await _sender.Send(new GetSubjectDetailQuery(telegramUserId, subjectId), ct);
         if (detail.IsFailure)
         {
-            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, detail.Error.Message, ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Error(detail.Error), ct);
             return;
         }
 
@@ -587,11 +597,11 @@ public sealed class AdminModule
 
             if (result.IsFailure)
             {
-                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, result.Error.Message, ct);
+                await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Error(result.Error), ct);
                 return;
             }
 
-            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"Subject renamed to {result.Value.Name}.", ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.AdminSubjectRenamed, result.Value.Name), ct);
         }
         catch (ValidationException ex)
         {
@@ -607,7 +617,7 @@ public sealed class AdminModule
         var detail = await _sender.Send(new GetSubjectDetailQuery(telegramUserId, subjectId), ct);
         if (detail.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, detail.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(detail.Error), ct);
             return;
         }
 
@@ -616,12 +626,14 @@ public sealed class AdminModule
             new UpdateSubjectCommand(telegramUserId, subjectId, d.Name, d.Description, !d.IsActive), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return;
         }
 
-        var state = result.Value.IsActive ? "activated" : "deactivated";
-        await _telegram.SendTextAsync(chatId, $"Subject {result.Value.Name} {state}.", ct);
+        var message = result.Value.IsActive
+            ? _text.Get(TextKeys.AdminSubjectActivated, result.Value.Name)
+            : _text.Get(TextKeys.AdminSubjectDeactivated, result.Value.Name);
+        await _telegram.SendTextAsync(chatId, message, ct);
         await ShowSubjectsAsync(chatId, telegramUserId, ct);
     }
 
@@ -632,13 +644,13 @@ public sealed class AdminModule
         var result = await _sender.Send(new GetUserProfileQuery(telegramUserId), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return false;
         }
 
         if (result.Value.Role != nameof(UserRole.Admin))
         {
-            await _telegram.SendTextAsync(chatId, AdminErrors.NotAdmin.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(AdminErrors.NotAdmin), ct);
             return false;
         }
 
@@ -669,107 +681,111 @@ public sealed class AdminModule
     private static int ParsePage(string[] parts, int index) =>
         parts.Length > index && int.TryParse(parts[index], out var page) && page > 0 ? page : 1;
 
-    private static string DisplayName(string? fullName, string? username)
+    private string RoleLabel(string roleName) => _text.Get(TextKeys.Role(roleName));
+
+    private string DisplayName(string? fullName, string? username)
     {
         if (!string.IsNullOrWhiteSpace(fullName))
         {
             return fullName!;
         }
 
-        return string.IsNullOrWhiteSpace(username) ? "(no name)" : "@" + username;
+        return string.IsNullOrWhiteSpace(username) ? _text.Get(TextKeys.AdminNoName) : "@" + username;
     }
 
-    private static string ValidationText(ValidationException ex) =>
-        "Invalid input:\n" + string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
+    private string ValidationText(ValidationException ex) =>
+        _text.Get(TextKeys.AdminValidation, string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage)));
 
-    private static readonly IReadOnlyList<IReadOnlyList<InlineButton>> NoKeyboard =
-        Array.Empty<IReadOnlyList<InlineButton>>();
-
-    private static List<IReadOnlyList<InlineButton>> CancelRows() => new()
+    private IReadOnlyList<IReadOnlyList<InlineButton>> CancelRows() => new List<IReadOnlyList<InlineButton>>
     {
         CancelRow(),
     };
 
-    private static IReadOnlyList<InlineButton> CancelRow() => new[]
+    private IReadOnlyList<InlineButton> CancelRow() => new[]
     {
-        new InlineButton("Cancel", CallbackData.AdminCancel),
+        new InlineButton(_text.Get(TextKeys.CommonCancel), CallbackData.AdminCancel),
     };
 
-    private static IReadOnlyList<InlineButton> MenuRow() => new[]
+    private IReadOnlyList<InlineButton> MenuRow() => new[]
     {
-        new InlineButton("⬅ Menu", CallbackData.AdminMenu),
+        new InlineButton(_text.Get(TextKeys.AdminBtnMenu), CallbackData.AdminMenu),
     };
 
     // --- Rendering --- //
 
-    private static string RenderUsers(AdminUsersPageDto page)
+    private string RenderUsers(AdminUsersPageDto page)
     {
         if (page.Items.Count == 0)
         {
-            return "Users\n\nNo users yet.";
+            return _text.Get(TextKeys.AdminUsersEmpty);
         }
 
         var lines = page.Items.Select((u, i) =>
         {
             var number = (page.Page - 1) * page.PageSize + i + 1;
             var name = DisplayName(u.FullName, u.Username);
-            return $"{number}. {name} — {u.Role} (tg:{u.TelegramUserId})";
+            return $"{number}. {name} — {RoleLabel(u.Role)} (tg:{u.TelegramUserId})";
         });
 
-        return $"Users ({page.TotalCount})\n\n{string.Join("\n", lines)}\n\nPage {page.Page}/{page.TotalPages}\nTap a user to change their role.";
+        return $"{_text.Get(TextKeys.AdminUsersTitle, page.TotalCount)}\n\n{string.Join("\n", lines)}\n\n" +
+            $"{_text.Get(TextKeys.CommonPage, page.Page, page.TotalPages)}\n{_text.Get(TextKeys.AdminUsersTap)}";
     }
 
-    private static string RenderInvites(IReadOnlyList<InviteCodeDto> codes)
+    private string RenderInvites(IReadOnlyList<InviteCodeDto> codes)
     {
         if (codes.Count == 0)
         {
-            return "Invite codes\n\nNo codes yet. Tap \"New code\" to create one.";
+            return _text.Get(TextKeys.AdminInvitesEmpty);
         }
 
         var lines = codes.Select((c, i) =>
         {
-            var status = c.IsUsed ? "used" : "available";
-            var expiry = c.ExpiresAt is { } e ? $", expires {e:yyyy-MM-dd}" : string.Empty;
-            return $"{i + 1}. {c.Code} — {c.Role}, {status}{expiry}";
+            var status = c.IsUsed ? _text.Get(TextKeys.AdminInviteUsed) : _text.Get(TextKeys.AdminInviteAvailable);
+            var expiry = c.ExpiresAt is { } e
+                ? _text.Get(TextKeys.AdminInviteExpires, e.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture))
+                : string.Empty;
+            return $"{i + 1}. {c.Code} — {RoleLabel(c.Role.ToString())}, {status}{expiry}";
         });
 
-        return $"Invite codes\n\n{string.Join("\n", lines)}";
+        return $"{_text.Get(TextKeys.AdminInvitesTitle)}\n\n{string.Join("\n", lines)}";
     }
 
-    private static string RenderSubjects(IReadOnlyList<EduTrack.Application.Studies.SubjectDto> subjects)
+    private string RenderSubjects(IReadOnlyList<EduTrack.Application.Studies.SubjectDto> subjects)
     {
         if (subjects.Count == 0)
         {
-            return "Subjects\n\nNo subjects yet. Tap \"New subject\" to add one.";
+            return _text.Get(TextKeys.AdminSubjectsEmpty);
         }
 
-        var lines = subjects.Select((s, i) => $"{i + 1}. {s.Name} — {(s.IsActive ? "active" : "inactive")}");
-        return $"Subjects\n\n{string.Join("\n", lines)}";
+        var lines = subjects.Select((s, i) =>
+            $"{i + 1}. {s.Name} — {(s.IsActive ? _text.Get(TextKeys.AdminSubjectActive) : _text.Get(TextKeys.AdminSubjectInactive))}");
+        return $"{_text.Get(TextKeys.AdminSubjectsTitle)}\n\n{string.Join("\n", lines)}";
     }
 
-    private static string RenderAudit(AuditLogPageDto page)
+    private string RenderAudit(AuditLogPageDto page)
     {
         if (page.Items.Count == 0)
         {
-            return "Audit log\n\nNo entries yet.";
+            return _text.Get(TextKeys.AdminAuditEmpty);
         }
 
         var lines = page.Items.Select(e =>
         {
-            var who = e.ActorName ?? "system";
+            var who = e.ActorName ?? _text.Get(TextKeys.AdminAuditSystem);
             return $"{e.CreatedAt:yyyy-MM-dd HH:mm} · {who}\n   {e.Action} {e.EntityType}";
         });
 
-        return $"Audit log ({page.TotalCount})\n\n{string.Join("\n", lines)}\n\nPage {page.Page}/{page.TotalPages}";
+        return $"{_text.Get(TextKeys.AdminAuditTitle, page.TotalCount)}\n\n{string.Join("\n", lines)}\n\n" +
+            $"{_text.Get(TextKeys.CommonPage, page.Page, page.TotalPages)}";
     }
 
-    private static string RenderStatus(SystemStatusDto s) =>
-        "System status\n\n" +
-        $"Users: {s.TotalUsers} (admins: {s.Admins}, students: {s.Students})\n" +
-        $"Subjects: {s.Subjects} (active: {s.ActiveSubjects})\n" +
-        $"Grades: {s.Grades}\n" +
-        $"Deadlines: {s.Assignments}\n" +
-        $"Invite codes: {s.InviteCodes} (available: {s.UnusedInviteCodes})\n" +
-        $"Audit entries: {s.AuditEntries}\n\n" +
-        $"As of {s.GeneratedAtUtc:yyyy-MM-dd HH:mm} UTC";
+    private string RenderStatus(SystemStatusDto s) =>
+        _text.Get(TextKeys.AdminStatusTitle) + "\n\n" +
+        _text.Get(TextKeys.AdminStatusUsers, s.TotalUsers, s.Admins, s.Students) + "\n" +
+        _text.Get(TextKeys.AdminStatusSubjects, s.Subjects, s.ActiveSubjects) + "\n" +
+        _text.Get(TextKeys.AdminStatusGrades, s.Grades) + "\n" +
+        _text.Get(TextKeys.AdminStatusDeadlines, s.Assignments) + "\n" +
+        _text.Get(TextKeys.AdminStatusInvites, s.InviteCodes, s.UnusedInviteCodes) + "\n" +
+        _text.Get(TextKeys.AdminStatusAudit, s.AuditEntries) + "\n\n" +
+        _text.Get(TextKeys.AdminStatusAsOf, s.GeneratedAtUtc.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture));
 }

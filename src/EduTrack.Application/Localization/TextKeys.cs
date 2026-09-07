@@ -117,6 +117,81 @@ public static class TextKeys
     public const string RemainingHours = "remaining.hours";
     public const string RemainingMinutes = "remaining.minutes";
 
+    // Roles
+    /// <summary>Resource key for a role label, e.g. role.admin.</summary>
+    public static string Role(string roleName) => $"role.{roleName.ToLowerInvariant()}";
+
+    // Admin
+    public const string AdminMenuTitle = "admin.menu_title";
+    public const string AdminBtnUsers = "admin.btn_users";
+    public const string AdminBtnInvites = "admin.btn_invites";
+    public const string AdminBtnSubjects = "admin.btn_subjects";
+    public const string AdminBtnAudit = "admin.btn_audit";
+    public const string AdminBtnStatus = "admin.btn_status";
+    public const string AdminBtnMenu = "admin.btn_menu";
+    public const string AdminBtnNewCode = "admin.btn_new_code";
+    public const string AdminBtnNewSubject = "admin.btn_new_subject";
+    public const string AdminBtnDeactivate = "admin.btn_deactivate";
+    public const string AdminBtnActivate = "admin.btn_activate";
+    public const string AdminAnnounceUsage = "admin.announce_usage";
+    public const string AdminAnnounceQueued = "admin.announce_queued";
+    public const string AdminRolePicker = "admin.role_picker";
+    public const string AdminExpiry1Day = "admin.expiry_1day";
+    public const string AdminExpiry7Days = "admin.expiry_7days";
+    public const string AdminExpiry30Days = "admin.expiry_30days";
+    public const string AdminExpiryNever = "admin.expiry_never";
+    public const string AdminExpiryPicker = "admin.expiry_picker";
+    public const string AdminCodeCreated = "admin.code_created";
+    public const string AdminCodeExpires = "admin.code_expires";
+    public const string AdminCodeNoExpiry = "admin.code_no_expiry";
+    public const string AdminRoleUpdated = "admin.role_updated";
+    public const string AdminNewSubjectPrompt = "admin.new_subject_prompt";
+    public const string AdminSubjectDescPrompt = "admin.subject_desc_prompt";
+    public const string AdminSubjectNameEmpty = "admin.subject_name_empty";
+    public const string AdminSubjectNewNameEmpty = "admin.subject_newname_empty";
+    public const string AdminSubjectAdded = "admin.subject_added";
+    public const string AdminSubjectRenamePrompt = "admin.subject_rename_prompt";
+    public const string AdminSubjectRenamed = "admin.subject_renamed";
+    public const string AdminSubjectActivated = "admin.subject_activated";
+    public const string AdminSubjectDeactivated = "admin.subject_deactivated";
+    public const string AdminValidation = "admin.validation";
+    public const string AdminNoName = "admin.no_name";
+    public const string AdminUsersEmpty = "admin.users_empty";
+    public const string AdminUsersTitle = "admin.users_title";
+    public const string AdminUsersTap = "admin.users_tap";
+    public const string AdminInvitesTitle = "admin.invites_title";
+    public const string AdminInvitesEmpty = "admin.invites_empty";
+    public const string AdminInviteUsed = "admin.invite_used";
+    public const string AdminInviteAvailable = "admin.invite_available";
+    public const string AdminInviteExpires = "admin.invite_expires";
+    public const string AdminSubjectsTitle = "admin.subjects_title";
+    public const string AdminSubjectsEmpty = "admin.subjects_empty";
+    public const string AdminSubjectActive = "admin.subject_active";
+    public const string AdminSubjectInactive = "admin.subject_inactive";
+    public const string AdminAuditEmpty = "admin.audit_empty";
+    public const string AdminAuditTitle = "admin.audit_title";
+    public const string AdminAuditSystem = "admin.audit_system";
+    public const string AdminStatusTitle = "admin.status_title";
+    public const string AdminStatusUsers = "admin.status_users";
+    public const string AdminStatusSubjects = "admin.status_subjects";
+    public const string AdminStatusGrades = "admin.status_grades";
+    public const string AdminStatusDeadlines = "admin.status_deadlines";
+    public const string AdminStatusInvites = "admin.status_invites";
+    public const string AdminStatusAudit = "admin.status_audit";
+    public const string AdminStatusAsOf = "admin.status_asof";
+
+    // Stats
+    public const string StatsTitle = "stats.title";
+    public const string StatsNoGrades = "stats.no_grades";
+    public const string StatsGpa = "stats.gpa";
+    public const string StatsWeek = "stats.week";
+    public const string StatsMonth = "stats.month";
+    public const string StatsBySubject = "stats.by_subject";
+    public const string StatsSubjectLine = "stats.subject_line";
+    public const string StatsNeedsAttention = "stats.needs_attention";
+    public const string StatsUpcoming = "stats.upcoming";
+    public const string StatsRecorded = "stats.recorded";
+
     /// <summary>Resource key for an assignment type label, e.g. type.homework.</summary>
     public static string Type(string typeName) => $"type.{typeName.ToLowerInvariant()}";
 

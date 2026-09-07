@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Text;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Studies.Queries.GetStudentStats;
 using EduTrack.Application.Studies.Stats;
 using EduTrack.Application.Abstractions.Telegram;
+using EduTrack.Bot.Web.Localization;
 using MediatR;
 
 namespace EduTrack.Bot.Web.Telegram;
@@ -12,11 +14,13 @@ public sealed class StatsModule
 {
     private readonly ISender _sender;
     private readonly ITelegramSender _telegram;
+    private readonly IUiText _text;
 
-    public StatsModule(ISender sender, ITelegramSender telegram)
+    public StatsModule(ISender sender, ITelegramSender telegram, IUiText text)
     {
         _sender = sender;
         _telegram = telegram;
+        _text = text;
     }
 
     public async Task ShowStatsAsync(long chatId, long telegramUserId, CancellationToken ct)
@@ -24,46 +28,49 @@ public sealed class StatsModule
         var result = await _sender.Send(new GetStudentStatsQuery(telegramUserId), ct);
         if (result.IsFailure)
         {
-            await _telegram.SendTextAsync(chatId, result.Error.Message, ct);
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
             return;
         }
 
         await _telegram.SendTextAsync(chatId, Render(result.Value), ct);
     }
 
-    private static string Render(StudentStatsDto s)
+    private string Render(StudentStatsDto s)
     {
+        var title = _text.Get(TextKeys.StatsTitle);
+
         if (s.TotalGrades == 0)
         {
-            return " Your stats\n\nNo grades yet. Add one with /grade_add.";
+            return $"{title}\n\n{_text.Get(TextKeys.StatsNoGrades)}";
         }
 
         var sb = new StringBuilder();
-        sb.Append(" Your stats\n\n");
-        sb.Append(CultureInfo.InvariantCulture, $"GPA (all time): {Avg(s.OverallGpa)}\n");
-        sb.Append(CultureInfo.InvariantCulture, $"This week: {Avg(s.WeekAverage)} ({s.WeekCount} grade(s))\n");
-        sb.Append(CultureInfo.InvariantCulture, $"This month: {Avg(s.MonthAverage)} ({s.MonthCount} grade(s))\n");
+        sb.Append(title).Append("\n\n");
+        sb.Append(_text.Get(TextKeys.StatsGpa, Avg(s.OverallGpa))).Append('\n');
+        sb.Append(_text.Get(TextKeys.StatsWeek, Avg(s.WeekAverage), s.WeekCount)).Append('\n');
+        sb.Append(_text.Get(TextKeys.StatsMonth, Avg(s.MonthAverage), s.MonthCount)).Append('\n');
 
         if (s.Subjects.Count > 0)
         {
-            sb.Append("\nBy subject:\n");
+            sb.Append('\n').Append(_text.Get(TextKeys.StatsBySubject)).Append('\n');
             foreach (var subject in s.Subjects)
             {
-                sb.Append(CultureInfo.InvariantCulture, $"• {subject.SubjectName}: {subject.Average:0.00} ({subject.Count})\n");
+                sb.Append(_text.Get(TextKeys.StatsSubjectLine, subject.SubjectName, Number(subject.Average), subject.Count)).Append('\n');
             }
         }
 
         if (s.WorstSubject is not null)
         {
-            sb.Append(CultureInfo.InvariantCulture, $"\nNeeds attention: {s.WorstSubject} ({Avg(s.WorstSubjectAverage)})\n");
+            sb.Append('\n').Append(_text.Get(TextKeys.StatsNeedsAttention, s.WorstSubject, Avg(s.WorstSubjectAverage))).Append('\n');
         }
 
-        sb.Append(CultureInfo.InvariantCulture, $"Upcoming deadlines: {s.UpcomingDeadlines}\n");
-        sb.Append(CultureInfo.InvariantCulture, $"Grades recorded: {s.TotalGrades}");
+        sb.Append(_text.Get(TextKeys.StatsUpcoming, s.UpcomingDeadlines)).Append('\n');
+        sb.Append(_text.Get(TextKeys.StatsRecorded, s.TotalGrades));
 
         return sb.ToString();
     }
 
-    private static string Avg(double? value) =>
-        value is { } v ? v.ToString("0.00", CultureInfo.InvariantCulture) : "—";
+    private static string Avg(double? value) => value is { } v ? Number(v) : "—";
+
+    private static string Number(double value) => value.ToString("0.00", CultureInfo.InvariantCulture);
 }
