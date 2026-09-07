@@ -1,5 +1,6 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Notifications;
 using EduTrack.Application.Reminders;
 using EduTrack.Domain.Reminders;
@@ -19,17 +20,20 @@ public sealed class SendDueRemindersJob : IJob
     private readonly IApplicationDbContext _db;
     private readonly IDateTimeProvider _clock;
     private readonly SchedulingOptions _options;
+    private readonly ITranslator _translator;
     private readonly ILogger<SendDueRemindersJob> _logger;
 
     public SendDueRemindersJob(
         IApplicationDbContext db,
         IDateTimeProvider clock,
         IOptions<SchedulingOptions> options,
+        ITranslator translator,
         ILogger<SendDueRemindersJob> logger)
     {
         _db = db;
         _clock = clock;
         _options = options.Value;
+        _translator = translator;
         _logger = logger;
     }
 
@@ -45,7 +49,7 @@ public sealed class SendDueRemindersJob : IJob
             join s in _db.Subjects on a.SubjectId equals s.Id
             join u in _db.Users on r.UserId equals u.Id
             orderby r.SendAtUtc
-            select new DueReminder(r, s.Name, a.Title, a.DueAtUtc, u.TimeZone))
+            select new DueReminder(r, s.Name, a.Title, a.DueAtUtc, u.TimeZone, u.Language))
             .Take(batchSize)
             .ToListAsync(context.CancellationToken);
 
@@ -57,7 +61,7 @@ public sealed class SendDueRemindersJob : IJob
         foreach (var item in due)
         {
             var (type, title, body) = ReminderNotification.Build(
-                item.Reminder.Kind, item.SubjectName, item.AssignmentTitle, item.DueAtUtc, item.TimeZone);
+                _translator, item.Reminder.Kind, item.SubjectName, item.AssignmentTitle, item.DueAtUtc, item.TimeZone, item.Language);
 
             OutboxWriter.Enqueue(_db, new UserNotificationRequested(
                 Guid.NewGuid(),
@@ -81,5 +85,6 @@ public sealed class SendDueRemindersJob : IJob
         string SubjectName,
         string AssignmentTitle,
         DateTime DueAtUtc,
-        string? TimeZone);
+        string? TimeZone,
+        string? Language);
 }

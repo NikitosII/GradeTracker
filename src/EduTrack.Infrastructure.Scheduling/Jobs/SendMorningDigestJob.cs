@@ -1,5 +1,6 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Notifications;
 using EduTrack.Application.Reminders.Digests;
 using EduTrack.Domain.Notifications;
@@ -20,6 +21,7 @@ public sealed class SendMorningDigestJob : IJob
     private readonly IMorningDigestComposer _composer;
     private readonly IDateTimeProvider _clock;
     private readonly NotificationOptions _notifications;
+    private readonly ITranslator _translator;
     private readonly ILogger<SendMorningDigestJob> _logger;
 
     public SendMorningDigestJob(
@@ -27,12 +29,14 @@ public sealed class SendMorningDigestJob : IJob
         IMorningDigestComposer composer,
         IDateTimeProvider clock,
         IOptions<NotificationOptions> notifications,
+        ITranslator translator,
         ILogger<SendMorningDigestJob> logger)
     {
         _db = db;
         _composer = composer;
         _clock = clock;
         _notifications = notifications.Value;
+        _translator = translator;
         _logger = logger;
     }
 
@@ -79,11 +83,13 @@ public sealed class SendMorningDigestJob : IJob
                 continue;
             }
 
+            var title = _translator.Find(user.Language, TextKeys.NotifyDigestTitle) ?? "Good morning!";
+
             OutboxWriter.Enqueue(_db, new UserNotificationRequested(
                 Guid.NewGuid(),
                 user.Id,
                 NotificationType.MorningDigest,
-                "Good morning!",
+                title,
                 body,
                 Important: false), now);
 

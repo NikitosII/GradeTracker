@@ -1,6 +1,7 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Notifications;
 using EduTrack.Domain.Audit;
 using EduTrack.Domain.Common;
@@ -13,11 +14,13 @@ internal sealed class SendAnnouncementCommandHandler : ICommandHandler<SendAnnou
 {
     private readonly IApplicationDbContext _db;
     private readonly IDateTimeProvider _clock;
+    private readonly ITranslator _translator;
 
-    public SendAnnouncementCommandHandler(IApplicationDbContext db, IDateTimeProvider clock)
+    public SendAnnouncementCommandHandler(IApplicationDbContext db, IDateTimeProvider clock, ITranslator translator)
     {
         _db = db;
         _clock = clock;
+        _translator = translator;
     }
 
     public async Task<Result<int>> Handle(SendAnnouncementCommand request, CancellationToken cancellationToken)
@@ -31,18 +34,20 @@ internal sealed class SendAnnouncementCommandHandler : ICommandHandler<SendAnnou
         var now = _clock.UtcNow;
         var text = request.Text.Trim();
 
-        var recipientIds = await _db.Users
+        var recipients = await _db.Users
             .AsNoTracking()
-            .Select(u => u.Id)
+            .Select(u => new { u.Id, u.Language })
             .ToListAsync(cancellationToken);
 
-        foreach (var userId in recipientIds)
+        foreach (var recipient in recipients)
         {
+            var title = _translator.Find(recipient.Language, TextKeys.NotifyAnnouncementTitle) ?? "Announcement";
+
             OutboxWriter.Enqueue(_db, new UserNotificationRequested(
                 Guid.NewGuid(),
-                userId,
+                recipient.Id,
                 NotificationType.SystemAnnouncement,
-                "Announcement",
+                title,
                 text,
                 Important: false), now);
         }
@@ -53,11 +58,11 @@ internal sealed class SendAnnouncementCommandHandler : ICommandHandler<SendAnnou
             AuditEntities.Announcement,
             null,
             oldValue: null,
-            newValue: $"{recipientIds.Count} recipients",
+            newValue: $"{recipients.Count} recipients",
             now));
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(recipientIds.Count);
+        return Result.Success(recipients.Count);
     }
 }

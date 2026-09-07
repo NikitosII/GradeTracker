@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using EduTrack.Application.Abstractions.Persistence;
+using EduTrack.Application.Localization;
 using EduTrack.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +10,12 @@ namespace EduTrack.Application.Reminders.Digests;
 internal sealed class MorningDigestComposer : IMorningDigestComposer
 {
     private readonly IApplicationDbContext _db;
+    private readonly ITranslator _translator;
 
-    public MorningDigestComposer(IApplicationDbContext db)
+    public MorningDigestComposer(IApplicationDbContext db, ITranslator translator)
     {
         _db = db;
+        _translator = translator;
     }
 
     public async Task<string?> ComposeAsync(User user, DateTime nowUtc, CancellationToken cancellationToken)
@@ -42,12 +45,13 @@ internal sealed class MorningDigestComposer : IMorningDigestComposer
             return null;
         }
 
+        var language = user.Language;
         var body = new StringBuilder();
 
-        body.Append("Today:");
+        body.Append(T(language, TextKeys.DigestToday));
         if (today.Count == 0)
         {
-            body.Append("\nNo deadlines due today.");
+            body.Append('\n').Append(T(language, TextKeys.DigestNoDeadlines));
         }
         else
         {
@@ -62,7 +66,7 @@ internal sealed class MorningDigestComposer : IMorningDigestComposer
 
         if (averages.Count > 0)
         {
-            body.Append("\n\nAverage score:");
+            body.Append("\n\n").Append(T(language, TextKeys.DigestAverage));
             foreach (var avg in averages)
             {
                 body.Append(CultureInfo.InvariantCulture, $"\n{avg.Subject}: {avg.Average:0.0}");
@@ -71,6 +75,8 @@ internal sealed class MorningDigestComposer : IMorningDigestComposer
 
         return body.ToString();
     }
+
+    private string T(string? language, string key) => _translator.Find(language, key) ?? key;
 
     private static TimeZoneInfo ResolveTimeZone(string? timeZoneId)
     {

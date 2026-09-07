@@ -1,6 +1,7 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Notifications;
 using EduTrack.Domain.Audit;
 using EduTrack.Domain.Common;
@@ -13,11 +14,13 @@ internal sealed class ChangeUserRoleCommandHandler : ICommandHandler<ChangeUserR
 {
     private readonly IApplicationDbContext _db;
     private readonly IDateTimeProvider _clock;
+    private readonly ITranslator _translator;
 
-    public ChangeUserRoleCommandHandler(IApplicationDbContext db, IDateTimeProvider clock)
+    public ChangeUserRoleCommandHandler(IApplicationDbContext db, IDateTimeProvider clock, ITranslator translator)
     {
         _db = db;
         _clock = clock;
+        _translator = translator;
     }
 
     public async Task<Result<AdminUserDto>> Handle(ChangeUserRoleCommand request, CancellationToken cancellationToken)
@@ -57,12 +60,17 @@ internal sealed class ChangeUserRoleCommandHandler : ICommandHandler<ChangeUserR
                 newValue: request.NewRole.ToString(),
                 now));
 
+            var roleLabel = _translator.Find(target.Language, TextKeys.Role(request.NewRole.ToString())) ?? request.NewRole.ToString();
+            var title = _translator.Find(target.Language, TextKeys.NotifyRoleChangedTitle) ?? "Your account was updated";
+            var body = _translator.Find(target.Language, TextKeys.NotifyRoleChangedBody, roleLabel)
+                ?? $"An administrator changed your role to {request.NewRole}.";
+
             OutboxWriter.Enqueue(_db, new UserNotificationRequested(
                 Guid.NewGuid(),
                 target.Id,
                 NotificationType.AdminDataChange,
-                "Your account was updated",
-                $"An administrator changed your role to {request.NewRole}.",
+                title,
+                body,
                 Important: true), now);
 
             await _db.SaveChangesAsync(cancellationToken);

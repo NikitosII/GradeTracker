@@ -688,4 +688,45 @@ No entries yet.</value>
   <data name="stats.recorded" xml:space="preserve">
     <value>Grades recorded: {0}</value>
   </data>
+  <data name="notify.reminder_24h_title" xml:space="preserve">
+    <value>Deadline in 24 hours</value>
+  </data>
+  <data name="notify.reminder_2h_title" xml:space="preserve">
+    <value>Deadline in 2 hours</value>
+  </data>
+  <data name="notify.reminder_overdue_title" xml:space="preserve">
+    <value>Deadline passed</value>
+  </data>
+  <data name="notify.reminder_title" xml:space="preserve">
+    <value>Deadline reminder</value>
+  </data>
+  <data name="notify.reminder_due_body" xml:space="preserve">
+    <value>{0} - {1}
+Due {2}.</value>
+  </data>
+  <data name="notify.reminder_overdue_body" xml:space="preserve">
+    <value>{0} - {1}
+Was due {2}.</value>
+  </data>
+  <data name="notify.digest_title" xml:space="preserve">
+    <value>Good morning!</value>
+  </data>
+  <data name="notify.role_changed_title" xml:space="preserve">
+    <value>Your account was updated</value>
+  </data>
+  <data name="notify.role_changed_body" xml:space="preserve">
+    <value>An administrator changed your role to {0}.</value>
+  </data>
+  <data name="notify.announcement_title" xml:space="preserve">
+    <value>Announcement</value>
+  </data>
+  <data name="digest.today" xml:space="preserve">
+    <value>Today:</value>
+  </data>
+  <data name="digest.no_deadlines" xml:space="preserve">
+    <value>No deadlines due today.</value>
+  </data>
+  <data name="digest.average" xml:space="preserve">
+    <value>Average score:</value>
+  </data>
 </root>

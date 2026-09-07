@@ -192,6 +192,21 @@ public static class TextKeys
     public const string StatsUpcoming = "stats.upcoming";
     public const string StatsRecorded = "stats.recorded";
 
+    // Notifications, reminders, digest
+    public const string NotifyReminder24hTitle = "notify.reminder_24h_title";
+    public const string NotifyReminder2hTitle = "notify.reminder_2h_title";
+    public const string NotifyReminderOverdueTitle = "notify.reminder_overdue_title";
+    public const string NotifyReminderTitle = "notify.reminder_title";
+    public const string NotifyReminderDueBody = "notify.reminder_due_body";
+    public const string NotifyReminderOverdueBody = "notify.reminder_overdue_body";
+    public const string NotifyDigestTitle = "notify.digest_title";
+    public const string NotifyRoleChangedTitle = "notify.role_changed_title";
+    public const string NotifyRoleChangedBody = "notify.role_changed_body";
+    public const string NotifyAnnouncementTitle = "notify.announcement_title";
+    public const string DigestToday = "digest.today";
+    public const string DigestNoDeadlines = "digest.no_deadlines";
+    public const string DigestAverage = "digest.average";
+
     /// <summary>Resource key for an assignment type label, e.g. type.homework.</summary>
     public static string Type(string typeName) => $"type.{typeName.ToLowerInvariant()}";
 

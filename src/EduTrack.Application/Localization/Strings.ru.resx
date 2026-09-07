@@ -688,4 +688,45 @@
   <data name="stats.recorded" xml:space="preserve">
     <value>Всего оценок: {0}</value>
   </data>
+  <data name="notify.reminder_24h_title" xml:space="preserve">
+    <value>Дедлайн через 24 часа</value>
+  </data>
+  <data name="notify.reminder_2h_title" xml:space="preserve">
+    <value>Дедлайн через 2 часа</value>
+  </data>
+  <data name="notify.reminder_overdue_title" xml:space="preserve">
+    <value>Дедлайн прошёл</value>
+  </data>
+  <data name="notify.reminder_title" xml:space="preserve">
+    <value>Напоминание о дедлайне</value>
+  </data>
+  <data name="notify.reminder_due_body" xml:space="preserve">
+    <value>{0} — {1}
+Срок: {2}.</value>
+  </data>
+  <data name="notify.reminder_overdue_body" xml:space="preserve">
+    <value>{0} — {1}
+Был срок: {2}.</value>
+  </data>
+  <data name="notify.digest_title" xml:space="preserve">
+    <value>Доброе утро!</value>
+  </data>
+  <data name="notify.role_changed_title" xml:space="preserve">
+    <value>Ваш аккаунт обновлён</value>
+  </data>
+  <data name="notify.role_changed_body" xml:space="preserve">
+    <value>Администратор изменил вашу роль на {0}.</value>
+  </data>
+  <data name="notify.announcement_title" xml:space="preserve">
+    <value>Объявление</value>
+  </data>
+  <data name="digest.today" xml:space="preserve">
+    <value>Сегодня:</value>
+  </data>
+  <data name="digest.no_deadlines" xml:space="preserve">
+    <value>На сегодня дедлайнов нет.</value>
+  </data>
+  <data name="digest.average" xml:space="preserve">
+    <value>Средний балл:</value>
+  </data>
 </root>
