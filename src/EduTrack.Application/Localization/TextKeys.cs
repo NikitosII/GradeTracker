@@ -192,6 +192,12 @@ public static class TextKeys
     public const string StatsUpcoming = "stats.upcoming";
     public const string StatsRecorded = "stats.recorded";
 
+    // Validation
+    public const string ValidTimeZone = "valid.timezone";
+    public const string ValidLanguage = "valid.language";
+    public const string ValidQuietHours = "valid.quiet_hours";
+    public const string ValidBindCode = "valid.bind_code";
+
     // Notifications, reminders, digest
     public const string NotifyReminder24hTitle = "notify.reminder_24h_title";
     public const string NotifyReminder2hTitle = "notify.reminder_2h_title";

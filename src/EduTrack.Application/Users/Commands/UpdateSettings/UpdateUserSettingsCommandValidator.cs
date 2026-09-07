@@ -1,3 +1,4 @@
+using EduTrack.Application.Localization;
 using FluentValidation;
 
 namespace EduTrack.Application.Users.Commands.UpdateSettings;
@@ -15,11 +16,13 @@ public sealed class UpdateUserSettingsCommandValidator : AbstractValidator<Updat
             .NotEmpty()
             .MaximumLength(64)
             .Must(BeAValidTimeZone)
-            .WithMessage("Unknown time zone.");
+            .WithMessage("Unknown time zone.")
+            .WithErrorCode(TextKeys.ValidTimeZone);
 
         RuleFor(x => x.Language)
             .Must(lang => SupportedLanguages.Contains(lang))
-            .WithMessage("Language must be one of: ru, en.");
+            .WithMessage("Language must be one of: ru, en.")
+            .WithErrorCode(TextKeys.ValidLanguage);
 
         RuleFor(x => x.QuietHoursStart)
             .InclusiveBetween(0, 23)
@@ -31,7 +34,8 @@ public sealed class UpdateUserSettingsCommandValidator : AbstractValidator<Updat
 
         RuleFor(x => x)
             .Must(x => x.QuietHoursStart is null == (x.QuietHoursEnd is null))
-            .WithMessage("Quiet hours start and end must both be set or both be cleared.");
+            .WithMessage("Quiet hours start and end must both be set or both be cleared.")
+            .WithErrorCode(TextKeys.ValidQuietHours);
     }
 
     private static bool BeAValidTimeZone(string timeZoneId)

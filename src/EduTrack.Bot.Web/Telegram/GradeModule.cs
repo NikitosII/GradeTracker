@@ -401,8 +401,7 @@ public sealed class GradeModule
         }
         catch (ValidationException ex)
         {
-            var details = string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
-            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.GradeCouldNotSave, details), ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.GradeCouldNotSave, _text.ValidationDetails(ex)), ct);
             return;
         }
 

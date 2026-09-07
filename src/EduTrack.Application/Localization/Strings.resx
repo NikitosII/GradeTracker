@@ -729,4 +729,16 @@ Was due {2}.</value>
   <data name="digest.average" xml:space="preserve">
     <value>Average score:</value>
   </data>
+  <data name="valid.timezone" xml:space="preserve">
+    <value>Unknown time zone.</value>
+  </data>
+  <data name="valid.language" xml:space="preserve">
+    <value>Language must be one of: ru, en.</value>
+  </data>
+  <data name="valid.quiet_hours" xml:space="preserve">
+    <value>Quiet hours start and end must both be set or both be cleared.</value>
+  </data>
+  <data name="valid.bind_code" xml:space="preserve">
+    <value>The code may contain only letters, digits, '-' and '_'.</value>
+  </data>
 </root>

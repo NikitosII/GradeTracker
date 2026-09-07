@@ -414,8 +414,7 @@ public sealed class DeadlineModule
         }
         catch (ValidationException ex)
         {
-            var details = string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
-            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineCouldNotSave, details), ct);
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineCouldNotSave, _text.ValidationDetails(ex)), ct);
             return;
         }
 

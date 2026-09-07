@@ -163,7 +163,7 @@ public sealed class SettingsModule
         }
         catch (ValidationException ex)
         {
-            await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.SettingsInvalid, Details(ex)), NoKeyboard, ct);
+            await _telegram.EditKeyboardAsync(chatId, messageId, _text.Get(TextKeys.SettingsInvalid, _text.ValidationDetails(ex)), NoKeyboard, ct);
         }
     }
 
@@ -272,7 +272,4 @@ public sealed class SettingsModule
         s.QuietHoursStart is { } start && s.QuietHoursEnd is { } end ? FormatQuiet(start, end) : _text.Get(TextKeys.SettingsQuietOff);
 
     private static string FormatQuiet(int start, int end) => $"{start:00}:00–{end:00}:00";
-
-    private static string Details(ValidationException ex) =>
-        string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
 }

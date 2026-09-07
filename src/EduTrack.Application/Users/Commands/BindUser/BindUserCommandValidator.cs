@@ -1,3 +1,4 @@
+using EduTrack.Application.Localization;
 using FluentValidation;
 
 namespace EduTrack.Application.Users.Commands.BindUser;
@@ -13,6 +14,7 @@ public sealed class BindUserCommandValidator : AbstractValidator<BindUserCommand
             .NotEmpty()
             .MaximumLength(64)
             .Matches("^[A-Za-z0-9_-]+$")
-            .WithMessage("The code may contain only letters, digits, '-' and '_'.");
+            .WithMessage("The code may contain only letters, digits, '-' and '_'.")
+            .WithErrorCode(TextKeys.ValidBindCode);
     }
 }

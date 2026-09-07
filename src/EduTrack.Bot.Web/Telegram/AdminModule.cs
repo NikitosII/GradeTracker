@@ -694,7 +694,7 @@ public sealed class AdminModule
     }
 
     private string ValidationText(ValidationException ex) =>
-        _text.Get(TextKeys.AdminValidation, string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage)));
+        _text.Get(TextKeys.AdminValidation, _text.ValidationDetails(ex));
 
     private IReadOnlyList<IReadOnlyList<InlineButton>> CancelRows() => new List<IReadOnlyList<InlineButton>>
     {

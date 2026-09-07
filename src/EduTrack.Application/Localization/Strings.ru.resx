@@ -729,4 +729,16 @@
   <data name="digest.average" xml:space="preserve">
     <value>Средний балл:</value>
   </data>
+  <data name="valid.timezone" xml:space="preserve">
+    <value>Неизвестный часовой пояс.</value>
+  </data>
+  <data name="valid.language" xml:space="preserve">
+    <value>Язык должен быть одним из: ru, en.</value>
+  </data>
+  <data name="valid.quiet_hours" xml:space="preserve">
+    <value>Начало и конец тихих часов должны быть либо оба заданы, либо оба очищены.</value>
+  </data>
+  <data name="valid.bind_code" xml:space="preserve">
+    <value>Код может содержать только буквы, цифры, «-» и «_».</value>
+  </data>
 </root>

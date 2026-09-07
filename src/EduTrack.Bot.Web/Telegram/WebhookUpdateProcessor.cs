@@ -120,6 +120,20 @@ public sealed class WebhookUpdateProcessor
         _language.Language = profile is { IsSuccess: true }
             ? Normalize(profile.Value.Language)
             : Normalize(from.LanguageCode);
+
+        // Only the UI culture, so FluentValidation's built-in messages localize        System.Globalization.CultureInfo.CurrentUICulture = ResolveUiCulture(_language.Language);
+    }
+
+    private static System.Globalization.CultureInfo ResolveUiCulture(string language)
+    {
+        try
+        {
+            return System.Globalization.CultureInfo.GetCultureInfo(language);
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        {
+            return System.Globalization.CultureInfo.InvariantCulture;
+        }
     }
 
     private static string Normalize(string? code)
@@ -319,8 +333,7 @@ public sealed class WebhookUpdateProcessor
         }
         catch (ValidationException ex)
         {
-            var details = string.Join("\n", ex.Errors.Select(e => "- " + e.ErrorMessage));
-            return _text.Get(TextKeys.BindInvalid, details);
+            return _text.Get(TextKeys.BindInvalid, _text.ValidationDetails(ex));
         }
 
         return result.IsSuccess
