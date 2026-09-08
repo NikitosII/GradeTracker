@@ -1,5 +1,6 @@
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Common.Messaging;
+using EduTrack.Application.Studies.Stats;
 using EduTrack.Application.Users;
 using EduTrack.Domain.Common;
 using Microsoft.EntityFrameworkCore;
@@ -40,10 +41,13 @@ internal sealed class GetOwnGradesQueryHandler : IQueryHandler<GetOwnGradesQuery
             owned = owned.Where(g => g.SubjectId == subjectId);
         }
 
-        var totalCount = await owned.CountAsync(cancellationToken);
-        double? average = totalCount == 0
-            ? null
-            : Math.Round(await owned.AverageAsync(g => (double)g.Value, cancellationToken), 2);
+        // Weighted GPA, consistent with /stats and the digest.
+        var weights = await owned
+            .Select(g => new { g.Value, g.Weight })
+            .ToListAsync(cancellationToken);
+
+        var totalCount = weights.Count;
+        var average = GpaCalculator.WeightedAverage(weights.Select(w => (w.Value, w.Weight)));
 
         var items = await (
                 from g in owned

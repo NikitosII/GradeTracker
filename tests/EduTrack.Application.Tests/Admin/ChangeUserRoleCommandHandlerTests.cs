@@ -1,5 +1,6 @@
 using EduTrack.Application.Admin;
 using EduTrack.Application.Admin.Commands.ChangeUserRole;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Tests.TestSupport;
 using EduTrack.Domain.Users;
 using FluentAssertions;
@@ -12,7 +13,7 @@ public class ChangeUserRoleCommandHandlerTests
     private static readonly DateTime Now = new(2026, 8, 23, 12, 0, 0, DateTimeKind.Utc);
     private readonly TestApplicationDbContext _db = TestApplicationDbContext.CreateInMemory();
 
-    private ChangeUserRoleCommandHandler CreateSut() => new(_db, new FixedClock(Now));
+    private ChangeUserRoleCommandHandler CreateSut() => new(_db, new FixedClock(Now), new ResxTranslator());
 
     private async Task<(User admin, User student)> SeedAsync()
     {

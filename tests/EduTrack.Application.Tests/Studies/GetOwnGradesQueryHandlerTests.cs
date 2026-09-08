@@ -46,6 +46,25 @@ public class GetOwnGradesQueryHandlerTests
     }
 
     [Fact]
+    public async Task Average_is_weighted_by_grade_weight()
+    {
+        var user = User.Register(101, "bob", "Bob", null, UserRole.Student, Now);
+        var subject = Subject.Create("Physics", null, Now);
+        _db.Users.Add(user);
+        _db.Subjects.Add(subject);
+
+        // (5*3 + 3*1) / (3+1) = 18/4 = 4.5  (unweighted mean would be 4.0).
+        _db.Grades.Add(Grade.Add(user.Id, subject.Id, 5, 3m, null, Now.AddDays(1), user.Id, Now));
+        _db.Grades.Add(Grade.Add(user.Id, subject.Id, 3, 1m, null, Now.AddDays(2), user.Id, Now));
+        await _db.SaveChangesAsync();
+
+        var result = await CreateSut().Handle(
+            new GetOwnGradesQuery(101, subject.Id), CancellationToken.None);
+
+        result.Value.Average.Should().Be(4.5);
+    }
+
+    [Fact]
     public async Task Fails_when_user_not_bound()
     {
         var result = await CreateSut().Handle(

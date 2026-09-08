@@ -73,6 +73,7 @@ public sealed class WebhookUpdateProcessor
         try
         {
             await ResolveLanguageAsync(update, cancellationToken);
+            System.Globalization.CultureInfo.CurrentUICulture = ResolveUiCulture(_language.Language);
 
             if (update.CallbackQuery is { } callback)
             {
@@ -120,8 +121,6 @@ public sealed class WebhookUpdateProcessor
         _language.Language = profile is { IsSuccess: true }
             ? Normalize(profile.Value.Language)
             : Normalize(from.LanguageCode);
-
-        // Only the UI culture, so FluentValidation's built-in messages localize        System.Globalization.CultureInfo.CurrentUICulture = ResolveUiCulture(_language.Language);
     }
 
     private static System.Globalization.CultureInfo ResolveUiCulture(string language)

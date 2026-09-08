@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using EduTrack.Application.Abstractions.Persistence;
 using EduTrack.Application.Localization;
+using EduTrack.Application.Studies.Stats;
 using EduTrack.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,13 +33,22 @@ internal sealed class MorningDigestComposer : IMorningDigestComposer
             orderby a.DueAtUtc
             select new { s.Name, a.Title, a.DueAtUtc }).ToListAsync(cancellationToken);
 
-        var averages = await (
+        // Weighted GPA (spec §22.1), consistent with /grades and /stats.
+        var gradeRows = await (
             from g in _db.Grades.AsNoTracking()
             join s in _db.Subjects.AsNoTracking() on g.SubjectId equals s.Id
             where g.StudentUserId == user.Id
-            group g.Value by s.Name into bySubject
-            orderby bySubject.Key
-            select new { Subject = bySubject.Key, Average = bySubject.Average() }).ToListAsync(cancellationToken);
+            select new { Subject = s.Name, g.Value, g.Weight }).ToListAsync(cancellationToken);
+
+        var averages = gradeRows
+            .GroupBy(r => r.Subject)
+            .OrderBy(grp => grp.Key)
+            .Select(grp => new
+            {
+                Subject = grp.Key,
+                Average = GpaCalculator.WeightedAverage(grp.Select(r => (r.Value, r.Weight))) ?? 0,
+            })
+            .ToList();
 
         if (today.Count == 0 && averages.Count == 0)
         {

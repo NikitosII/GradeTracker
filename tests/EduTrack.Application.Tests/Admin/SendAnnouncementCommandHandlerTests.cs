@@ -1,5 +1,6 @@
 using EduTrack.Application.Admin;
 using EduTrack.Application.Admin.Commands.SendAnnouncement;
+using EduTrack.Application.Localization;
 using EduTrack.Application.Notifications;
 using EduTrack.Application.Tests.TestSupport;
 using EduTrack.Domain.Users;
@@ -13,7 +14,7 @@ public class SendAnnouncementCommandHandlerTests
     private static readonly DateTime Now = new(2026, 8, 23, 12, 0, 0, DateTimeKind.Utc);
     private readonly TestApplicationDbContext _db = TestApplicationDbContext.CreateInMemory();
 
-    private SendAnnouncementCommandHandler CreateSut() => new(_db, new FixedClock(Now));
+    private SendAnnouncementCommandHandler CreateSut() => new(_db, new FixedClock(Now), new ResxTranslator());
 
     [Fact]
     public async Task Queues_one_outbox_message_per_user_and_audits()
