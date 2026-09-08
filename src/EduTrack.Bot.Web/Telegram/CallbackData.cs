@@ -37,6 +37,12 @@ public static class CallbackData
     public const string DeadlineWizardConfirm = "dw:ok";
     public const string DeadlineWizardCancel = "dw:x";
 
+    public const string DeadlineWizardRepeatOnce = "dw:rep:none";
+
+    public static string DeadlineWizardRepeat(int frequency) => $"dw:rep:{frequency}";
+
+    public static string DeadlineWizardCount(int count) => $"dw:cnt:{count}";
+
     // --- Admin --- //
 
     public const string AdminViewNamespace = "av";

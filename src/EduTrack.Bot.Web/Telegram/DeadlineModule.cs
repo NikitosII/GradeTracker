@@ -4,6 +4,7 @@ using EduTrack.Application.Common.Time;
 using EduTrack.Application.Localization;
 using EduTrack.Application.Studies;
 using EduTrack.Application.Studies.Commands.CreateOwnAssignment;
+using EduTrack.Application.Studies.Commands.CreateRecurringAssignment;
 using EduTrack.Application.Studies.Commands.UpdateOwnAssignment;
 using EduTrack.Application.Studies.Queries.ExportCalendar;
 using EduTrack.Application.Studies.Queries.GetOwnAssignments;
@@ -187,7 +188,7 @@ public sealed class DeadlineModule
 
             case DeadlineStep.Due when TryParseDue(text, out var due):
                 state.DueAtUtc = due;
-                await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
+                await AfterDueAsync(chatId, telegramUserId, state, ct);
                 return true;
 
             case DeadlineStep.Due:
@@ -280,6 +281,23 @@ public sealed class DeadlineModule
             case "skip" when state.Step == DeadlineStep.Description:
                 state.Description = null;
                 await AdvanceToDueAsync(chatId, state, ct);
+                break;
+
+            case "rep" when state.Step == DeadlineStep.Repeat && parts.Length >= 3 && parts[2] == "none":
+                state.RecurrenceFrequency = null;
+                state.RecurrenceCount = null;
+                await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
+                break;
+
+            case "rep" when state.Step == DeadlineStep.Repeat && parts.Length >= 3
+                && int.TryParse(parts[2], out var freq) && Enum.IsDefined(typeof(RecurrenceFrequency), freq):
+                state.RecurrenceFrequency = freq;
+                await AdvanceToCountAsync(chatId, state, ct);
+                break;
+
+            case "cnt" when state.Step == DeadlineStep.Count && parts.Length >= 3 && int.TryParse(parts[2], out var count):
+                state.RecurrenceCount = count;
+                await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
                 break;
 
             case "ok" when state.Step == DeadlineStep.Confirm:
@@ -375,6 +393,47 @@ public sealed class DeadlineModule
         await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineSendDue), CancelRows(), ct);
     }
 
+    /// <summary>After the due date: the add wizard offers recurrence; edit goes straight to confirm.</summary>
+    private async Task AfterDueAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
+    {
+        if (state.Flow == ConversationFlow.DeadlineEdit)
+        {
+            await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
+            return;
+        }
+
+        await AdvanceToRepeatAsync(chatId, state, ct);
+    }
+
+    private async Task AdvanceToRepeatAsync(long chatId, ConversationState state, CancellationToken ct)
+    {
+        state.Step = DeadlineStep.Repeat;
+
+        var rows = new List<IReadOnlyList<InlineButton>>
+        {
+            new[] { new InlineButton(_text.Get(TextKeys.DeadlineRepeatOnce), CallbackData.DeadlineWizardRepeatOnce) },
+            new[]
+            {
+                new InlineButton(_text.Get(TextKeys.RecurrenceDaily), CallbackData.DeadlineWizardRepeat((int)RecurrenceFrequency.Daily)),
+                new InlineButton(_text.Get(TextKeys.RecurrenceWeekly), CallbackData.DeadlineWizardRepeat((int)RecurrenceFrequency.Weekly)),
+                new InlineButton(_text.Get(TextKeys.RecurrenceMonthly), CallbackData.DeadlineWizardRepeat((int)RecurrenceFrequency.Monthly)),
+            },
+        };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineRepeatPrompt), WithCancel(rows), ct);
+    }
+
+    private async Task AdvanceToCountAsync(long chatId, ConversationState state, CancellationToken ct)
+    {
+        state.Step = DeadlineStep.Count;
+
+        var buttons = CountPresets
+            .Select(n => new InlineButton($"×{n}", CallbackData.DeadlineWizardCount(n)))
+            .ToArray();
+
+        var rows = new List<IReadOnlyList<InlineButton>> { buttons };
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineCountPrompt), WithCancel(rows), ct);
+    }
+
     private async Task AdvanceToConfirmAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
     {
         state.Step = DeadlineStep.Confirm;
@@ -387,6 +446,11 @@ public sealed class DeadlineModule
             $"{_text.Get(TextKeys.LabelTitle)}: {state.Title}\n" +
             $"{_text.Get(TextKeys.LabelDescription)}: {state.Description ?? _text.Get(TextKeys.CommonNone)}\n" +
             $"{_text.Get(TextKeys.LabelDue)}: {(state.DueAtUtc ?? _clock.UtcNow):yyyy-MM-dd HH:mm} UTC";
+
+        if (state.RecurrenceFrequency is int f && state.RecurrenceCount is int c)
+        {
+            summary += "\n" + _text.Get(TextKeys.DeadlineRepeatSummary, FrequencyLabel((RecurrenceFrequency)f), c);
+        }
 
         var rows = new List<IReadOnlyList<InlineButton>>
         {
@@ -401,6 +465,13 @@ public sealed class DeadlineModule
 
     private async Task ExecuteAsync(long chatId, long telegramUserId, ConversationState state, CancellationToken ct)
     {
+        if (state.Flow == ConversationFlow.DeadlineAdd
+            && state.RecurrenceFrequency is int freq && state.RecurrenceCount is int count)
+        {
+            await ExecuteRecurringAsync(chatId, telegramUserId, state, (RecurrenceFrequency)freq, count, ct);
+            return;
+        }
+
         var type = (AssignmentType)(state.AssignmentType ?? 0);
         var title = state.Title ?? string.Empty;
         var dueAtUtc = state.DueAtUtc ?? _clock.UtcNow;
@@ -428,7 +499,44 @@ public sealed class DeadlineModule
         await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, $"{header}\n\n{RenderDeadline(result.Value)}", ct);
     }
 
+    private async Task ExecuteRecurringAsync(long chatId, long telegramUserId, ConversationState state, RecurrenceFrequency frequency, int count, CancellationToken ct)
+    {
+        var type = (AssignmentType)(state.AssignmentType ?? 0);
+        var title = state.Title ?? string.Empty;
+        var firstDueAtUtc = state.DueAtUtc ?? _clock.UtcNow;
+
+        Result<int> result;
+        try
+        {
+            result = await _sender.Send(new CreateRecurringAssignmentCommand(
+                telegramUserId, state.SubjectId ?? Guid.Empty, type, title, state.Description, firstDueAtUtc, frequency, 1, count), ct);
+        }
+        catch (ValidationException ex)
+        {
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineCouldNotSave, _text.ValidationDetails(ex)), ct);
+            return;
+        }
+
+        if (result.IsFailure)
+        {
+            await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Error(result.Error), ct);
+            return;
+        }
+
+        await WizardUi.CompleteAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineRecurringAdded, result.Value), ct);
+    }
+
     // --- Rendering & helpers --- //
+
+    private static readonly int[] CountPresets = { 4, 8, 12 };
+
+    private string FrequencyLabel(RecurrenceFrequency frequency) => frequency switch
+    {
+        RecurrenceFrequency.Daily => _text.Get(TextKeys.RecurrenceDaily),
+        RecurrenceFrequency.Weekly => _text.Get(TextKeys.RecurrenceWeekly),
+        RecurrenceFrequency.Monthly => _text.Get(TextKeys.RecurrenceMonthly),
+        _ => _text.Get(TextKeys.RecurrenceWeekly),
+    };
 
     private static bool IsDeadlineFlow(ConversationState state) =>
         state.Flow == ConversationFlow.DeadlineAdd || state.Flow == ConversationFlow.DeadlineEdit;

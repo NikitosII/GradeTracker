@@ -111,6 +111,16 @@ public static class TextKeys
     public const string DeadlineScopeNext = "deadline.scope_next";
     public const string DeadlineScopeUpcoming = "deadline.scope_upcoming";
 
+    // Recurrence (deadline add wizard)
+    public const string DeadlineRepeatPrompt = "deadline.repeat_prompt";
+    public const string DeadlineRepeatOnce = "deadline.repeat_once";
+    public const string DeadlineCountPrompt = "deadline.count_prompt";
+    public const string DeadlineRepeatSummary = "deadline.repeat_summary";
+    public const string DeadlineRecurringAdded = "deadline.recurring_added";
+    public const string RecurrenceDaily = "recurrence.daily";
+    public const string RecurrenceWeekly = "recurrence.weekly";
+    public const string RecurrenceMonthly = "recurrence.monthly";
+
     // Time remaining
     public const string RemainingOverdue = "remaining.overdue";
     public const string RemainingDays = "remaining.days";

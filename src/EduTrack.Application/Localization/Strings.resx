@@ -741,4 +741,28 @@ Was due {2}.</value>
   <data name="valid.bind_code" xml:space="preserve">
     <value>The code may contain only letters, digits, '-' and '_'.</value>
   </data>
+  <data name="deadline.repeat_prompt" xml:space="preserve">
+    <value>Repeat this deadline?</value>
+  </data>
+  <data name="deadline.repeat_once" xml:space="preserve">
+    <value>Once</value>
+  </data>
+  <data name="deadline.count_prompt" xml:space="preserve">
+    <value>How many times?</value>
+  </data>
+  <data name="deadline.repeat_summary" xml:space="preserve">
+    <value>Repeats: {0} ×{1}</value>
+  </data>
+  <data name="deadline.recurring_added" xml:space="preserve">
+    <value>{0} deadlines added.</value>
+  </data>
+  <data name="recurrence.daily" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="recurrence.weekly" xml:space="preserve">
+    <value>Weekly</value>
+  </data>
+  <data name="recurrence.monthly" xml:space="preserve">
+    <value>Monthly</value>
+  </data>
 </root>

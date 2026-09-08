@@ -32,6 +32,8 @@ public static class DeadlineStep
     public const string Title = "d_title";
     public const string Description = "d_description";
     public const string Due = "d_due";
+    public const string Repeat = "d_repeat";
+    public const string Count = "d_count";
     public const string Confirm = "d_confirm";
 }
 
@@ -69,4 +71,8 @@ public sealed class ConversationState
     public string? Title { get; set; }
     public string? Description { get; set; }
     public DateTime? DueAtUtc { get; set; }
+
+    // Recurrence (deadline add wizard).
+    public int? RecurrenceFrequency { get; set; }
+    public int? RecurrenceCount { get; set; }
 }

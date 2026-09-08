@@ -741,4 +741,28 @@
   <data name="valid.bind_code" xml:space="preserve">
     <value>Код может содержать только буквы, цифры, «-» и «_».</value>
   </data>
+  <data name="deadline.repeat_prompt" xml:space="preserve">
+    <value>Повторять этот дедлайн?</value>
+  </data>
+  <data name="deadline.repeat_once" xml:space="preserve">
+    <value>Один раз</value>
+  </data>
+  <data name="deadline.count_prompt" xml:space="preserve">
+    <value>Сколько раз?</value>
+  </data>
+  <data name="deadline.repeat_summary" xml:space="preserve">
+    <value>Повтор: {0} ×{1}</value>
+  </data>
+  <data name="deadline.recurring_added" xml:space="preserve">
+    <value>Добавлено дедлайнов: {0}.</value>
+  </data>
+  <data name="recurrence.daily" xml:space="preserve">
+    <value>Ежедневно</value>
+  </data>
+  <data name="recurrence.weekly" xml:space="preserve">
+    <value>Еженедельно</value>
+  </data>
+  <data name="recurrence.monthly" xml:space="preserve">
+    <value>Ежемесячно</value>
+  </data>
 </root>
