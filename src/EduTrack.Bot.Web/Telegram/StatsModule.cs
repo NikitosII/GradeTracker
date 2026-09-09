@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using EduTrack.Application.Localization;
 using EduTrack.Application.Studies.Queries.GetStudentStats;
+using EduTrack.Application.Studies.Queries.GetStudentTrends;
 using EduTrack.Application.Studies.Stats;
 using EduTrack.Application.Abstractions.Telegram;
 using EduTrack.Bot.Web.Localization;
@@ -33,6 +34,70 @@ public sealed class StatsModule
         }
 
         await _telegram.SendTextAsync(chatId, Render(result.Value), ct);
+    }
+
+    public async Task ShowTrendsAsync(long chatId, long telegramUserId, CancellationToken ct)
+    {
+        var result = await _sender.Send(new GetStudentTrendsQuery(telegramUserId), ct);
+        if (result.IsFailure)
+        {
+            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
+            return;
+        }
+
+        await _telegram.SendTextAsync(chatId, RenderTrends(result.Value), ct);
+    }
+
+    public async Task ShowReportAsync(long chatId, long telegramUserId, CancellationToken ct)
+    {
+        var stats = await _sender.Send(new GetStudentStatsQuery(telegramUserId), ct);
+        if (stats.IsFailure)
+        {
+            await _telegram.SendTextAsync(chatId, _text.Error(stats.Error), ct);
+            return;
+        }
+
+        var trends = await _sender.Send(new GetStudentTrendsQuery(telegramUserId), ct);
+
+        var body = $"{_text.Get(TextKeys.ReportTitle)}\n\n{Render(stats.Value)}";
+        if (trends.IsSuccess)
+        {
+            body += $"\n\n{RenderTrends(trends.Value)}";
+        }
+
+        await _telegram.SendTextAsync(chatId, body, ct);
+    }
+
+    private string RenderTrends(StudentTrendsDto t)
+    {
+        var title = _text.Get(TextKeys.TrendsTitle);
+
+        if (t.Subjects.Count == 0)
+        {
+            return $"{title}\n\n{_text.Get(TextKeys.TrendsNoData)}";
+        }
+
+        var sb = new StringBuilder();
+        sb.Append(title).Append("\n\n");
+        foreach (var subject in t.Subjects)
+        {
+            var current = subject.CurrentAverage is { } c ? Number(c) : "—";
+            sb.Append(_text.Get(TextKeys.TrendsSubjectLine, subject.SubjectName, current, ArrowDelta(subject.Delta))).Append('\n');
+        }
+
+        return sb.ToString().TrimEnd('\n');
+    }
+
+    private static string ArrowDelta(double? delta)
+    {
+        if (delta is not { } d)
+        {
+            return "→";
+        }
+
+        var arrow = d > 0 ? "↑" : d < 0 ? "↓" : "→";
+        var sign = d > 0 ? "+" : string.Empty;
+        return $"{arrow} {sign}{d.ToString("0.00", CultureInfo.InvariantCulture)}";
     }
 
     private string Render(StudentStatsDto s)

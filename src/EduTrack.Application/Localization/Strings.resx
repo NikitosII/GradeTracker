@@ -86,6 +86,8 @@ Type /help to see available commands.</value>
 /settings - notifications, quiet hours, time zone, language
 /export - export your deadlines to a calendar (.ics)
 /stats - your grade statistics
+/trends - grade dynamics by subject
+/report - full performance report
 /cancel - cancel the current action
 
 Admin only:
@@ -687,6 +689,18 @@ No entries yet.</value>
   </data>
   <data name="stats.recorded" xml:space="preserve">
     <value>Grades recorded: {0}</value>
+  </data>
+  <data name="trends.title" xml:space="preserve">
+    <value>Trends (last 30 days vs previous 30)</value>
+  </data>
+  <data name="trends.no_data" xml:space="preserve">
+    <value>Not enough recent grades to show trends yet.</value>
+  </data>
+  <data name="trends.subject_line" xml:space="preserve">
+    <value>• {0}: {1} {2}</value>
+  </data>
+  <data name="report.title" xml:space="preserve">
+    <value>Report</value>
   </data>
   <data name="notify.reminder_24h_title" xml:space="preserve">
     <value>Deadline in 24 hours</value>

@@ -1,5 +1,6 @@
 using EduTrack.Application.Abstractions.Telegram;
 using EduTrack.Application.Studies.Queries.GetStudentStats;
+using EduTrack.Application.Studies.Queries.GetStudentTrends;
 using EduTrack.Application.Studies.Stats;
 using EduTrack.Bot.Web.Localization;
 using EduTrack.Bot.Web.Telegram;
@@ -53,6 +54,41 @@ public class StatsModuleTests
         await _telegram.Received(1).SendTextAsync(
             ChatId,
             Arg.Is<string>(s => s.Contains("Ваша статистика") && s.Contains("Средний балл (за всё время)")),
+            Arg.Any<CancellationToken>());
+    }
+
+    private static StudentTrendsDto SampleTrends() => new(new[]
+    {
+        new SubjectTrendDto("Math", 4.6, 4.2, 0.4, 3),
+    });
+
+    [Fact]
+    public async Task Renders_trends_with_direction_arrow()
+    {
+        _sender.Send(Arg.Any<GetStudentTrendsQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(SampleTrends()));
+
+        await CreateSut().ShowTrendsAsync(ChatId, UserId, CancellationToken.None);
+
+        await _telegram.Received(1).SendTextAsync(
+            ChatId,
+            Arg.Is<string>(s => s.Contains("Math") && s.Contains("↑") && s.Contains("+0.40")),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Report_combines_stats_and_trends()
+    {
+        _sender.Send(Arg.Any<GetStudentStatsQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(Sample()));
+        _sender.Send(Arg.Any<GetStudentTrendsQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(SampleTrends()));
+
+        await CreateSut().ShowReportAsync(ChatId, UserId, CancellationToken.None);
+
+        await _telegram.Received(1).SendTextAsync(
+            ChatId,
+            Arg.Is<string>(s => s.Contains("Report") && s.Contains("GPA (all time)") && s.Contains("↑")),
             Arg.Any<CancellationToken>());
     }
 

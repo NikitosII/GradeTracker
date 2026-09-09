@@ -202,6 +202,12 @@ public static class TextKeys
     public const string StatsUpcoming = "stats.upcoming";
     public const string StatsRecorded = "stats.recorded";
 
+    // Trends & report
+    public const string TrendsTitle = "trends.title";
+    public const string TrendsNoData = "trends.no_data";
+    public const string TrendsSubjectLine = "trends.subject_line";
+    public const string ReportTitle = "report.title";
+
     // Validation
     public const string ValidTimeZone = "valid.timezone";
     public const string ValidLanguage = "valid.language";

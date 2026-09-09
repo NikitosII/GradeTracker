@@ -86,6 +86,8 @@
 /settings — уведомления, тихие часы, часовой пояс, язык
 /export — экспорт дедлайнов в календарь (.ics)
 /stats — статистика по оценкам
+/trends — динамика оценок по предметам
+/report — полный отчёт об успеваемости
 /cancel — отменить текущее действие
 
 Только для администратора:
@@ -687,6 +689,18 @@
   </data>
   <data name="stats.recorded" xml:space="preserve">
     <value>Всего оценок: {0}</value>
+  </data>
+  <data name="trends.title" xml:space="preserve">
+    <value>Тренды (последние 30 дней к предыдущим 30)</value>
+  </data>
+  <data name="trends.no_data" xml:space="preserve">
+    <value>Пока недостаточно недавних оценок для трендов.</value>
+  </data>
+  <data name="trends.subject_line" xml:space="preserve">
+    <value>• {0}: {1} {2}</value>
+  </data>
+  <data name="report.title" xml:space="preserve">
+    <value>Отчёт</value>
   </data>
   <data name="notify.reminder_24h_title" xml:space="preserve">
     <value>Дедлайн через 24 часа</value>
