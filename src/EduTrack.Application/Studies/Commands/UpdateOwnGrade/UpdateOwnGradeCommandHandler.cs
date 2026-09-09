@@ -1,7 +1,9 @@
 using EduTrack.Application.Abstractions.Persistence;
+using EduTrack.Application.Admin;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
 using EduTrack.Application.Users;
+using EduTrack.Domain.Audit;
 using EduTrack.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,6 +43,8 @@ internal sealed class UpdateOwnGradeCommandHandler : ICommandHandler<UpdateOwnGr
             return Result.Failure<GradeDto>(GradeErrors.NotOwner);
         }
 
+        var oldValue = grade.Value;
+
         grade.Update(
             value: request.Value,
             weight: request.Weight,
@@ -49,12 +53,16 @@ internal sealed class UpdateOwnGradeCommandHandler : ICommandHandler<UpdateOwnGr
             updatedByUserId: user.Id,
             nowUtc: _clock.UtcNow);
 
-        await _db.SaveChangesAsync(cancellationToken);
-
         var subjectName = await _db.Subjects
             .Where(s => s.Id == grade.SubjectId)
             .Select(s => s.Name)
             .FirstOrDefaultAsync(cancellationToken) ?? string.Empty;
+
+        _db.AuditLogs.Add(AuditLog.Create(
+            user.Id, AuditActions.GradeUpdated, AuditEntities.Grade, grade.Id.ToString(),
+            oldValue: $"{subjectName}: {oldValue}", newValue: $"{subjectName}: {request.Value}", _clock.UtcNow));
+
+        await _db.SaveChangesAsync(cancellationToken);
 
         return Result.Success(grade.ToGradeDto(subjectName));
     }

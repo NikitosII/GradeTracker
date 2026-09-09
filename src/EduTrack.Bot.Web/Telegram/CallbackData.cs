@@ -100,5 +100,11 @@ public static class CallbackData
 
     public static string SettingsSetQuiet(int start, int end) => $"st:quiet:{start}:{end}";
 
+    // --- History --- //
+
+    public const string HistoryNamespace = "hist";
+
+    public static string HistoryPage(int page) => $"hist:{page}";
+
     public static string[] Parts(string data) => data.Split(':');
 }

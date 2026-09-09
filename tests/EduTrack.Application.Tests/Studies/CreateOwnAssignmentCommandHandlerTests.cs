@@ -1,3 +1,4 @@
+using EduTrack.Application.Admin;
 using EduTrack.Application.Studies;
 using EduTrack.Application.Studies.Commands.CreateOwnAssignment;
 using EduTrack.Application.Tests.TestSupport;
@@ -63,6 +64,11 @@ public class CreateOwnAssignmentCommandHandlerTests
             EduTrack.Domain.Reminders.ReminderKind.Overdue,
         });
         reminders.Should().OnlyContain(r => r.Status == EduTrack.Domain.Reminders.ReminderStatus.Pending);
+
+        var audit = await _db.AuditLogs.SingleAsync();
+        audit.Action.Should().Be(AuditActions.DeadlineCreated);
+        audit.UserId.Should().Be(user.Id);
+        audit.NewValue.Should().Contain("Lab #3");
     }
 
     [Fact]

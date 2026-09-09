@@ -88,6 +88,7 @@
 /stats — статистика по оценкам
 /trends — динамика оценок по предметам
 /report — полный отчёт об успеваемости
+/history — ваши последние изменения
 /cancel — отменить текущее действие
 
 Только для администратора:
@@ -701,6 +702,24 @@
   </data>
   <data name="report.title" xml:space="preserve">
     <value>Отчёт</value>
+  </data>
+  <data name="history.title" xml:space="preserve">
+    <value>История изменений</value>
+  </data>
+  <data name="history.empty" xml:space="preserve">
+    <value>Изменений пока нет.</value>
+  </data>
+  <data name="history.grade_added" xml:space="preserve">
+    <value>Оценка добавлена</value>
+  </data>
+  <data name="history.grade_updated" xml:space="preserve">
+    <value>Оценка изменена</value>
+  </data>
+  <data name="history.deadline_created" xml:space="preserve">
+    <value>Дедлайн добавлен</value>
+  </data>
+  <data name="history.deadline_updated" xml:space="preserve">
+    <value>Дедлайн изменён</value>
   </data>
   <data name="notify.reminder_24h_title" xml:space="preserve">
     <value>Дедлайн через 24 часа</value>

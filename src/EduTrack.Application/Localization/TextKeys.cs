@@ -202,6 +202,14 @@ public static class TextKeys
     public const string StatsUpcoming = "stats.upcoming";
     public const string StatsRecorded = "stats.recorded";
 
+    // History
+    public const string HistoryTitle = "history.title";
+    public const string HistoryEmpty = "history.empty";
+    public const string HistoryGradeAdded = "history.grade_added";
+    public const string HistoryGradeUpdated = "history.grade_updated";
+    public const string HistoryDeadlineCreated = "history.deadline_created";
+    public const string HistoryDeadlineUpdated = "history.deadline_updated";
+
     // Trends & report
     public const string TrendsTitle = "trends.title";
     public const string TrendsNoData = "trends.no_data";

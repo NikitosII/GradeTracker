@@ -1,3 +1,4 @@
+using EduTrack.Application.Admin;
 using EduTrack.Application.Studies;
 using EduTrack.Application.Studies.Commands.AddOwnGrade;
 using EduTrack.Application.Tests.TestSupport;
@@ -49,6 +50,11 @@ public class AddOwnGradeCommandHandlerTests
         grade.CreatedByUserId.Should().Be(user.Id);
         grade.UpdatedByUserId.Should().Be(user.Id);
         grade.Weight.Should().Be(1.5m);
+
+        var audit = await _db.AuditLogs.SingleAsync();
+        audit.Action.Should().Be(AuditActions.GradeAdded);
+        audit.UserId.Should().Be(user.Id);
+        audit.NewValue.Should().Be("Mathematics: 5");
     }
 
     [Fact]

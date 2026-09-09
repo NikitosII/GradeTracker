@@ -1,7 +1,9 @@
 using EduTrack.Application.Abstractions.Persistence;
+using EduTrack.Application.Admin;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
 using EduTrack.Application.Users;
+using EduTrack.Domain.Audit;
 using EduTrack.Domain.Common;
 using EduTrack.Domain.Studies;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +50,9 @@ internal sealed class AddOwnGradeCommandHandler : ICommandHandler<AddOwnGradeCom
             nowUtc: _clock.UtcNow);
 
         _db.Grades.Add(grade);
+        _db.AuditLogs.Add(AuditLog.Create(
+            user.Id, AuditActions.GradeAdded, AuditEntities.Grade, grade.Id.ToString(),
+            oldValue: null, newValue: $"{subject.Name}: {request.Value}", _clock.UtcNow));
         await _db.SaveChangesAsync(cancellationToken);
 
         return Result.Success(grade.ToGradeDto(subject.Name));

@@ -1,8 +1,10 @@
 using EduTrack.Application.Abstractions.Persistence;
+using EduTrack.Application.Admin;
 using EduTrack.Application.Common.Messaging;
 using EduTrack.Application.Common.Time;
 using EduTrack.Application.Reminders;
 using EduTrack.Application.Users;
+using EduTrack.Domain.Audit;
 using EduTrack.Domain.Common;
 using EduTrack.Domain.Studies;
 using Microsoft.EntityFrameworkCore;
@@ -51,6 +53,9 @@ internal sealed class CreateOwnAssignmentCommandHandler : ICommandHandler<Create
             nowUtc: now);
 
         _db.Assignments.Add(assignment);
+        _db.AuditLogs.Add(AuditLog.Create(
+            user.Id, AuditActions.DeadlineCreated, AuditEntities.Deadline, assignment.Id.ToString(),
+            oldValue: null, newValue: $"{request.Title} — {request.DueAtUtc:yyyy-MM-dd HH:mm} UTC", now));
         await ReminderPlanner.SyncAsync(_db, assignment, now, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
 

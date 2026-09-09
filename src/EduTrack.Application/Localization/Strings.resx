@@ -88,6 +88,7 @@ Type /help to see available commands.</value>
 /stats - your grade statistics
 /trends - grade dynamics by subject
 /report - full performance report
+/history - your recent changes
 /cancel - cancel the current action
 
 Admin only:
@@ -701,6 +702,24 @@ No entries yet.</value>
   </data>
   <data name="report.title" xml:space="preserve">
     <value>Report</value>
+  </data>
+  <data name="history.title" xml:space="preserve">
+    <value>Your history</value>
+  </data>
+  <data name="history.empty" xml:space="preserve">
+    <value>No changes recorded yet.</value>
+  </data>
+  <data name="history.grade_added" xml:space="preserve">
+    <value>Added grade</value>
+  </data>
+  <data name="history.grade_updated" xml:space="preserve">
+    <value>Updated grade</value>
+  </data>
+  <data name="history.deadline_created" xml:space="preserve">
+    <value>Added deadline</value>
+  </data>
+  <data name="history.deadline_updated" xml:space="preserve">
+    <value>Updated deadline</value>
   </data>
   <data name="notify.reminder_24h_title" xml:space="preserve">
     <value>Deadline in 24 hours</value>

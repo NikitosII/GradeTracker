@@ -30,13 +30,14 @@ public sealed class WebhookUpdateProcessor
     private readonly ReminderModule _reminders;
     private readonly SettingsModule _settings;
     private readonly StatsModule _stats;
+    private readonly HistoryModule _history;
     private readonly IUiText _text;
     private readonly ILanguageContext _language;
     private readonly IInboxStore _inbox;
     private readonly IApplicationMetrics _metrics;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, StatsModule stats, IUiText text, ILanguageContext language, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, StatsModule stats, HistoryModule history, IUiText text, ILanguageContext language, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
@@ -46,6 +47,7 @@ public sealed class WebhookUpdateProcessor
         _reminders = reminders;
         _settings = settings;
         _stats = stats;
+        _history = history;
         _text = text;
         _language = language;
         _inbox = inbox;
@@ -195,6 +197,10 @@ public sealed class WebhookUpdateProcessor
         {
             await _settings.HandleCallbackAsync(chatId, userId, callback.Id, data, callback.Message.MessageId, cancellationToken);
         }
+        else if (data.StartsWith(HistoryModule.Namespace + ":", StringComparison.Ordinal))
+        {
+            await _history.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
+        }
         else
         {
             await _grades.HandleCallbackAsync(chatId, userId, callback.Id, data, cancellationToken);
@@ -274,6 +280,9 @@ public sealed class WebhookUpdateProcessor
                 break;
             case "/report":
                 await _stats.ShowReportAsync(chatId, telegramUserId, cancellationToken);
+                break;
+            case "/history":
+                await _history.ShowHistoryAsync(chatId, telegramUserId, 1, cancellationToken);
                 break;
             case "/admin":
                 await _admins.ShowMenuAsync(chatId, telegramUserId, cancellationToken);
