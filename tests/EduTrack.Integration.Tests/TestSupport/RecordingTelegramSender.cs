@@ -14,6 +14,9 @@ public sealed class RecordingTelegramSender : ITelegramSender
 
     public ConcurrentQueue<string> Messages { get; } = new();
 
+    /// <summary>Inline keyboards attached to sent/edited messages, in order.</summary>
+    public ConcurrentQueue<IReadOnlyList<IReadOnlyList<InlineButton>>> Keyboards { get; } = new();
+
     /// <summary>Message ids that <see cref="DeleteMessageAsync"/> was asked to remove.</summary>
     public ConcurrentQueue<int> Deleted { get; } = new();
 
@@ -29,6 +32,7 @@ public sealed class RecordingTelegramSender : ITelegramSender
     public Task<int> SendKeyboardAsync(long chatId, string text, IReadOnlyList<IReadOnlyList<InlineButton>> rows, CancellationToken cancellationToken = default)
     {
         Messages.Enqueue(text);
+        Keyboards.Enqueue(rows);
         return Task.FromResult(Interlocked.Increment(ref _nextMessageId));
     }
 
@@ -68,4 +72,8 @@ public sealed class RecordingTelegramSender : ITelegramSender
 
     public bool Sent(string substring)
         => Messages.Any(m => m.Contains(substring, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>True if any sent keyboard contains a button with the given callback data.</summary>
+    public bool HasButton(string callbackData)
+        => Keyboards.SelectMany(k => k).SelectMany(r => r).Any(b => b.CallbackData == callbackData);
 }

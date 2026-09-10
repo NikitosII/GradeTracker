@@ -27,6 +27,12 @@ public static class CallbackData
 
     public static string DeadlineView(string scope, int page) => $"dv:{scope}:{page}";
 
+    /// <summary>Hub action: open the guided edit wizard.</summary>
+    public const string DeadlineEdit = "dv:edit";
+
+    /// <summary>Hub action: explain the one-line /quick capture.</summary>
+    public const string DeadlineQuick = "dv:quick";
+
     public static string DeadlineWizardSubject(Guid subjectId) => $"dw:sub:{subjectId}";
 
     public static string DeadlineWizardItem(Guid assignmentId) => $"dw:item:{assignmentId}";

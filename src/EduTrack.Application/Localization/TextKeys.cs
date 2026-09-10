@@ -111,6 +111,13 @@ public static class TextKeys
     public const string DeadlineScopeNext = "deadline.scope_next";
     public const string DeadlineScopeUpcoming = "deadline.scope_upcoming";
 
+    // Deadline hub action buttons (shown under the /deadlines list)
+    public const string DeadlineBtnToday = "deadline.btn_today";
+    public const string DeadlineBtnWeek = "deadline.btn_week";
+    public const string DeadlineBtnNext = "deadline.btn_next";
+    public const string DeadlineBtnQuick = "deadline.btn_quick";
+    public const string DeadlineBtnEdit = "deadline.btn_edit";
+
     // Recurrence (deadline add wizard)
     public const string DeadlineRepeatPrompt = "deadline.repeat_prompt";
     public const string DeadlineRepeatOnce = "deadline.repeat_once";

@@ -77,13 +77,8 @@
 /subjects — список предметов
 /grade_add — добавить оценку
 /grade_edit — изменить оценку
-/deadlines — ближайшие дедлайны
-/today — дедлайны на сегодня
-/week — дедлайны на неделю
-/next — ближайший дедлайн
+/deadlines — ваши дедлайны, с кнопками «сегодня/неделя/ближайший», быстрым добавлением и изменением
 /deadline_add — добавить дедлайн
-/quick — добавить дедлайн одной строкой (напр. Физика домашка завтра 18:00)
-/deadline_edit — изменить дедлайн
 /settings — уведомления, тихие часы, часовой пояс, язык
 /export — экспорт дедлайнов в календарь (.ics)
 /report — полный отчёт об успеваемости (статистика и динамика)
@@ -402,6 +397,21 @@
   </data>
   <data name="deadline.scope_upcoming" xml:space="preserve">
     <value>Предстоящие дедлайны</value>
+  </data>
+  <data name="deadline.btn_today" xml:space="preserve">
+    <value>Сегодня</value>
+  </data>
+  <data name="deadline.btn_week" xml:space="preserve">
+    <value>На неделе</value>
+  </data>
+  <data name="deadline.btn_next" xml:space="preserve">
+    <value>Ближайший</value>
+  </data>
+  <data name="deadline.btn_quick" xml:space="preserve">
+    <value>⚡ Быстро добавить</value>
+  </data>
+  <data name="deadline.btn_edit" xml:space="preserve">
+    <value>✏️ Изменить</value>
   </data>
   <data name="remaining.overdue" xml:space="preserve">
     <value>просрочено</value>

@@ -119,6 +119,9 @@ public sealed class DeadlineModule
             }
         }
 
+        // Hub actions: let the user pick what to do next instead of hunting through /help.
+        rows.AddRange(ActionRows());
+
         var title = _text.Get(window.TitleKey);
         await _telegram.SendKeyboardAsync(chatId, RenderDeadlinesPage(title, pageData, now, window.Paged), rows, ct);
     }
@@ -281,7 +284,21 @@ public sealed class DeadlineModule
 
     private async Task HandleViewCallbackAsync(long chatId, long telegramUserId, string[] parts, CancellationToken ct)
     {
-        // dv:{scope}:{page}
+        // dv:{scope}:{page}  |  dv:edit  |  dv:quick
+        var action = parts.Length > 1 ? parts[1] : string.Empty;
+
+        if (action == "edit")
+        {
+            await StartEditAsync(chatId, telegramUserId, ct);
+            return;
+        }
+
+        if (action == "quick")
+        {
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.DeadlineQuickUsage), ct);
+            return;
+        }
+
         if (parts.Length < 3)
         {
             return;
@@ -291,6 +308,22 @@ public sealed class DeadlineModule
         var page = int.TryParse(parts[2], out var p) ? p : 1;
         await ShowDeadlinesAsync(chatId, telegramUserId, scope, page, ct);
     }
+
+    /// <summary>The action bar shown under every deadline list: scope filters plus quick-add and edit.</summary>
+    private List<IReadOnlyList<InlineButton>> ActionRows() => new()
+    {
+        new[]
+        {
+            new InlineButton(_text.Get(TextKeys.DeadlineBtnToday), CallbackData.DeadlineView(ScopeToday, 1)),
+            new InlineButton(_text.Get(TextKeys.DeadlineBtnWeek), CallbackData.DeadlineView(ScopeWeek, 1)),
+            new InlineButton(_text.Get(TextKeys.DeadlineBtnNext), CallbackData.DeadlineView(ScopeNext, 1)),
+        },
+        new[]
+        {
+            new InlineButton(_text.Get(TextKeys.DeadlineBtnQuick), CallbackData.DeadlineQuick),
+            new InlineButton(_text.Get(TextKeys.DeadlineBtnEdit), CallbackData.DeadlineEdit),
+        },
+    };
 
     // --- Wizard callbacks --- //
 

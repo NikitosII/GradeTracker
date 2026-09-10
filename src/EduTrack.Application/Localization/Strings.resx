@@ -77,13 +77,8 @@ Type /help to see available commands.</value>
 /subjects - list subjects
 /grade_add - add a grade
 /grade_edit - edit a grade
-/deadlines - your upcoming deadlines
-/today - deadlines due today
-/week - deadlines due this week
-/next - your nearest deadline
+/deadlines - your deadlines, with buttons for today/this week/nearest, quick add and edit
 /deadline_add - add a deadline
-/quick - add a deadline in one line (e.g. Physics homework tomorrow 18:00)
-/deadline_edit - edit a deadline
 /settings - notifications, quiet hours, time zone, language
 /export - export your deadlines to a calendar (.ics)
 /report - full performance report (stats and trends)
@@ -402,6 +397,21 @@ Select a subject:</value>
   </data>
   <data name="deadline.scope_upcoming" xml:space="preserve">
     <value>Upcoming deadlines</value>
+  </data>
+  <data name="deadline.btn_today" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="deadline.btn_week" xml:space="preserve">
+    <value>This week</value>
+  </data>
+  <data name="deadline.btn_next" xml:space="preserve">
+    <value>Nearest</value>
+  </data>
+  <data name="deadline.btn_quick" xml:space="preserve">
+    <value>⚡ Quick add</value>
+  </data>
+  <data name="deadline.btn_edit" xml:space="preserve">
+    <value>✏️ Edit</value>
   </data>
   <data name="remaining.overdue" xml:space="preserve">
     <value>overdue</value>

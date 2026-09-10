@@ -1,4 +1,5 @@
 using EduTrack.Application.Studies;
+using EduTrack.Application.Studies.Queries.GetOwnAssignments;
 using EduTrack.Application.Studies.Queries.GetSubjects;
 using EduTrack.Application.Users;
 using EduTrack.Application.Users.Queries.GetUserProfile;
@@ -80,5 +81,41 @@ public class DeadlineModuleTests
 
         _telegram.Sent("/deadline_add").Should().BeTrue();
         (await _conversations.GetAsync(ChatId, CancellationToken.None)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Deadlines_view_shows_hub_action_buttons()
+    {
+        _sender.Send(Arg.Any<GetOwnAssignmentsQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new AssignmentsPageDto(Array.Empty<AssignmentDto>(), 1, 5, 0)));
+
+        await CreateSut().ShowDeadlinesAsync(ChatId, UserId, DeadlineModule.ScopeAll, 1, CancellationToken.None);
+
+        _telegram.HasButton(CallbackData.DeadlineView(DeadlineModule.ScopeToday, 1)).Should().BeTrue();
+        _telegram.HasButton(CallbackData.DeadlineView(DeadlineModule.ScopeWeek, 1)).Should().BeTrue();
+        _telegram.HasButton(CallbackData.DeadlineView(DeadlineModule.ScopeNext, 1)).Should().BeTrue();
+        _telegram.HasButton(CallbackData.DeadlineQuick).Should().BeTrue();
+        _telegram.HasButton(CallbackData.DeadlineEdit).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Hub_quick_button_shows_usage_hint()
+    {
+        await CreateSut().HandleCallbackAsync(ChatId, UserId, "cbq", CallbackData.DeadlineQuick, CancellationToken.None);
+
+        _telegram.Sent("/quick").Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Hub_edit_button_starts_edit_wizard()
+    {
+        SeedProfileAndSubjects();
+
+        await CreateSut().HandleCallbackAsync(ChatId, UserId, "cbq", CallbackData.DeadlineEdit, CancellationToken.None);
+
+        var state = await _conversations.GetAsync(ChatId, CancellationToken.None);
+        state.Should().NotBeNull();
+        state!.Flow.Should().Be(ConversationFlow.DeadlineEdit);
+        state.Step.Should().Be(DeadlineStep.Subject);
     }
 }
