@@ -41,6 +41,7 @@ builder.Services.AddScoped<SettingsModule>();
 builder.Services.AddScoped<StatsModule>();
 builder.Services.AddScoped<HistoryModule>();
 builder.Services.AddScoped<ArchiveModule>();
+builder.Services.AddScoped<RecommendationsModule>();
 builder.Services.AddScoped<WebhookUpdateProcessor>();
 
 builder.Services.AddHealthChecks()

@@ -91,6 +91,7 @@
 /report — полный отчёт об успеваемости
 /history — ваши последние изменения
 /archive — скрыть или восстановить оценки и дедлайны
+/tips — персональные рекомендации
 /cancel — отменить текущее действие
 
 Только для администратора:
@@ -695,6 +696,33 @@
   </data>
   <data name="trends.title" xml:space="preserve">
     <value>Тренды (последние 30 дней к предыдущим 30)</value>
+  </data>
+  <data name="tips.title" xml:space="preserve">
+    <value>💡 Рекомендации</value>
+  </data>
+  <data name="tips.empty" xml:space="preserve">
+    <value>Всё под контролем. 👍</value>
+  </data>
+  <data name="rec.overdue" xml:space="preserve">
+    <value>⚠️ У вас {0} просроченных дедлайнов — займитесь ими в первую очередь.</value>
+  </data>
+  <data name="rec.urgent" xml:space="preserve">
+    <value>⏰ Начните с «{0}» ({1}), срок {2}.</value>
+  </data>
+  <data name="rec.week_workload" xml:space="preserve">
+    <value>🗓 На этой неделе у вас {0} дедлайнов — распланируйте время.</value>
+  </data>
+  <data name="rec.falling" xml:space="preserve">
+    <value>📉 Средний балл по «{0}» снижается ({1} → {2}).</value>
+  </data>
+  <data name="rec.low_subject" xml:space="preserve">
+    <value>📚 «{0}» — ваш самый слабый предмет (средний {1}), уделите ему внимание.</value>
+  </data>
+  <data name="rec.rising" xml:space="preserve">
+    <value>📈 Отличная работа — средний балл по «{0}» растёт ({1} → {2}).</value>
+  </data>
+  <data name="rec.no_grades" xml:space="preserve">
+    <value>👋 Добавьте первую оценку через /grade_add, чтобы отслеживать прогресс.</value>
   </data>
   <data name="trends.no_data" xml:space="preserve">
     <value>Пока недостаточно недавних оценок для трендов.</value>

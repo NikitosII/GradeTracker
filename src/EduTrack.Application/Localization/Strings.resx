@@ -91,6 +91,7 @@ Type /help to see available commands.</value>
 /report - full performance report
 /history - your recent changes
 /archive - hide or restore grades and deadlines
+/tips - personalized recommendations
 /cancel - cancel the current action
 
 Admin only:
@@ -695,6 +696,33 @@ No entries yet.</value>
   </data>
   <data name="trends.title" xml:space="preserve">
     <value>Trends (last 30 days vs previous 30)</value>
+  </data>
+  <data name="tips.title" xml:space="preserve">
+    <value>💡 Recommendations</value>
+  </data>
+  <data name="tips.empty" xml:space="preserve">
+    <value>You're all caught up. 👍</value>
+  </data>
+  <data name="rec.overdue" xml:space="preserve">
+    <value>⚠️ You have {0} overdue deadline(s) — take care of them first.</value>
+  </data>
+  <data name="rec.urgent" xml:space="preserve">
+    <value>⏰ Start with "{0}" ({1}), due {2}.</value>
+  </data>
+  <data name="rec.week_workload" xml:space="preserve">
+    <value>🗓 You have {0} deadlines this week — plan ahead.</value>
+  </data>
+  <data name="rec.falling" xml:space="preserve">
+    <value>📉 Your {0} average is slipping ({1} → {2}).</value>
+  </data>
+  <data name="rec.low_subject" xml:space="preserve">
+    <value>📚 {0} is your weakest subject (avg {1}) — give it some focus.</value>
+  </data>
+  <data name="rec.rising" xml:space="preserve">
+    <value>📈 Nice work — your {0} average is rising ({1} → {2}).</value>
+  </data>
+  <data name="rec.no_grades" xml:space="preserve">
+    <value>👋 Add your first grade with /grade_add to start tracking progress.</value>
   </data>
   <data name="trends.no_data" xml:space="preserve">
     <value>Not enough recent grades to show trends yet.</value>

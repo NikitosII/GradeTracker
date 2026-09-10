@@ -237,6 +237,17 @@ public static class TextKeys
     public const string ArchiveDoneArchived = "archive.done_archived";
     public const string ArchiveDoneRestored = "archive.done_restored";
 
+    // Recommendations (/tips)
+    public const string TipsTitle = "tips.title";
+    public const string TipsEmpty = "tips.empty";
+    public const string RecOverdue = "rec.overdue";
+    public const string RecUrgent = "rec.urgent";
+    public const string RecWeekWorkload = "rec.week_workload";
+    public const string RecFalling = "rec.falling";
+    public const string RecLowSubject = "rec.low_subject";
+    public const string RecRising = "rec.rising";
+    public const string RecNoGrades = "rec.no_grades";
+
     // Trends & report
     public const string TrendsTitle = "trends.title";
     public const string TrendsNoData = "trends.no_data";

@@ -32,13 +32,14 @@ public sealed class WebhookUpdateProcessor
     private readonly StatsModule _stats;
     private readonly HistoryModule _history;
     private readonly ArchiveModule _archive;
+    private readonly RecommendationsModule _recommendations;
     private readonly IUiText _text;
     private readonly ILanguageContext _language;
     private readonly IInboxStore _inbox;
     private readonly IApplicationMetrics _metrics;
     private readonly ILogger<WebhookUpdateProcessor> _logger;
 
-    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, StatsModule stats, HistoryModule history, ArchiveModule archive, IUiText text, ILanguageContext language, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
+    public WebhookUpdateProcessor(ISender sender, ITelegramSender telegram, GradeModule grades, DeadlineModule deadlines, AdminModule admins, ReminderModule reminders, SettingsModule settings, StatsModule stats, HistoryModule history, ArchiveModule archive, RecommendationsModule recommendations, IUiText text, ILanguageContext language, IInboxStore inbox, IApplicationMetrics metrics, ILogger<WebhookUpdateProcessor> logger)
     {
         _sender = sender;
         _telegram = telegram;
@@ -50,6 +51,7 @@ public sealed class WebhookUpdateProcessor
         _stats = stats;
         _history = history;
         _archive = archive;
+        _recommendations = recommendations;
         _text = text;
         _language = language;
         _inbox = inbox;
@@ -296,6 +298,9 @@ public sealed class WebhookUpdateProcessor
                 break;
             case "/archive":
                 await _archive.ShowMenuAsync(chatId, cancellationToken);
+                break;
+            case "/tips":
+                await _recommendations.ShowTipsAsync(chatId, telegramUserId, cancellationToken);
                 break;
             case "/admin":
                 await _admins.ShowMenuAsync(chatId, telegramUserId, cancellationToken);
