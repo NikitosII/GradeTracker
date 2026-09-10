@@ -6,7 +6,6 @@ using EduTrack.Bot.Web.Localization;
 using EduTrack.Bot.Web.Telegram;
 using EduTrack.Domain.Common;
 using EduTrack.Integration.Tests.TestSupport;
-using FluentAssertions;
 using MediatR;
 using NSubstitute;
 
@@ -28,28 +27,42 @@ public class StatsModuleTests
         Subjects: new[] { new SubjectStatDto("Math", 4.6, 5) },
         WorstSubject: "Math", WorstSubjectAverage: 4.6, UpcomingDeadlines: 1, TotalGrades: 8);
 
-    [Fact]
-    public async Task Renders_stats_in_english()
+    private static StudentTrendsDto SampleTrends() => new(new[]
     {
-        _sender.Send(Arg.Any<GetStudentStatsQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(Sample()));
+        new SubjectTrendDto("Math", 4.6, 4.2, 0.4, 3),
+    });
 
-        await CreateSut().ShowStatsAsync(ChatId, UserId, CancellationToken.None);
+    private void SetupStats(StudentStatsDto stats) =>
+        _sender.Send(Arg.Any<GetStudentStatsQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(stats));
+
+    private void SetupTrends(StudentTrendsDto trends) =>
+        _sender.Send(Arg.Any<GetStudentTrendsQuery>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(trends));
+
+    [Fact]
+    public async Task Report_combines_stats_and_trends_in_english()
+    {
+        SetupStats(Sample());
+        SetupTrends(SampleTrends());
+
+        await CreateSut().ShowReportAsync(ChatId, UserId, CancellationToken.None);
 
         await _telegram.Received(1).SendTextAsync(
             ChatId,
-            Arg.Is<string>(s => s.Contains("GPA (all time)") && s.Contains("Math") && s.Contains("4.60")),
+            Arg.Is<string>(s => s.Contains("Report") && s.Contains("GPA (all time)")
+                && s.Contains("Math") && s.Contains("4.60") && s.Contains("↑") && s.Contains("+0.40")),
             Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Renders_stats_in_russian()
+    public async Task Report_renders_in_russian()
     {
-        _sender.Send(Arg.Any<GetStudentStatsQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(Sample()));
+        SetupStats(Sample());
+        SetupTrends(SampleTrends());
 
         var russian = CreateSut(new TestUiText(new TestLanguageContext { Language = "ru" }));
-        await russian.ShowStatsAsync(ChatId, UserId, CancellationToken.None);
+        await russian.ShowReportAsync(ChatId, UserId, CancellationToken.None);
 
         await _telegram.Received(1).SendTextAsync(
             ChatId,
@@ -57,49 +70,13 @@ public class StatsModuleTests
             Arg.Any<CancellationToken>());
     }
 
-    private static StudentTrendsDto SampleTrends() => new(new[]
-    {
-        new SubjectTrendDto("Math", 4.6, 4.2, 0.4, 3),
-    });
-
     [Fact]
-    public async Task Renders_trends_with_direction_arrow()
+    public async Task Report_shows_empty_state_when_no_grades()
     {
-        _sender.Send(Arg.Any<GetStudentTrendsQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(SampleTrends()));
-
-        await CreateSut().ShowTrendsAsync(ChatId, UserId, CancellationToken.None);
-
-        await _telegram.Received(1).SendTextAsync(
-            ChatId,
-            Arg.Is<string>(s => s.Contains("Math") && s.Contains("↑") && s.Contains("+0.40")),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Report_combines_stats_and_trends()
-    {
-        _sender.Send(Arg.Any<GetStudentStatsQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(Sample()));
-        _sender.Send(Arg.Any<GetStudentTrendsQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(SampleTrends()));
+        SetupStats(new StudentStatsDto(null, null, 0, null, 0, Array.Empty<SubjectStatDto>(), null, null, 0, 0));
+        SetupTrends(new StudentTrendsDto(Array.Empty<SubjectTrendDto>()));
 
         await CreateSut().ShowReportAsync(ChatId, UserId, CancellationToken.None);
-
-        await _telegram.Received(1).SendTextAsync(
-            ChatId,
-            Arg.Is<string>(s => s.Contains("Report") && s.Contains("GPA (all time)") && s.Contains("↑")),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Renders_empty_state_when_no_grades()
-    {
-        _sender.Send(Arg.Any<GetStudentStatsQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(new StudentStatsDto(
-                null, null, 0, null, 0, Array.Empty<SubjectStatDto>(), null, null, 0, 0)));
-
-        await CreateSut().ShowStatsAsync(ChatId, UserId, CancellationToken.None);
 
         await _telegram.Received(1).SendTextAsync(
             ChatId,

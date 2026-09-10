@@ -86,9 +86,7 @@ Type /help to see available commands.</value>
 /deadline_edit - edit a deadline
 /settings - notifications, quiet hours, time zone, language
 /export - export your deadlines to a calendar (.ics)
-/stats - your grade statistics
-/trends - grade dynamics by subject
-/report - full performance report
+/report - full performance report (stats and trends)
 /history - your recent changes
 /archive - hide or restore grades and deadlines
 /tips - personalized recommendations

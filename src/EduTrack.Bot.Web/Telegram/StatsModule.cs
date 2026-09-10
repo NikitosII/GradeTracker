@@ -10,7 +10,7 @@ using MediatR;
 
 namespace EduTrack.Bot.Web.Telegram;
 
-/// <summary>Handles /stats: a text snapshot of the caller's performance.</summary>
+/// <summary>Handles /report: a combined text snapshot of the caller's performance and trends.</summary>
 public sealed class StatsModule
 {
     private readonly ISender _sender;
@@ -22,30 +22,6 @@ public sealed class StatsModule
         _sender = sender;
         _telegram = telegram;
         _text = text;
-    }
-
-    public async Task ShowStatsAsync(long chatId, long telegramUserId, CancellationToken ct)
-    {
-        var result = await _sender.Send(new GetStudentStatsQuery(telegramUserId), ct);
-        if (result.IsFailure)
-        {
-            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
-            return;
-        }
-
-        await _telegram.SendTextAsync(chatId, Render(result.Value), ct);
-    }
-
-    public async Task ShowTrendsAsync(long chatId, long telegramUserId, CancellationToken ct)
-    {
-        var result = await _sender.Send(new GetStudentTrendsQuery(telegramUserId), ct);
-        if (result.IsFailure)
-        {
-            await _telegram.SendTextAsync(chatId, _text.Error(result.Error), ct);
-            return;
-        }
-
-        await _telegram.SendTextAsync(chatId, RenderTrends(result.Value), ct);
     }
 
     public async Task ShowReportAsync(long chatId, long telegramUserId, CancellationToken ct)

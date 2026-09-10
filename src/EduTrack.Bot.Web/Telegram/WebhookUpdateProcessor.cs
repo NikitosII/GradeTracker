@@ -284,12 +284,6 @@ public sealed class WebhookUpdateProcessor
             case "/export":
                 await _deadlines.ExportAsync(chatId, telegramUserId, cancellationToken);
                 break;
-            case "/stats":
-                await _stats.ShowStatsAsync(chatId, telegramUserId, cancellationToken);
-                break;
-            case "/trends":
-                await _stats.ShowTrendsAsync(chatId, telegramUserId, cancellationToken);
-                break;
             case "/report":
                 await _stats.ShowReportAsync(chatId, telegramUserId, cancellationToken);
                 break;
