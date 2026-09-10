@@ -33,8 +33,11 @@ public sealed class AssignmentConfiguration : IEntityTypeConfiguration<Assignmen
         builder.Property(a => a.CreatedAt).IsRequired();
         builder.Property(a => a.UpdatedAt).IsRequired();
         builder.Property(a => a.IsDeleted).IsRequired();
+        builder.Property(a => a.IsArchived).IsRequired();
+        builder.Property(a => a.ArchivedAt);
 
         builder.HasIndex(a => new { a.OwnerUserId, a.DueAtUtc });
-        builder.HasQueryFilter(a => !a.IsDeleted);
+        builder.HasIndex(a => new { a.OwnerUserId, a.IsArchived });
+        builder.HasQueryFilter(a => !a.IsDeleted && !a.IsArchived);
     }
 }

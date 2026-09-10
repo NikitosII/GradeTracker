@@ -13,6 +13,10 @@ public static class AuditActions
     public const string GradeUpdated = "GradeUpdated";
     public const string DeadlineCreated = "DeadlineCreated";
     public const string DeadlineUpdated = "DeadlineUpdated";
+    public const string GradeArchived = "GradeArchived";
+    public const string GradeUnarchived = "GradeUnarchived";
+    public const string DeadlineArchived = "DeadlineArchived";
+    public const string DeadlineUnarchived = "DeadlineUnarchived";
 }
 
 /// <summary>Entity type names written to the audit log.</summary>

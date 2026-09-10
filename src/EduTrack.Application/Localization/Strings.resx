@@ -82,6 +82,7 @@ Type /help to see available commands.</value>
 /week - deadlines due this week
 /next - your nearest deadline
 /deadline_add - add a deadline
+/quick - add a deadline in one line (e.g. Physics homework tomorrow 18:00)
 /deadline_edit - edit a deadline
 /settings - notifications, quiet hours, time zone, language
 /export - export your deadlines to a calendar (.ics)
@@ -89,6 +90,7 @@ Type /help to see available commands.</value>
 /trends - grade dynamics by subject
 /report - full performance report
 /history - your recent changes
+/archive - hide or restore grades and deadlines
 /cancel - cancel the current action
 
 Admin only:
@@ -721,6 +723,69 @@ No entries yet.</value>
   <data name="history.deadline_updated" xml:space="preserve">
     <value>Updated deadline</value>
   </data>
+  <data name="history.grade_archived" xml:space="preserve">
+    <value>Archived grade</value>
+  </data>
+  <data name="history.grade_unarchived" xml:space="preserve">
+    <value>Restored grade</value>
+  </data>
+  <data name="history.deadline_archived" xml:space="preserve">
+    <value>Archived deadline</value>
+  </data>
+  <data name="history.deadline_unarchived" xml:space="preserve">
+    <value>Restored deadline</value>
+  </data>
+  <data name="archive.title" xml:space="preserve">
+    <value>🗄 Archive</value>
+  </data>
+  <data name="archive.menu_prompt" xml:space="preserve">
+    <value>Hide grades and deadlines you no longer need, or restore archived ones.</value>
+  </data>
+  <data name="archive.btn_archive_deadline" xml:space="preserve">
+    <value>🗄 Archive a deadline</value>
+  </data>
+  <data name="archive.btn_archive_grade" xml:space="preserve">
+    <value>🗄 Archive a grade</value>
+  </data>
+  <data name="archive.btn_deadlines_archived" xml:space="preserve">
+    <value>♻️ Archived deadlines</value>
+  </data>
+  <data name="archive.btn_grades_archived" xml:space="preserve">
+    <value>♻️ Archived grades</value>
+  </data>
+  <data name="archive.btn_back" xml:space="preserve">
+    <value>« Back</value>
+  </data>
+  <data name="archive.list_deadlines_live" xml:space="preserve">
+    <value>Tap a deadline to archive it:</value>
+  </data>
+  <data name="archive.list_grades_live" xml:space="preserve">
+    <value>Tap a grade to archive it:</value>
+  </data>
+  <data name="archive.list_deadlines_archived" xml:space="preserve">
+    <value>Tap a deadline to restore it:</value>
+  </data>
+  <data name="archive.list_grades_archived" xml:space="preserve">
+    <value>Tap a grade to restore it:</value>
+  </data>
+  <data name="archive.empty_deadlines_live" xml:space="preserve">
+    <value>No active deadlines to archive.</value>
+  </data>
+  <data name="archive.empty_grades_live" xml:space="preserve">
+    <value>No active grades to archive.</value>
+  </data>
+  <data name="archive.empty_deadlines_archived" xml:space="preserve">
+    <value>No archived deadlines.</value>
+  </data>
+  <data name="archive.empty_grades_archived" xml:space="preserve">
+    <value>No archived grades.</value>
+  </data>
+  <data name="archive.done_archived" xml:space="preserve">
+    <value>Archived. ✅</value>
+  </data>
+  <data name="archive.done_restored" xml:space="preserve">
+    <value>Restored. ✅</value>
+  </data>
   <data name="notify.reminder_24h_title" xml:space="preserve">
     <value>Deadline in 24 hours</value>
   </data>
@@ -788,6 +853,12 @@ Was due {2}.</value>
   </data>
   <data name="deadline.recurring_added" xml:space="preserve">
     <value>{0} deadlines added.</value>
+  </data>
+  <data name="deadline.quick_usage" xml:space="preserve">
+    <value>Send the deadline in one line, e.g. /quick Physics homework tomorrow 18:00</value>
+  </data>
+  <data name="deadline.quick_unparsed" xml:space="preserve">
+    <value>Couldn't read the subject and due date. Use /deadline_add to add it step by step.</value>
   </data>
   <data name="recurrence.daily" xml:space="preserve">
     <value>Daily</value>

@@ -9,6 +9,8 @@ using EduTrack.Application.Studies.Commands.UpdateOwnAssignment;
 using EduTrack.Application.Studies.Queries.ExportCalendar;
 using EduTrack.Application.Studies.Queries.GetOwnAssignments;
 using EduTrack.Application.Studies.Queries.GetSubjects;
+using EduTrack.Application.Studies.Nlp;
+using EduTrack.Application.Users.Queries.GetUserProfile;
 using EduTrack.Bot.Web.Conversations;
 using EduTrack.Bot.Web.Localization;
 using EduTrack.Domain.Common;
@@ -136,6 +138,53 @@ public sealed class DeadlineModule
             Step = DeadlineStep.Subject,
         };
         await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineAddSelectSubject), WithCancel(subjectRows), ct);
+    }
+
+    /// <summary>/quick &lt;text&gt;: interpret a free-text phrase into a deadline and jump straight to the confirmation step.</summary>
+    public async Task QuickAddAsync(long chatId, long telegramUserId, string? argument, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(argument))
+        {
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.DeadlineQuickUsage), ct);
+            return;
+        }
+
+        var profileResult = await _sender.Send(new GetUserProfileQuery(telegramUserId), ct);
+        if (profileResult.IsFailure)
+        {
+            await _telegram.SendTextAsync(chatId, _text.Error(profileResult.Error), ct);
+            return;
+        }
+
+        var subjectsResult = await _sender.Send(new GetSubjectsQuery(), ct);
+        if (subjectsResult.IsFailure)
+        {
+            await _telegram.SendTextAsync(chatId, _text.Error(subjectsResult.Error), ct);
+            return;
+        }
+
+        var profile = profileResult.Value;
+        var parsed = DeadlineTextParser.Parse(
+            argument, subjectsResult.Value, profile.Language, _clock.UtcNow, profile.TimeZone);
+
+        // Both the subject and the due date must be understood; otherwise fall back to the guided wizard.
+        if (parsed.SubjectId is not { } subjectId || parsed.DueAtUtc is not { } dueAtUtc)
+        {
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.DeadlineQuickUnparsed), ct);
+            return;
+        }
+
+        var state = new ConversationState
+        {
+            Flow = ConversationFlow.DeadlineAdd,
+            SubjectId = subjectId,
+            SubjectName = parsed.SubjectName,
+            AssignmentType = (int)parsed.Type,
+            Title = parsed.Title,
+            DueAtUtc = dueAtUtc,
+        };
+
+        await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
     }
 
     public async Task StartEditAsync(long chatId, long telegramUserId, CancellationToken ct)

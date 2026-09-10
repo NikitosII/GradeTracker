@@ -106,5 +106,27 @@ public static class CallbackData
 
     public static string HistoryPage(int page) => $"hist:{page}";
 
+    // --- Archive --- //
+
+    public const string ArchiveNamespace = "arch";
+
+    // List kinds: da = deadlines archived, ga = grades archived, dl = deadlines live, gl = grades live.
+    public const string ArchiveDeadlinesArchived = "da";
+    public const string ArchiveGradesArchived = "ga";
+    public const string ArchiveDeadlinesLive = "dl";
+    public const string ArchiveGradesLive = "gl";
+
+    // Entity codes for archive/restore actions: d = deadline, g = grade.
+    public const string ArchiveEntityDeadline = "d";
+    public const string ArchiveEntityGrade = "g";
+
+    public const string ArchiveMenu = "arch:menu";
+
+    public static string ArchiveList(string kind, int page) => $"arch:list:{kind}:{page}";
+
+    public static string ArchiveDo(string entity, Guid id) => $"arch:ar:{entity}:{id}";
+
+    public static string ArchiveRestore(string entity, Guid id) => $"arch:re:{entity}:{id}";
+
     public static string[] Parts(string data) => data.Split(':');
 }

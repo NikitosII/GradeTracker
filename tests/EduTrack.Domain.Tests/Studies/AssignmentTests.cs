@@ -52,4 +52,46 @@ public class AssignmentTests
 
         assignment.IsDeleted.Should().BeTrue();
     }
+
+    [Fact]
+    public void Archive_sets_flag_and_timestamp()
+    {
+        var assignment = Assignment.Create(
+            Owner, Subject, AssignmentType.Test, "Quiz", null, Now.AddDays(1), Owner, Now);
+        var editor = Guid.NewGuid();
+        var when = Now.AddHours(2);
+
+        assignment.Archive(editor, when);
+
+        assignment.IsArchived.Should().BeTrue();
+        assignment.ArchivedAt.Should().Be(when);
+        assignment.UpdatedByUserId.Should().Be(editor);
+        assignment.UpdatedAt.Should().Be(when);
+    }
+
+    [Fact]
+    public void Unarchive_clears_flag_and_timestamp()
+    {
+        var assignment = Assignment.Create(
+            Owner, Subject, AssignmentType.Test, "Quiz", null, Now.AddDays(1), Owner, Now);
+        assignment.Archive(Owner, Now.AddHours(1));
+
+        assignment.Unarchive(Owner, Now.AddHours(3));
+
+        assignment.IsArchived.Should().BeFalse();
+        assignment.ArchivedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public void Archive_is_idempotent_and_does_not_move_the_timestamp()
+    {
+        var assignment = Assignment.Create(
+            Owner, Subject, AssignmentType.Test, "Quiz", null, Now.AddDays(1), Owner, Now);
+        var first = Now.AddHours(1);
+        assignment.Archive(Owner, first);
+
+        assignment.Archive(Owner, Now.AddHours(5));
+
+        assignment.ArchivedAt.Should().Be(first);
+    }
 }

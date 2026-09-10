@@ -19,6 +19,10 @@ internal sealed class GetOwnHistoryQueryHandler : IQueryHandler<GetOwnHistoryQue
         AuditActions.GradeUpdated,
         AuditActions.DeadlineCreated,
         AuditActions.DeadlineUpdated,
+        AuditActions.GradeArchived,
+        AuditActions.GradeUnarchived,
+        AuditActions.DeadlineArchived,
+        AuditActions.DeadlineUnarchived,
     };
 
     private readonly IApplicationDbContext _db;

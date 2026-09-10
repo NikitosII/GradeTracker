@@ -64,6 +64,10 @@ public class Grade
     public DateTime UpdatedAt { get; private set; }
     public bool IsDeleted { get; private set; }
 
+    /// <summary>Archived grades are hidden from the normal views and analytics but kept for the archive.</summary>
+    public bool IsArchived { get; private set; }
+    public DateTime? ArchivedAt { get; private set; }
+
     public static Grade Add(
         Guid studentUserId,
         Guid subjectId,
@@ -98,6 +102,33 @@ public class Grade
     public void Delete(Guid updatedByUserId, DateTime nowUtc)
     {
         IsDeleted = true;
+        UpdatedByUserId = updatedByUserId;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Hides the grade from the normal views and analytics.</summary>
+    public void Archive(Guid updatedByUserId, DateTime nowUtc)
+    {
+        if (IsArchived)
+        {
+            return;
+        }
+
+        IsArchived = true;
+        ArchivedAt = nowUtc;
+        UpdatedByUserId = updatedByUserId;
+        UpdatedAt = nowUtc;
+    }
+
+    public void Unarchive(Guid updatedByUserId, DateTime nowUtc)
+    {
+        if (!IsArchived)
+        {
+            return;
+        }
+
+        IsArchived = false;
+        ArchivedAt = null;
         UpdatedByUserId = updatedByUserId;
         UpdatedAt = nowUtc;
     }

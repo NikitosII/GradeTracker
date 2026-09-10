@@ -29,8 +29,11 @@ public sealed class GradeConfiguration : IEntityTypeConfiguration<Grade>
         builder.Property(g => g.CreatedAt).IsRequired();
         builder.Property(g => g.UpdatedAt).IsRequired();
         builder.Property(g => g.IsDeleted).IsRequired();
+        builder.Property(g => g.IsArchived).IsRequired();
+        builder.Property(g => g.ArchivedAt);
 
         builder.HasIndex(g => new { g.StudentUserId, g.SubjectId });
-        builder.HasQueryFilter(g => !g.IsDeleted);
+        builder.HasIndex(g => new { g.StudentUserId, g.IsArchived });
+        builder.HasQueryFilter(g => !g.IsDeleted && !g.IsArchived);
     }
 }

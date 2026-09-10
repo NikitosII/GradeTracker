@@ -117,6 +117,10 @@ public static class TextKeys
     public const string DeadlineCountPrompt = "deadline.count_prompt";
     public const string DeadlineRepeatSummary = "deadline.repeat_summary";
     public const string DeadlineRecurringAdded = "deadline.recurring_added";
+
+    // Quick natural-language deadline capture (/quick)
+    public const string DeadlineQuickUsage = "deadline.quick_usage";
+    public const string DeadlineQuickUnparsed = "deadline.quick_unparsed";
     public const string RecurrenceDaily = "recurrence.daily";
     public const string RecurrenceWeekly = "recurrence.weekly";
     public const string RecurrenceMonthly = "recurrence.monthly";
@@ -209,6 +213,29 @@ public static class TextKeys
     public const string HistoryGradeUpdated = "history.grade_updated";
     public const string HistoryDeadlineCreated = "history.deadline_created";
     public const string HistoryDeadlineUpdated = "history.deadline_updated";
+    public const string HistoryGradeArchived = "history.grade_archived";
+    public const string HistoryGradeUnarchived = "history.grade_unarchived";
+    public const string HistoryDeadlineArchived = "history.deadline_archived";
+    public const string HistoryDeadlineUnarchived = "history.deadline_unarchived";
+
+    // Archive
+    public const string ArchiveTitle = "archive.title";
+    public const string ArchiveMenuPrompt = "archive.menu_prompt";
+    public const string ArchiveBtnDeadlinesArchived = "archive.btn_deadlines_archived";
+    public const string ArchiveBtnGradesArchived = "archive.btn_grades_archived";
+    public const string ArchiveBtnArchiveDeadline = "archive.btn_archive_deadline";
+    public const string ArchiveBtnArchiveGrade = "archive.btn_archive_grade";
+    public const string ArchiveBtnBack = "archive.btn_back";
+    public const string ArchiveListDeadlinesArchived = "archive.list_deadlines_archived";
+    public const string ArchiveListGradesArchived = "archive.list_grades_archived";
+    public const string ArchiveListDeadlinesLive = "archive.list_deadlines_live";
+    public const string ArchiveListGradesLive = "archive.list_grades_live";
+    public const string ArchiveEmptyDeadlinesArchived = "archive.empty_deadlines_archived";
+    public const string ArchiveEmptyGradesArchived = "archive.empty_grades_archived";
+    public const string ArchiveEmptyDeadlinesLive = "archive.empty_deadlines_live";
+    public const string ArchiveEmptyGradesLive = "archive.empty_grades_live";
+    public const string ArchiveDoneArchived = "archive.done_archived";
+    public const string ArchiveDoneRestored = "archive.done_restored";
 
     // Trends & report
     public const string TrendsTitle = "trends.title";

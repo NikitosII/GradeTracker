@@ -82,6 +82,7 @@
 /week — дедлайны на неделю
 /next — ближайший дедлайн
 /deadline_add — добавить дедлайн
+/quick — добавить дедлайн одной строкой (напр. Физика домашка завтра 18:00)
 /deadline_edit — изменить дедлайн
 /settings — уведомления, тихие часы, часовой пояс, язык
 /export — экспорт дедлайнов в календарь (.ics)
@@ -89,6 +90,7 @@
 /trends — динамика оценок по предметам
 /report — полный отчёт об успеваемости
 /history — ваши последние изменения
+/archive — скрыть или восстановить оценки и дедлайны
 /cancel — отменить текущее действие
 
 Только для администратора:
@@ -721,6 +723,69 @@
   <data name="history.deadline_updated" xml:space="preserve">
     <value>Дедлайн изменён</value>
   </data>
+  <data name="history.grade_archived" xml:space="preserve">
+    <value>Оценка в архиве</value>
+  </data>
+  <data name="history.grade_unarchived" xml:space="preserve">
+    <value>Оценка восстановлена</value>
+  </data>
+  <data name="history.deadline_archived" xml:space="preserve">
+    <value>Дедлайн в архиве</value>
+  </data>
+  <data name="history.deadline_unarchived" xml:space="preserve">
+    <value>Дедлайн восстановлен</value>
+  </data>
+  <data name="archive.title" xml:space="preserve">
+    <value>🗄 Архив</value>
+  </data>
+  <data name="archive.menu_prompt" xml:space="preserve">
+    <value>Скройте ненужные оценки и дедлайны или восстановите их из архива.</value>
+  </data>
+  <data name="archive.btn_archive_deadline" xml:space="preserve">
+    <value>🗄 Архивировать дедлайн</value>
+  </data>
+  <data name="archive.btn_archive_grade" xml:space="preserve">
+    <value>🗄 Архивировать оценку</value>
+  </data>
+  <data name="archive.btn_deadlines_archived" xml:space="preserve">
+    <value>♻️ Дедлайны в архиве</value>
+  </data>
+  <data name="archive.btn_grades_archived" xml:space="preserve">
+    <value>♻️ Оценки в архиве</value>
+  </data>
+  <data name="archive.btn_back" xml:space="preserve">
+    <value>« Назад</value>
+  </data>
+  <data name="archive.list_deadlines_live" xml:space="preserve">
+    <value>Нажмите на дедлайн, чтобы архивировать его:</value>
+  </data>
+  <data name="archive.list_grades_live" xml:space="preserve">
+    <value>Нажмите на оценку, чтобы архивировать её:</value>
+  </data>
+  <data name="archive.list_deadlines_archived" xml:space="preserve">
+    <value>Нажмите на дедлайн, чтобы восстановить его:</value>
+  </data>
+  <data name="archive.list_grades_archived" xml:space="preserve">
+    <value>Нажмите на оценку, чтобы восстановить её:</value>
+  </data>
+  <data name="archive.empty_deadlines_live" xml:space="preserve">
+    <value>Нет активных дедлайнов для архивирования.</value>
+  </data>
+  <data name="archive.empty_grades_live" xml:space="preserve">
+    <value>Нет активных оценок для архивирования.</value>
+  </data>
+  <data name="archive.empty_deadlines_archived" xml:space="preserve">
+    <value>В архиве нет дедлайнов.</value>
+  </data>
+  <data name="archive.empty_grades_archived" xml:space="preserve">
+    <value>В архиве нет оценок.</value>
+  </data>
+  <data name="archive.done_archived" xml:space="preserve">
+    <value>Архивировано. ✅</value>
+  </data>
+  <data name="archive.done_restored" xml:space="preserve">
+    <value>Восстановлено. ✅</value>
+  </data>
   <data name="notify.reminder_24h_title" xml:space="preserve">
     <value>Дедлайн через 24 часа</value>
   </data>
@@ -788,6 +853,12 @@
   </data>
   <data name="deadline.recurring_added" xml:space="preserve">
     <value>Добавлено дедлайнов: {0}.</value>
+  </data>
+  <data name="deadline.quick_usage" xml:space="preserve">
+    <value>Отправьте дедлайн одной строкой, например: /quick Физика домашка завтра 18:00</value>
+  </data>
+  <data name="deadline.quick_unparsed" xml:space="preserve">
+    <value>Не удалось распознать предмет и срок. Используйте /deadline_add, чтобы добавить пошагово.</value>
   </data>
   <data name="recurrence.daily" xml:space="preserve">
     <value>Ежедневно</value>

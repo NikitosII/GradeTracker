@@ -61,4 +61,18 @@ public class GradeTests
         grade.IsDeleted.Should().BeTrue();
         grade.UpdatedAt.Should().Be(later);
     }
+
+    [Fact]
+    public void Archive_then_unarchive_toggles_flag()
+    {
+        var grade = Grade.Add(Student, Subject, 3, 1m, null, Now, Student, Now);
+
+        grade.Archive(Student, Now.AddHours(1));
+        grade.IsArchived.Should().BeTrue();
+        grade.ArchivedAt.Should().Be(Now.AddHours(1));
+
+        grade.Unarchive(Student, Now.AddHours(2));
+        grade.IsArchived.Should().BeFalse();
+        grade.ArchivedAt.Should().BeNull();
+    }
 }

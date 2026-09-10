@@ -92,6 +92,10 @@ public sealed class HistoryModule
         AuditActions.GradeUpdated => _text.Get(TextKeys.HistoryGradeUpdated),
         AuditActions.DeadlineCreated => _text.Get(TextKeys.HistoryDeadlineCreated),
         AuditActions.DeadlineUpdated => _text.Get(TextKeys.HistoryDeadlineUpdated),
+        AuditActions.GradeArchived => _text.Get(TextKeys.HistoryGradeArchived),
+        AuditActions.GradeUnarchived => _text.Get(TextKeys.HistoryGradeUnarchived),
+        AuditActions.DeadlineArchived => _text.Get(TextKeys.HistoryDeadlineArchived),
+        AuditActions.DeadlineUnarchived => _text.Get(TextKeys.HistoryDeadlineUnarchived),
         _ => action,
     };
 

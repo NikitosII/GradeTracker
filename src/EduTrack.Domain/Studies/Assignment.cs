@@ -51,6 +51,10 @@ public class Assignment
     public DateTime UpdatedAt { get; private set; }
     public bool IsDeleted { get; private set; }
 
+    /// <summary>Archived deadlines are hidden from the normal views but kept for the archive.</summary>
+    public bool IsArchived { get; private set; }
+    public DateTime? ArchivedAt { get; private set; }
+
     public static Assignment Create(
         Guid ownerUserId,
         Guid subjectId,
@@ -81,6 +85,33 @@ public class Assignment
     public void Delete(Guid updatedByUserId, DateTime nowUtc)
     {
         IsDeleted = true;
+        UpdatedByUserId = updatedByUserId;
+        UpdatedAt = nowUtc;
+    }
+
+    /// <summary>Hides the deadline from the normal views; pending reminders stop firing while archived.</summary>
+    public void Archive(Guid updatedByUserId, DateTime nowUtc)
+    {
+        if (IsArchived)
+        {
+            return;
+        }
+
+        IsArchived = true;
+        ArchivedAt = nowUtc;
+        UpdatedByUserId = updatedByUserId;
+        UpdatedAt = nowUtc;
+    }
+
+    public void Unarchive(Guid updatedByUserId, DateTime nowUtc)
+    {
+        if (!IsArchived)
+        {
+            return;
+        }
+
+        IsArchived = false;
+        ArchivedAt = null;
         UpdatedByUserId = updatedByUserId;
         UpdatedAt = nowUtc;
     }
