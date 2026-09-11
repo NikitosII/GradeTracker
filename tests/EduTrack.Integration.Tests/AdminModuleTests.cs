@@ -64,6 +64,28 @@ public class AdminModuleTests
     }
 
     [Fact]
+    public async Task Menu_exposes_all_hub_action_buttons()
+    {
+        StubProfile(nameof(UserRole.Admin));
+
+        await CreateSut().ShowMenuAsync(ChatId, UserId, CancellationToken.None);
+
+        await _telegram.Received(1).SendKeyboardAsync(
+            ChatId,
+            Arg.Any<string>(),
+            Arg.Is<IReadOnlyList<IReadOnlyList<InlineButton>>>(rows =>
+                HasButton(rows, CallbackData.AdminUsers(1))
+                && HasButton(rows, CallbackData.AdminInvites)
+                && HasButton(rows, CallbackData.AdminSubjects)
+                && HasButton(rows, CallbackData.AdminAudit(1))
+                && HasButton(rows, CallbackData.AdminStatus)),
+            Arg.Any<CancellationToken>());
+    }
+
+    private static bool HasButton(IReadOnlyList<IReadOnlyList<InlineButton>> rows, string callbackData) =>
+        rows.SelectMany(r => r).Any(b => b.CallbackData == callbackData);
+
+    [Fact]
     public async Task Menu_is_shown_in_russian_for_a_russian_admin()
     {
         StubProfile(nameof(UserRole.Admin));

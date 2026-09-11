@@ -86,11 +86,7 @@ Type /help to see available commands.</value>
 /cancel - cancel the current action
 
 Admin only:
-/admin - admin menu
-/users - manage users and roles
-/invites - manage invite codes
-/audit - view the audit log
-/status - system status
+/admin - admin menu with buttons for users, invites, subjects, audit and status
 /announce &lt;message&gt; - broadcast to all users</value>
   </data>
   <data name="unknown" xml:space="preserve">
