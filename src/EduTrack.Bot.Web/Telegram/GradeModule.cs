@@ -57,6 +57,12 @@ public sealed class GradeModule
         };
         rows.AddRange(await SubjectRowsAsync(s => CallbackData.ViewSubject(s.Id, 1), ct));
 
+        rows.Add(new[]
+        {
+            new InlineButton(_text.Get(TextKeys.GradeBtnAdd), CallbackData.GradeAdd),
+            new InlineButton(_text.Get(TextKeys.GradeBtnEdit), CallbackData.GradeEdit),
+        });
+
         await _telegram.SendKeyboardAsync(chatId, _text.Get(TextKeys.GradeChooseSubjectView), rows, ct);
     }
 
@@ -175,7 +181,21 @@ public sealed class GradeModule
 
     private async Task HandleViewCallbackAsync(long chatId, long telegramUserId, string[] parts, CancellationToken ct)
     {
-        // gv:sub:{subjectId}:{page}
+        // gv:sub:{subjectId}:{page}  |  gv:add  |  gv:edit
+        var action = parts.Length > 1 ? parts[1] : string.Empty;
+
+        if (action == "add")
+        {
+            await StartAddAsync(chatId, telegramUserId, ct);
+            return;
+        }
+
+        if (action == "edit")
+        {
+            await StartEditAsync(chatId, telegramUserId, ct);
+            return;
+        }
+
         if (parts.Length < 4 || parts[1] != "sub")
         {
             return;

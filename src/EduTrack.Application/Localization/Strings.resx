@@ -73,10 +73,8 @@ Type /help to see available commands.</value>
 /help - this help
 /bind &lt;code&gt; - link your account
 /profile - your profile
-/grades - view your grades by subject
+/grades - view grades by subject, with buttons to add and edit
 /subjects - list subjects
-/grade_add - add a grade
-/grade_edit - edit a grade
 /deadlines - your deadlines, with buttons for today/this week/nearest, quick add and edit
 /deadline_add - add a deadline
 /settings - notifications, quiet hours, time zone, language
@@ -270,7 +268,13 @@ Notifications are off — only critical alerts are delivered.</value>
     <value>Due</value>
   </data>
   <data name="grade.choose_subject_view" xml:space="preserve">
-    <value>Choose a subject to view your grades:</value>
+    <value>Choose a subject to view your grades, or add / edit a grade:</value>
+  </data>
+  <data name="grade.btn_add" xml:space="preserve">
+    <value>➕ Add grade</value>
+  </data>
+  <data name="grade.btn_edit" xml:space="preserve">
+    <value>✏️ Edit grade</value>
   </data>
   <data name="grade.add_select_subject" xml:space="preserve">
     <value>Add a grade.

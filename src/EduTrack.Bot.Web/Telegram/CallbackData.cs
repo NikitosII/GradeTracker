@@ -10,6 +10,9 @@ public static class CallbackData
 
     public static string ViewSubject(Guid subjectId, int page) => $"gv:sub:{subjectId}:{page}";
 
+    public const string GradeAdd = "gv:add";
+    public const string GradeEdit = "gv:edit";
+
     public static string WizardSubject(Guid subjectId) => $"gw:sub:{subjectId}";
 
     public static string WizardGrade(Guid gradeId) => $"gw:grade:{gradeId}";

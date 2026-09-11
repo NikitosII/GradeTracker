@@ -68,6 +68,8 @@ public static class TextKeys
 
     // Grades
     public const string GradeChooseSubjectView = "grade.choose_subject_view";
+    public const string GradeBtnAdd = "grade.btn_add";
+    public const string GradeBtnEdit = "grade.btn_edit";
     public const string GradeAddSelectSubject = "grade.add_select_subject";
     public const string GradeEditSelectSubject = "grade.edit_select_subject";
     public const string GradeWizardExpired = "grade.wizard_expired";

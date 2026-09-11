@@ -73,10 +73,8 @@
 /help — эта справка
 /bind &lt;код&gt; — привязать аккаунт
 /profile — ваш профиль
-/grades — оценки по предметам
+/grades — оценки по предметам, с кнопками добавления и изменения
 /subjects — список предметов
-/grade_add — добавить оценку
-/grade_edit — изменить оценку
 /deadlines — ваши дедлайны, с кнопками «сегодня/неделя/ближайший», быстрым добавлением и изменением
 /deadline_add — добавить дедлайн
 /settings — уведомления, тихие часы, часовой пояс, язык
@@ -270,7 +268,13 @@
     <value>Срок</value>
   </data>
   <data name="grade.choose_subject_view" xml:space="preserve">
-    <value>Выберите предмет для просмотра оценок:</value>
+    <value>Выберите предмет для просмотра оценок или добавьте / измените оценку:</value>
+  </data>
+  <data name="grade.btn_add" xml:space="preserve">
+    <value>➕ Добавить оценку</value>
+  </data>
+  <data name="grade.btn_edit" xml:space="preserve">
+    <value>✏️ Изменить оценку</value>
   </data>
   <data name="grade.add_select_subject" xml:space="preserve">
     <value>Добавление оценки.
