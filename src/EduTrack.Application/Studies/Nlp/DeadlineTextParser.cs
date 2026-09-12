@@ -60,10 +60,7 @@ public static class DeadlineTextParser
         var original = (text ?? string.Empty).Trim();
         var lower = original.ToLowerInvariant();
 
-        var subject = subjects
-            .Where(s => s.IsActive && !string.IsNullOrWhiteSpace(s.Name) && lower.Contains(s.Name.ToLowerInvariant()))
-            .OrderByDescending(s => s.Name.Length)
-            .FirstOrDefault();
+        var subject = MatchSubject(lower, subjects);
 
         var type = MatchType(lower);
 
@@ -83,6 +80,140 @@ public static class DeadlineTextParser
         var title = BuildTitle(original, subject?.Name, dateText, timeText);
 
         return new ParsedDeadline(subject?.Id, subject?.Name, type, dueAtUtc, title);
+    }
+
+    /// <summary>
+    /// Resolves the subject named in the text: first an exact (longest) substring match, then a
+    /// typo/prefix-tolerant token match, so "phys", "matematics" or "comp science" still land.
+    /// </summary>
+    private static SubjectDto? MatchSubject(string lower, IReadOnlyList<SubjectDto> subjects)
+    {
+        var active = subjects.Where(s => s.IsActive && !string.IsNullOrWhiteSpace(s.Name)).ToList();
+
+        // 1. Exact substring — the longest matching name wins.
+        var substring = active
+            .Where(s => lower.Contains(s.Name.ToLowerInvariant()))
+            .OrderByDescending(s => s.Name.Length)
+            .FirstOrDefault();
+        if (substring is not null)
+        {
+            return substring;
+        }
+
+        // 2. Token match: every word of the subject name must appear in the text, allowing a
+        //    one-character typo or a prefix abbreviation (min 4 chars) per word.
+        var inputTokens = Tokenize(lower);
+        if (inputTokens.Count == 0)
+        {
+            return null;
+        }
+
+        SubjectDto? best = null;
+        var bestScore = 0;
+        foreach (var subject in active)
+        {
+            var nameTokens = Tokenize(subject.Name.ToLowerInvariant());
+            if (nameTokens.Count == 0 || !nameTokens.All(nt => inputTokens.Any(it => TokenMatches(it, nt))))
+            {
+                continue;
+            }
+
+            var score = subject.Name.Length;
+            if (score > bestScore)
+            {
+                bestScore = score;
+                best = subject;
+            }
+        }
+
+        return best;
+    }
+
+    private static bool TokenMatches(string input, string nameToken)
+    {
+        if (input == nameToken)
+        {
+            return true;
+        }
+
+        // Prefix abbreviation, e.g. "phys" -> "physics", "math" -> "mathematics".
+        if (input.Length >= 4 && nameToken.StartsWith(input, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        // One-character typo tolerance for reasonably long words.
+        return nameToken.Length >= 4 && input.Length >= 4 && LevenshteinWithinOne(input, nameToken);
+    }
+
+    private static List<string> Tokenize(string text)
+    {
+        var tokens = new List<string>();
+        var current = new System.Text.StringBuilder();
+        foreach (var ch in text)
+        {
+            if (char.IsLetterOrDigit(ch))
+            {
+                current.Append(ch);
+            }
+            else if (current.Length > 0)
+            {
+                tokens.Add(current.ToString());
+                current.Clear();
+            }
+        }
+
+        if (current.Length > 0)
+        {
+            tokens.Add(current.ToString());
+        }
+
+        return tokens;
+    }
+
+    /// <summary>True when <paramref name="a"/> and <paramref name="b"/> differ by at most one edit.</summary>
+    private static bool LevenshteinWithinOne(string a, string b)
+    {
+        var lengthDiff = Math.Abs(a.Length - b.Length);
+        if (lengthDiff > 1)
+        {
+            return false;
+        }
+
+        // Walk both strings; allow a single insert/delete/substitute.
+        int i = 0, j = 0, edits = 0;
+        while (i < a.Length && j < b.Length)
+        {
+            if (a[i] == b[j])
+            {
+                i++;
+                j++;
+                continue;
+            }
+
+            if (++edits > 1)
+            {
+                return false;
+            }
+
+            if (a.Length > b.Length)
+            {
+                i++;
+            }
+            else if (b.Length > a.Length)
+            {
+                j++;
+            }
+            else
+            {
+                i++;
+                j++;
+            }
+        }
+
+        // Any remaining tail character counts as the one allowed edit.
+        edits += (a.Length - i) + (b.Length - j);
+        return edits <= 1;
     }
 
     private static AssignmentType MatchType(string lower)

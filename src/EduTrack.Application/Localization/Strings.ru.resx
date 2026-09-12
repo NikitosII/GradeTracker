@@ -894,7 +894,10 @@
     <value>Отправьте дедлайн одной строкой, например: /quick Физика домашка завтра 18:00</value>
   </data>
   <data name="deadline.quick_unparsed" xml:space="preserve">
-    <value>Не удалось распознать предмет и срок. Используйте /deadline_add, чтобы добавить пошагово.</value>
+    <value>Не удалось распознать срок. Используйте /deadline_add, чтобы добавить пошагово.</value>
+  </data>
+  <data name="deadline.quick_pick_subject" xml:space="preserve">
+    <value>Срок понял — по какому предмету?</value>
   </data>
   <data name="recurrence.daily" xml:space="preserve">
     <value>Ежедневно</value>

@@ -22,6 +22,34 @@ public class DeadlineTextParserTests
         => DeadlineTextParser.Parse(text, Subjects, language, NowUtc, tz);
 
     [Fact]
+    public void Matches_subject_by_prefix_abbreviation()
+    {
+        Parse("phys homework tomorrow").SubjectName.Should().Be("Physics");
+    }
+
+    [Fact]
+    public void Matches_multiword_subject_with_a_typo()
+    {
+        // "compter" is one edit from "computer"; "science" is exact.
+        Parse("compter science project friday").SubjectName.Should().Be("Computer Science");
+    }
+
+    [Fact]
+    public void Matches_single_word_subject_with_a_typo()
+    {
+        Parse("phisics exam tomorrow").SubjectName.Should().Be("Physics");
+    }
+
+    [Fact]
+    public void Leaves_subject_null_when_no_subject_is_close()
+    {
+        var result = Parse("Biology homework tomorrow");
+
+        result.SubjectName.Should().BeNull();
+        result.DueAtUtc.Should().NotBeNull(); // date still parses, enabling the pick-a-subject fallback
+    }
+
+    [Fact]
     public void Parses_subject_type_date_and_time()
     {
         var result = Parse("Physics homework tomorrow at 18:00");

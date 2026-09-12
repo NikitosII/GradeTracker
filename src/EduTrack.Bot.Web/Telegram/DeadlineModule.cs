@@ -170,8 +170,8 @@ public sealed class DeadlineModule
         var parsed = DeadlineTextParser.Parse(
             argument, subjectsResult.Value, profile.Language, _clock.UtcNow, profile.TimeZone);
 
-        // Both the subject and the due date must be understood; otherwise fall back to the guided wizard.
-        if (parsed.SubjectId is not { } subjectId || parsed.DueAtUtc is not { } dueAtUtc)
+        // Without a due date /quick can't meaningfully shortcut — send the user to the guided wizard.
+        if (parsed.DueAtUtc is not { } dueAtUtc)
         {
             await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.DeadlineQuickUnparsed), ct);
             return;
@@ -180,14 +180,31 @@ public sealed class DeadlineModule
         var state = new ConversationState
         {
             Flow = ConversationFlow.DeadlineAdd,
-            SubjectId = subjectId,
-            SubjectName = parsed.SubjectName,
             AssignmentType = (int)parsed.Type,
             Title = parsed.Title,
             DueAtUtc = dueAtUtc,
         };
 
-        await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
+        // Subject resolved -> straight to confirmation.
+        if (parsed.SubjectId is { } subjectId)
+        {
+            state.SubjectId = subjectId;
+            state.SubjectName = parsed.SubjectName;
+            await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
+            return;
+        }
+
+        // Date and type understood but the subject didn't match — ask the user to pick one
+        // instead of dead-ending, keeping everything else already parsed.
+        var subjectRows = await SubjectRowsAsync(s => CallbackData.DeadlineWizardQuickSubject(s.Id), ct);
+        if (subjectRows.Count == 0)
+        {
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.CommonNoSubjectsAdmin), ct);
+            return;
+        }
+
+        state.Step = DeadlineStep.QuickSubject;
+        await WizardUi.ShowStepAsync(_telegram, _conversations, chatId, state, _text.Get(TextKeys.DeadlineQuickPickSubject), WithCancel(subjectRows), ct);
     }
 
     public async Task StartEditAsync(long chatId, long telegramUserId, CancellationToken ct)
@@ -350,6 +367,10 @@ public sealed class DeadlineModule
                 await OnSubjectChosenAsync(chatId, telegramUserId, state, subjectId, ct);
                 break;
 
+            case "qsub" when state.Step == DeadlineStep.QuickSubject && parts.Length >= 3 && Guid.TryParse(parts[2], out var quickSubjectId):
+                await OnQuickSubjectChosenAsync(chatId, telegramUserId, state, quickSubjectId, ct);
+                break;
+
             case "item" when state.Step == DeadlineStep.Item && parts.Length >= 3 && Guid.TryParse(parts[2], out var assignmentId):
                 state.AssignmentId = assignmentId;
                 await AdvanceToTypeAsync(chatId, state, ct);
@@ -436,6 +457,23 @@ public sealed class DeadlineModule
         }
 
         await AdvanceToTypeAsync(chatId, state, ct);
+    }
+
+    /// <summary>/quick fallback: subject chosen from the picker — type/title/due are already parsed, so confirm.</summary>
+    private async Task OnQuickSubjectChosenAsync(long chatId, long telegramUserId, ConversationState state, Guid subjectId, CancellationToken ct)
+    {
+        var subjectsResult = await _sender.Send(new GetSubjectsQuery(), ct);
+        var subject = subjectsResult.IsSuccess ? subjectsResult.Value.FirstOrDefault(s => s.Id == subjectId) : null;
+
+        if (subject is null)
+        {
+            await _telegram.SendTextAsync(chatId, _text.Get(TextKeys.CommonSubjectGone), ct);
+            return;
+        }
+
+        state.SubjectId = subject.Id;
+        state.SubjectName = subject.Name;
+        await AdvanceToConfirmAsync(chatId, telegramUserId, state, ct);
     }
 
     // --- Step transitions --- //

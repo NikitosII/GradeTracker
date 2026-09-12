@@ -38,6 +38,9 @@ public static class CallbackData
 
     public static string DeadlineWizardSubject(Guid subjectId) => $"dw:sub:{subjectId}";
 
+    /// <summary>/quick fallback: subject chosen from the picker when the phrase's subject didn't match.</summary>
+    public static string DeadlineWizardQuickSubject(Guid subjectId) => $"dw:qsub:{subjectId}";
+
     public static string DeadlineWizardItem(Guid assignmentId) => $"dw:item:{assignmentId}";
 
     public static string DeadlineWizardType(int type) => $"dw:type:{type}";

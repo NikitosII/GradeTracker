@@ -130,6 +130,7 @@ public static class TextKeys
     // Quick natural-language deadline capture (/quick)
     public const string DeadlineQuickUsage = "deadline.quick_usage";
     public const string DeadlineQuickUnparsed = "deadline.quick_unparsed";
+    public const string DeadlineQuickPickSubject = "deadline.quick_pick_subject";
     public const string RecurrenceDaily = "recurrence.daily";
     public const string RecurrenceWeekly = "recurrence.weekly";
     public const string RecurrenceMonthly = "recurrence.monthly";

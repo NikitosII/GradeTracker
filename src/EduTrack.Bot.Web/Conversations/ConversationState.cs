@@ -27,6 +27,7 @@ public static class GradeStep
 public static class DeadlineStep
 {
     public const string Subject = "d_subject";
+    public const string QuickSubject = "d_quick_subject";
     public const string Item = "d_item";
     public const string Type = "d_type";
     public const string Title = "d_title";

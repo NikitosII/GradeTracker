@@ -894,7 +894,10 @@ Was due {2}.</value>
     <value>Send the deadline in one line, e.g. /quick Physics homework tomorrow 18:00</value>
   </data>
   <data name="deadline.quick_unparsed" xml:space="preserve">
-    <value>Couldn't read the subject and due date. Use /deadline_add to add it step by step.</value>
+    <value>Couldn't read the due date. Use /deadline_add to add it step by step.</value>
+  </data>
+  <data name="deadline.quick_pick_subject" xml:space="preserve">
+    <value>Got the date — which subject is it for?</value>
   </data>
   <data name="recurrence.daily" xml:space="preserve">
     <value>Daily</value>

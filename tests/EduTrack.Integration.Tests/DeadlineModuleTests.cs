@@ -84,6 +84,37 @@ public class DeadlineModuleTests
     }
 
     [Fact]
+    public async Task Quick_add_with_unknown_subject_offers_a_subject_picker()
+    {
+        SeedProfileAndSubjects();
+
+        // Date parses, but "Biology" matches no existing subject -> pick, don't dead-end.
+        await CreateSut().QuickAddAsync(ChatId, UserId, "Biology homework tomorrow", CancellationToken.None);
+
+        var state = await _conversations.GetAsync(ChatId, CancellationToken.None);
+        state.Should().NotBeNull();
+        state!.Step.Should().Be(DeadlineStep.QuickSubject);
+        state.SubjectId.Should().BeNull();
+        state.DueAtUtc.Should().Be(new DateTime(2026, 9, 10, 23, 59, 0, DateTimeKind.Utc));
+        _telegram.HasButton(CallbackData.DeadlineWizardQuickSubject(PhysicsId)).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Quick_subject_pick_jumps_to_confirmation()
+    {
+        SeedProfileAndSubjects();
+        await CreateSut().QuickAddAsync(ChatId, UserId, "Biology homework tomorrow", CancellationToken.None);
+
+        await CreateSut().HandleCallbackAsync(
+            ChatId, UserId, "cbq", CallbackData.DeadlineWizardQuickSubject(PhysicsId), CancellationToken.None);
+
+        var state = await _conversations.GetAsync(ChatId, CancellationToken.None);
+        state!.Step.Should().Be(DeadlineStep.Confirm);
+        state.SubjectId.Should().Be(PhysicsId);
+        state.SubjectName.Should().Be("Physics");
+    }
+
+    [Fact]
     public async Task Deadlines_view_shows_hub_action_buttons()
     {
         _sender.Send(Arg.Any<GetOwnAssignmentsQuery>(), Arg.Any<CancellationToken>())
