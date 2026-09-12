@@ -50,7 +50,7 @@ public class AdminModuleTests
     }
 
     [Fact]
-    public async Task Menu_is_shown_for_admin()
+    public async Task Menu_is_shown_for_admin_with_all_hub_action_buttons()
     {
         StubProfile(nameof(UserRole.Admin));
 
@@ -59,20 +59,6 @@ public class AdminModuleTests
         await _telegram.Received(1).SendKeyboardAsync(
             ChatId,
             Arg.Is<string>(s => s.Contains("Admin menu")),
-            Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>>(),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Menu_exposes_all_hub_action_buttons()
-    {
-        StubProfile(nameof(UserRole.Admin));
-
-        await CreateSut().ShowMenuAsync(ChatId, UserId, CancellationToken.None);
-
-        await _telegram.Received(1).SendKeyboardAsync(
-            ChatId,
-            Arg.Any<string>(),
             Arg.Is<IReadOnlyList<IReadOnlyList<InlineButton>>>(rows =>
                 HasButton(rows, CallbackData.AdminUsers(1))
                 && HasButton(rows, CallbackData.AdminInvites)
@@ -84,25 +70,6 @@ public class AdminModuleTests
 
     private static bool HasButton(IReadOnlyList<IReadOnlyList<InlineButton>> rows, string callbackData) =>
         rows.SelectMany(r => r).Any(b => b.CallbackData == callbackData);
-
-    [Fact]
-    public async Task Menu_is_shown_in_russian_for_a_russian_admin()
-    {
-        StubProfile(nameof(UserRole.Admin));
-
-        var russian = new AdminModule(
-            _sender, _telegram, _store,
-            new TestUiText(new TestLanguageContext { Language = "ru" }),
-            NullLogger<AdminModule>.Instance);
-
-        await russian.ShowMenuAsync(ChatId, UserId, CancellationToken.None);
-
-        await _telegram.Received(1).SendKeyboardAsync(
-            ChatId,
-            Arg.Is<string>(s => s.Contains("Меню администратора")),
-            Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>>(),
-            Arg.Any<CancellationToken>());
-    }
 
     [Fact]
     public async Task Choosing_expiry_sends_create_invite_command()

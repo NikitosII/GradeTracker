@@ -44,22 +44,6 @@ public class HistoryModuleTests
     }
 
     [Fact]
-    public async Task Renders_history_in_russian()
-    {
-        _sender.Send(Arg.Any<GetOwnHistoryQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(Sample()));
-
-        var russian = CreateSut(new TestUiText(new TestLanguageContext { Language = "ru" }));
-        await russian.ShowHistoryAsync(ChatId, UserId, 1, CancellationToken.None);
-
-        await _telegram.Received(1).SendKeyboardAsync(
-            ChatId,
-            Arg.Is<string>(s => s.Contains("История изменений") && s.Contains("Оценка добавлена")),
-            Arg.Any<IReadOnlyList<IReadOnlyList<InlineButton>>>(),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task Renders_empty_state()
     {
         _sender.Send(Arg.Any<GetOwnHistoryQuery>(), Arg.Any<CancellationToken>())

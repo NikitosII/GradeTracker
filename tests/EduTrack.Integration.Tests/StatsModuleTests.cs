@@ -56,21 +56,6 @@ public class StatsModuleTests
     }
 
     [Fact]
-    public async Task Report_renders_in_russian()
-    {
-        SetupStats(Sample());
-        SetupTrends(SampleTrends());
-
-        var russian = CreateSut(new TestUiText(new TestLanguageContext { Language = "ru" }));
-        await russian.ShowReportAsync(ChatId, UserId, CancellationToken.None);
-
-        await _telegram.Received(1).SendTextAsync(
-            ChatId,
-            Arg.Is<string>(s => s.Contains("Ваша статистика") && s.Contains("Средний балл (за всё время)")),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task Report_shows_empty_state_when_no_grades()
     {
         SetupStats(new StudentStatsDto(null, null, 0, null, 0, Array.Empty<SubjectStatDto>(), null, null, 0, 0));

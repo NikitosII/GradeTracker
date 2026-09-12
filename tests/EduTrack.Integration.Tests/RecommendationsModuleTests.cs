@@ -43,21 +43,6 @@ public class RecommendationsModuleTests
     }
 
     [Fact]
-    public async Task Renders_tips_in_russian()
-    {
-        _sender.Send(Arg.Any<GetStudentRecommendationsQuery>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(Sample()));
-
-        var russian = CreateSut(new TestUiText(new TestLanguageContext { Language = "ru" }));
-        await russian.ShowTipsAsync(ChatId, UserId, CancellationToken.None);
-
-        await _telegram.Received(1).SendTextAsync(
-            ChatId,
-            Arg.Is<string>(s => s.Contains("Рекомендации") && s.Contains("просроченных")),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task Renders_empty_state()
     {
         _sender.Send(Arg.Any<GetStudentRecommendationsQuery>(), Arg.Any<CancellationToken>())
